@@ -151,10 +151,91 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 ## Traceability
 
-<!-- Populated by gsd-roadmapper when ROADMAP.md is created. Maps each REQ-ID to its implementing phase. -->
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FND-01 | Phase 1 | Pending |
+| FND-02 | Phase 1 | Pending |
+| FND-03 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Pending |
+| FND-05 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Pending |
+| FND-08 | Phase 1 | Pending |
+| DB-01 | Phase 1 | Pending |
+| DB-02 | Phase 1 | Pending |
+| DB-03 | Phase 1 | Pending |
+| DB-04 | Phase 1 | Pending |
+| DB-05 | Phase 1 | Pending |
+| DB-06 | Phase 1 | Pending |
+| DB-07 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| AUTH-06 | Phase 2 | Pending |
+| AUTH-07 | Phase 2 | Pending |
+| AUTH-08 | Phase 2 | Pending |
+| HERO-01 | Phase 2 | Pending |
+| HERO-02 | Phase 2 | Pending |
+| HERO-03 | Phase 2 | Pending |
+| HERO-04 | Phase 2 | Pending |
+| HERO-05 | Phase 2 | Pending |
+| TRACK-03 | Phase 3 | Pending |
+| TRACK-04 | Phase 3 | Pending |
+| TRACK-05 | Phase 3 | Pending |
+| TRACK-01 | Phase 4 | Pending |
+| TRACK-02 | Phase 4 | Pending |
+| TRACK-06 | Phase 4 | Pending |
+| TRACK-07 | Phase 4 | Pending |
+| TRACK-08 | Phase 4 | Pending |
+| TRACK-09 | Phase 4 | Pending |
+| DASH-01 | Phase 4 | Pending |
+| DASH-02 | Phase 4 | Pending |
+| DASH-03 | Phase 4 | Pending |
+| DASH-04 | Phase 4 | Pending |
+| DASH-05 | Phase 4 | Pending |
+| DASH-06 | Phase 4 | Pending |
+| DASH-07 | Phase 4 | Pending |
+| DASH-08 | Phase 4 | Pending |
+| CHART-01 | Phase 5 | Pending |
+| CHART-02 | Phase 5 | Pending |
+| CHART-03 | Phase 5 | Pending |
+| CHART-04 | Phase 5 | Pending |
+| CHART-05 | Phase 5 | Pending |
+| CHART-06 | Phase 5 | Pending |
+| CRON-01 | Phase 6 | Pending |
+| CRON-02 | Phase 6 | Pending |
+| CRON-03 | Phase 6 | Pending |
+| CRON-04 | Phase 6 | Pending |
+| CRON-05 | Phase 6 | Pending |
+| CRON-06 | Phase 6 | Pending |
+| CRON-07 | Phase 6 | Pending |
+| CRON-08 | Phase 6 | Pending |
+| CRON-09 | Phase 6 | Pending |
+| CRON-10 | Phase 6 | Pending |
+| CRON-11 | Phase 6 | Pending |
+| EMAIL-01 | Phase 6 | Pending |
+| EMAIL-02 | Phase 6 | Pending |
+| EMAIL-03 | Phase 6 | Pending |
+| EMAIL-04 | Phase 6 | Pending |
+| EMAIL-05 | Phase 6 | Pending |
+| EMAIL-06 | Phase 6 | Pending |
+| POL-01 | Phase 7 | Pending |
+| POL-02 | Phase 7 | Pending |
+| POL-03 | Phase 7 | Pending |
+| POL-04 | Phase 7 | Pending |
+| POL-05 | Phase 7 | Pending |
+| POL-06 | Phase 7 | Pending |
+| DEP-01 | Phase 7 | Pending |
+| DEP-02 | Phase 7 | Pending |
+| DEP-03 | Phase 7 | Pending |
+| DEP-04 | Phase 7 | Pending |
+| DEP-05 | Phase 7 | Pending |
+| DEP-06 | Phase 7 | Pending |
 
-(Pending — roadmap phase coming next)
+**Coverage:** 76/76 v1 requirements mapped across 7 phases. No orphans.
 
 ---
 
-*Last updated: 2026-04-18 after initialization*
+*Last updated: 2026-04-17 — traceability populated by gsd-roadmapper*
