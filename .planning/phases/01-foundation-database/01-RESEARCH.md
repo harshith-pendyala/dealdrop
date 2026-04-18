@@ -895,7 +895,7 @@ npx supabase gen types typescript --linked > src/types/database.ts
 
 **User confirmation may be warranted for:** A1 (pg_cron enablement method — if it fails, Dashboard toggle is fallback), A7 (CRON_SECRET length). Other items are verified or have safe fallbacks.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `create extension if not exists pg_cron` succeed via migration file on all Supabase plan tiers?**
    - What we know: `pg_cron` requires enabling at the role level; Supabase manages this for the `postgres` role on paid plans. Dashboard toggle handles the permission side.
