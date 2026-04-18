@@ -14,7 +14,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 - [x] **FND-03**: `next.config.ts` has `images.remotePatterns` wildcard to render scraped product images from any domain
 - [x] **FND-04**: Supabase project created with `pg_cron` AND `pg_net` extensions enabled
 - [x] **FND-05**: Three distinct Supabase clients exist: `createServerClient` (RSC + actions), `createBrowserClient` (auth modal), `createAdminClient` (cron only, service role)
-- [ ] **FND-06**: Tailwind v4 + Shadcn UI initialized via `npx shadcn@latest init` with working theme tokens
+- [x] **FND-06**: Tailwind v4 + Shadcn UI initialized via `npx shadcn@latest init` with working theme tokens
 - [x] **FND-07**: `package.json` lint script uses ESLint CLI directly (not removed `next lint`)
 - [x] **FND-08**: Project `CLAUDE.md` (or equivalent) replaces "Create Next App" placeholder metadata in [dealdrop/app/layout.tsx](dealdrop/app/layout.tsx)
 
@@ -158,7 +158,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | FND-03 | Phase 1 | Complete |
 | FND-04 | Phase 1 | Complete |
 | FND-05 | Phase 1 | Complete |
-| FND-06 | Phase 1 | Pending |
+| FND-06 | Phase 1 | Complete |
 | FND-07 | Phase 1 | Complete |
 | FND-08 | Phase 1 | Complete |
 | DB-01 | Phase 1 | Complete |

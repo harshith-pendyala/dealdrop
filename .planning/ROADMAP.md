@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 01-02-PLAN.md — Wave 1: Env validation (Zod) + three Supabase client factories + proxy.ts stub
 - [x] 01-03-PLAN.md — Wave 1: Supabase project creation + CLI link + three schema migrations (schema, RLS, extensions)
 - [ ] 01-04-PLAN.md — Wave 2: [BLOCKING] supabase db push + type generation + RLS impersonation verification + Phase Gate
-- [ ] 01-05-PLAN.md — Wave 1: Shadcn UI init (new-york/zinc) + Button primitive + globals.css dark-mode media query merge
+- [x] 01-05-PLAN.md — Wave 1: Shadcn UI init (new-york/zinc) + Button primitive + globals.css dark-mode media query merge
 
 ### Phase 2: Authentication & Landing
 **Goal**: Users can sign in with Google OAuth, stay signed in across page loads, and see a contextually correct UI — the hero for logged-out visitors and a dashboard shell for authenticated users
