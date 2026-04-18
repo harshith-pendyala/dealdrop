@@ -1,10 +1,11 @@
 ---
 phase: 2
 slug: authentication-landing
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "new-york / zinc / 0.5rem / cssVariables / lucide (locked in Phase 1 — see dealdrop/components.json)"
 created: 2026-04-18
+reviewed_at: 2026-04-18
 ---
 
 # Phase 2 — UI Design Contract
@@ -74,7 +75,7 @@ Declared values (all multiples of 4, maps to Tailwind v4 default scale):
 
 **Exceptions:**
 
-- Header height: **56px** (`h-14`) — standard app-bar height, not a spacing token; this is the only non-multiple-of-4 size allowed in Phase 2 because it's an established Tailwind scale value and maps to the shadcn header pattern. All other vertical rhythm uses the 4pt scale.
+- Header height: **56px** (`h-14`) — standard app-bar height, primitive-owned (not a spacing-scale token). Still grid-aligned (56 = 4 × 14) but lives outside the declared 7-step scale because it maps to the shadcn header pattern / Tailwind `h-14`. All other vertical rhythm uses the declared 4pt scale.
 - Button height comes from Shadcn Button variants (`h-7`/`h-8`/`h-9` = 28/32/36px) — these are primitive-owned; do not override with padding.
 
 ---
@@ -100,12 +101,11 @@ Declared values (all multiples of 4, maps to Tailwind v4 default scale):
 
 **Fonts:** Geist Sans loaded as `--font-geist-sans` CSS variable; body inherits via `font-sans` (set in Phase 1 `@theme inline`). Geist Mono is loaded but unused in Phase 2.
 
-**Exactly 4 sizes. Exactly 2 weights. No italics, no tracking overrides.**
+**Exactly 4 type roles. Exactly 2 weights. No italics, no tracking overrides.** (Display has a responsive mobile clamp — still one role, not a 5th size.)
 
 | Role | Size | Weight | Line Height | Tailwind | Used for |
 |------|------|--------|-------------|----------|----------|
-| Display | 48px | 600 (semibold) | 1.1 | `text-5xl font-semibold leading-[1.1] tracking-tight` | Hero tagline "Never miss a price drop" (desktop) |
-| Display (mobile) | 32px | 600 | 1.15 | `text-3xl sm:text-5xl font-semibold leading-tight` | Hero tagline clamps down <640px |
+| Display | 48px desktop / 32px mobile (clamp) | 600 (semibold) | 1.1 / 1.15 | `text-3xl sm:text-5xl font-semibold leading-tight sm:leading-[1.1] tracking-tight` | Hero tagline "Never miss a price drop" — clamps to 32px below `sm` (640px) |
 | Heading | 20px | 600 (semibold) | 1.3 | `text-xl font-semibold leading-snug` | Modal title "Sign in to DealDrop"; FeatureCard title (e.g. "Multi-site support"); DashboardShell heading |
 | Body | 16px | 400 (regular) | 1.5 | `text-base leading-relaxed` | Hero subtitle; modal subtitle; FeatureCard blurb; DashboardShell placeholder copy; footer credit |
 | Label | 14px | 500 (medium) | 1.4 | `text-sm font-medium` | Header wordmark "DealDrop"; Sign In / Sign Out button label; "Continue with Google" button label |
