@@ -12,7 +12,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 - [x] **FND-01**: Project uses Next.js 16 App Router with `proxy.ts` (not `middleware.ts`), Server Actions, and async Request APIs (`await cookies()`, `await headers()`)
 - [x] **FND-02**: Environment variables validated at build time via `@t3-oss/env-nextjs` with Zod schemas (covers `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `FIRECRAWL_API_KEY`, `RESEND_API_KEY`, `CRON_SECRET`, `RESEND_FROM_EMAIL`)
 - [x] **FND-03**: `next.config.ts` has `images.remotePatterns` wildcard to render scraped product images from any domain
-- [ ] **FND-04**: Supabase project created with `pg_cron` AND `pg_net` extensions enabled
+- [x] **FND-04**: Supabase project created with `pg_cron` AND `pg_net` extensions enabled
 - [x] **FND-05**: Three distinct Supabase clients exist: `createServerClient` (RSC + actions), `createBrowserClient` (auth modal), `createAdminClient` (cron only, service role)
 - [ ] **FND-06**: Tailwind v4 + Shadcn UI initialized via `npx shadcn@latest init` with working theme tokens
 - [x] **FND-07**: `package.json` lint script uses ESLint CLI directly (not removed `next lint`)
@@ -20,12 +20,12 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 ### Database & Security (DB)
 
-- [ ] **DB-01**: `products` table created with columns: `id UUID PK`, `user_id UUID FK NOT NULL`, `url TEXT`, `name TEXT`, `current_price NUMERIC`, `currency TEXT`, `image_url TEXT`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`
-- [ ] **DB-02**: `products` has unique constraint on `(user_id, url)` preventing duplicate tracking per user
-- [ ] **DB-03**: `products` has CHECK constraint `current_price > 0` rejecting null/zero prices from failed scrapes
-- [ ] **DB-04**: `price_history` table created with columns: `id UUID PK`, `product_id UUID FK CASCADE`, `price NUMERIC`, `currency TEXT`, `checked_at TIMESTAMPTZ`
-- [ ] **DB-05**: RLS enabled on `products` with policies: SELECT/INSERT/UPDATE/DELETE only where `user_id = auth.uid()`
-- [ ] **DB-06**: RLS enabled on `price_history` with ownership-chain policy: `USING (product_id IN (SELECT id FROM products WHERE user_id = auth.uid()))` — read-only from user perspective
+- [x] **DB-01**: `products` table created with columns: `id UUID PK`, `user_id UUID FK NOT NULL`, `url TEXT`, `name TEXT`, `current_price NUMERIC`, `currency TEXT`, `image_url TEXT`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`
+- [x] **DB-02**: `products` has unique constraint on `(user_id, url)` preventing duplicate tracking per user
+- [x] **DB-03**: `products` has CHECK constraint `current_price > 0` rejecting null/zero prices from failed scrapes
+- [x] **DB-04**: `price_history` table created with columns: `id UUID PK`, `product_id UUID FK CASCADE`, `price NUMERIC`, `currency TEXT`, `checked_at TIMESTAMPTZ`
+- [x] **DB-05**: RLS enabled on `products` with policies: SELECT/INSERT/UPDATE/DELETE only where `user_id = auth.uid()`
+- [x] **DB-06**: RLS enabled on `price_history` with ownership-chain policy: `USING (product_id IN (SELECT id FROM products WHERE user_id = auth.uid()))` — read-only from user perspective
 - [ ] **DB-07**: Supabase-generated TypeScript types available via `supabase gen types typescript` integrated into the codebase
 
 ### Authentication (AUTH)
@@ -156,17 +156,17 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | FND-01 | Phase 1 | Complete |
 | FND-02 | Phase 1 | Complete |
 | FND-03 | Phase 1 | Complete |
-| FND-04 | Phase 1 | Pending |
+| FND-04 | Phase 1 | Complete |
 | FND-05 | Phase 1 | Complete |
 | FND-06 | Phase 1 | Pending |
 | FND-07 | Phase 1 | Complete |
 | FND-08 | Phase 1 | Complete |
-| DB-01 | Phase 1 | Pending |
-| DB-02 | Phase 1 | Pending |
-| DB-03 | Phase 1 | Pending |
-| DB-04 | Phase 1 | Pending |
-| DB-05 | Phase 1 | Pending |
-| DB-06 | Phase 1 | Pending |
+| DB-01 | Phase 1 | Complete |
+| DB-02 | Phase 1 | Complete |
+| DB-03 | Phase 1 | Complete |
+| DB-04 | Phase 1 | Complete |
+| DB-05 | Phase 1 | Complete |
+| DB-06 | Phase 1 | Complete |
 | DB-07 | Phase 1 | Pending |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |

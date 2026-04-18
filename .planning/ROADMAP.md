@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 5 plans
 - [x] 01-01-PLAN.md — Wave 0: Dependencies + scaffold config (tsconfig paths, metadata, next.config.ts images, .env files, .gitignore)
 - [x] 01-02-PLAN.md — Wave 1: Env validation (Zod) + three Supabase client factories + proxy.ts stub
-- [ ] 01-03-PLAN.md — Wave 1: Supabase project creation + CLI link + three schema migrations (schema, RLS, extensions)
+- [x] 01-03-PLAN.md — Wave 1: Supabase project creation + CLI link + three schema migrations (schema, RLS, extensions)
 - [ ] 01-04-PLAN.md — Wave 2: [BLOCKING] supabase db push + type generation + RLS impersonation verification + Phase Gate
 - [ ] 01-05-PLAN.md — Wave 1: Shadcn UI init (new-york/zinc) + Button primitive + globals.css dark-mode media query merge
 
