@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthModalProvider } from "@/components/auth/AuthModalProvider";
+import { AuthToastListener } from "@/components/auth/AuthToastListener";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +31,15 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthModalProvider>
+          {children}
+        </AuthModalProvider>
+        <Toaster position="top-center" richColors />
+        <Suspense fallback={null}>
+          <AuthToastListener />
+        </Suspense>
+      </body>
     </html>
   );
 }
