@@ -50,11 +50,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Clicking Sign Out from the header ends the session and the page reverts to showing the hero
   5. The full OAuth flow completes without errors on both localhost and a Vercel preview deployment
 **Plans**: 5 plans
-- [ ] 02-01-PLAN.md — Wave 1: Shadcn primitives install (Dialog, Card, Sonner) + sonner npm dep (AUTH-05 deps, POL-01 deps, HERO-02 deps)
-- [ ] 02-02-PLAN.md — Wave 1: proxy.ts session refresh + /auth/callback Route Handler + supabase/config.toml WR-03 fix (AUTH-02, AUTH-07)
+- [x] 02-01-PLAN.md — Wave 1: Shadcn primitives install (Dialog, Card, Sonner) + sonner npm dep (AUTH-05 deps, POL-01 deps, HERO-02 deps)
+- [x] 02-02-PLAN.md — Wave 1: proxy.ts session refresh + /auth/callback Route Handler + supabase/config.toml WR-03 fix (AUTH-02, AUTH-07)
 - [ ] 02-03-PLAN.md — Wave 2: Auth UI islands — AuthModalProvider, AuthModal, SignIn/SignOutButton, signOut Server Action, AuthToastListener (AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06)
 - [ ] 02-04-PLAN.md — Wave 3: Hero + FeatureCard + Header + DashboardShell + app/page.tsx branch + app/layout.tsx wiring + human OAuth smoke test (HERO-01..05, POL-01 mount, human-verify gate)
-- [ ] 02-05-PLAN.md — Wave 1: REQUIREMENTS.md traceability update (D-07 AUTH-04 split, D-13 POL-01 moved) + AUTH-08 ops checklist + printable 02-SMOKE-TEST.md (AUTH-08, AUTH-04 doc, POL-01 doc)
+- [x] 02-05-PLAN.md — Wave 1: REQUIREMENTS.md traceability update (D-07 AUTH-04 split, D-13 POL-01 moved) + AUTH-08 ops checklist + printable 02-SMOKE-TEST.md (AUTH-08, AUTH-04 doc, POL-01 doc)
 **UI hint**: yes
 
 ### Phase 3: Firecrawl Integration
