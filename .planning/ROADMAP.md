@@ -42,14 +42,19 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 2: Authentication & Landing
 **Goal**: Users can sign in with Google OAuth, stay signed in across page loads, and see a contextually correct UI — the hero for logged-out visitors and a dashboard shell for authenticated users
 **Depends on**: Phase 1
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, HERO-01, HERO-02, HERO-03, HERO-04, HERO-05
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, HERO-01, HERO-02, HERO-03, HERO-04, HERO-05, POL-01
 **Success Criteria** (what must be TRUE):
   1. A logged-out visitor sees the hero section with "Never miss a price drop" tagline, feature cards, and a Sign In button in the header
   2. Clicking Sign In opens the Shadcn Dialog modal with a single "Continue with Google" button
   3. After completing Google OAuth, the user is redirected to `/` and the page now shows the dashboard shell (not the hero)
   4. Clicking Sign Out from the header ends the session and the page reverts to showing the hero
   5. The full OAuth flow completes without errors on both localhost and a Vercel preview deployment
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 02-01-PLAN.md — Wave 1: Shadcn primitives install (Dialog, Card, Sonner) + sonner npm dep (AUTH-05 deps, POL-01 deps, HERO-02 deps)
+- [ ] 02-02-PLAN.md — Wave 1: proxy.ts session refresh + /auth/callback Route Handler + supabase/config.toml WR-03 fix (AUTH-02, AUTH-07)
+- [ ] 02-03-PLAN.md — Wave 2: Auth UI islands — AuthModalProvider, AuthModal, SignIn/SignOutButton, signOut Server Action, AuthToastListener (AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06)
+- [ ] 02-04-PLAN.md — Wave 3: Hero + FeatureCard + Header + DashboardShell + app/page.tsx branch + app/layout.tsx wiring + human OAuth smoke test (HERO-01..05, POL-01 mount, human-verify gate)
+- [ ] 02-05-PLAN.md — Wave 1: REQUIREMENTS.md traceability update (D-07 AUTH-04 split, D-13 POL-01 moved) + AUTH-08 ops checklist + printable 02-SMOKE-TEST.md (AUTH-08, AUTH-04 doc, POL-01 doc)
 **UI hint**: yes
 
 ### Phase 3: Firecrawl Integration
@@ -121,7 +126,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Database | 0/5 | Not started | - |
-| 2. Authentication & Landing | 0/TBD | Not started | - |
+| 2. Authentication & Landing | 0/5 | Not started | - |
 | 3. Firecrawl Integration | 0/TBD | Not started | - |
 | 4. Product Tracking & Dashboard | 0/TBD | Not started | - |
 | 5. Price History Chart | 0/TBD | Not started | - |

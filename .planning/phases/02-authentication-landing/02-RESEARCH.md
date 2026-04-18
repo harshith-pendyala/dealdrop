@@ -852,22 +852,25 @@ Since `tdd_mode: false`, Vitest is not required. Wave 0 for Phase 2 tests consis
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`supabaseResponse` reassignment pattern in proxy — TypeScript strict mode compatibility**
    - What we know: The pattern requires `let supabaseResponse = NextResponse.next(...)` and reassignment inside `setAll`. TypeScript strict mode with `noUncheckedIndexedAccess` may flag this.
    - What's unclear: Whether the pattern compiles cleanly under the project's strict tsconfig.
    - Recommendation: Implement as shown; if TS error, add explicit type annotation `let supabaseResponse: NextResponse`.
+   - RESOLVED: proxy.ts uses type inference; if strict TS flags it, add explicit `let supabaseResponse: NextResponse` annotation. Pattern 1 in 02-PATTERNS.md shows the exact shape used by Plan 02-02 Task 1.
 
 2. **Google OAuth "Testing" vs "Production" mode for Vercel preview deployments**
    - What we know: Google does not support wildcard redirect URIs in production OAuth clients.
    - What's unclear: Whether the user wants to configure a separate "Testing" OAuth client for dev/preview, or just test production flow on the production Vercel URL.
    - Recommendation: The AUTH-08 ops checklist should give both options and let the user decide. For portfolio bar, testing on the production Vercel URL is sufficient.
+   - RESOLVED: AUTH-08 ops checklist (Plan 02-05 Task 2) presents both options; for portfolio bar, testing on the production Vercel URL + localhost is sufficient, no separate Testing OAuth client needed unless user opts in.
 
 3. **`useSearchParams()` Suspense requirement in Next.js 16**
    - What we know: In Next.js 13-15, `useSearchParams()` without Suspense was warned in static rendering contexts.
    - What's unclear: Whether Next.js 16 still requires this or has changed behavior.
    - Recommendation: Wrap `AuthToastListener` in `<Suspense fallback={null}>` as a defensive measure — negligible cost, avoids potential build error.
+   - RESOLVED: defensive wrap. Plan 02-04 Task 2 wraps AuthToastListener in `<Suspense fallback={null}>` in layout.tsx per Pattern 8 in 02-PATTERNS.md.
 
 ---
 

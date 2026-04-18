@@ -2,8 +2,8 @@
 phase: 2
 slug: authentication-landing
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-18
 ---
 
@@ -36,24 +36,20 @@ created: 2026-04-18
 
 ## Per-Task Verification Map
 
-Task IDs will be filled in after PLAN.md files are written. For now, requirement-level map:
-
-| Req ID | Behavior | Test Type | Automated Command | File Exists | Status |
-|--------|----------|-----------|-------------------|-------------|--------|
-| AUTH-01 | Sign in with Google OAuth | Manual smoke | N/A — real Google redirect | ❌ manual | ⬜ pending |
-| AUTH-02 | `/auth/callback` exchanges code → redirect `/` | Build + manual smoke | `npm run build` proves route compiles; manual click-through verifies | ✅ dealdrop/app/auth/callback/route.ts (Wave 1) | ⬜ pending |
-| AUTH-03 | Sign In button opens modal | Manual smoke | Visual in browser | ❌ manual | ⬜ pending |
-| AUTH-04 | `openAuthModal()` exported from provider | Static check + manual | `grep -r "openAuthModal" dealdrop/src` → at least 2 matches (provider + consumer callsite) | ✅ dealdrop/src/components/auth/AuthModalProvider.tsx | ⬜ pending |
-| AUTH-05 | Modal has single "Continue with Google" button | Manual smoke | Visual in browser | ❌ manual | ⬜ pending |
-| AUTH-06 | Sign Out ends session → hero returns | Manual smoke | Click-through | ❌ manual | ⬜ pending |
-| AUTH-07 | proxy.ts refreshes session cookies | Manual smoke + static check | `grep getClaims dealdrop/proxy.ts` → present; verify cookies persist across nav in browser devtools | ✅ dealdrop/proxy.ts | ⬜ pending |
-| AUTH-08 | OAuth redirect URIs registered | Manual ops checklist | External config — must be verified against Supabase + Google consoles | ❌ manual | ⬜ pending |
-| HERO-01 | Tagline "Never miss a price drop" | Static check | `grep -r "Never miss a price drop" dealdrop/src/components/hero` → exact match | ✅ dealdrop/src/components/hero/Hero.tsx | ⬜ pending |
-| HERO-02 | Feature cards present (3x) | Static check + manual | `grep -c "FeatureCard" dealdrop/src/components/hero/Hero.tsx` → 3 | ✅ dealdrop/src/components/hero/{Hero,FeatureCard}.tsx | ⬜ pending |
-| HERO-03 | Header with wordmark + Sign In | Static check + manual | `grep -r "DealDrop" dealdrop/src/components/header/Header.tsx` | ✅ dealdrop/src/components/header/Header.tsx | ⬜ pending |
-| HERO-04 | "Made with love" credit | Static check | `grep -r "Made with love\|Made with" dealdrop/src/components/hero` → 1 match | ✅ dealdrop/src/components/hero/Hero.tsx | ⬜ pending |
-| HERO-05 | Mobile-responsive layout | Manual smoke | Resize browser to <640px; cards stack to 1 column | ❌ manual | ⬜ pending |
-| POL-01 | Sonner toast infrastructure | Static check + manual | `grep "<Toaster" dealdrop/app/layout.tsx` → present; toast fires on sign-out | ✅ dealdrop/app/layout.tsx, dealdrop/components/ui/sonner.tsx | ⬜ pending |
+| Task ID | Plan | Wave | Requirement(s) | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
+|---------|------|------|----------------|------------|-----------------|-----------|-------------------|-------------|--------|
+| 02-01 Task 1 | 02-01 | 1 | AUTH-05, POL-01, HERO-02 | T-02-01, T-02-02, T-02-03 | Shadcn CLI pulls from official registry only; no third-party registries; package-lock.json locks sonner integrity hash | build + static | `cd dealdrop && test -f components/ui/dialog.tsx && test -f components/ui/card.tsx && test -f components/ui/sonner.tsx && grep -q '"sonner"' package.json && npx tsc --noEmit` | ⬜ pending | ⬜ pending |
+| 02-02 Task 1 | 02-02 | 1 | AUTH-07 | T-02-04, T-02-07 | getClaims() validates JWT locally; supabaseResponse rebuild in setAll prevents dropped Set-Cookie headers; no env module in edge runtime | static | `cd dealdrop && grep -q "getClaims" proxy.ts && grep -q "createServerClient" proxy.ts && grep -q "supabaseResponse" proxy.ts && ! grep -q "from ['\"]@/lib/env['\"]" proxy.ts && npx tsc --noEmit` | ⬜ pending | ⬜ pending |
+| 02-02 Task 2 | 02-02 | 1 | AUTH-02 | T-02-05, T-02-06, T-02-08, T-02-09 | exchangeCodeForSession with PKCE; redirect hardcoded to origin/ or origin/?auth_error=1; no user-controlled next param; no service role key | build + static | `cd dealdrop && test -f app/auth/callback/route.ts && grep -q "exchangeCodeForSession" app/auth/callback/route.ts && grep -q 'auth_error=1' app/auth/callback/route.ts && ! grep -q 'https://127.0.0.1:3000' supabase/config.toml && npx tsc --noEmit && npm run build` | ⬜ pending | ⬜ pending |
+| 02-03 Task 1 | 02-03 | 2 | AUTH-04, AUTH-06 | T-02-11, T-02-12, T-02-15 | 'use server' directive enables cookie writes; signOut calls supabase.auth.signOut() server-side; no admin client | static | `cd dealdrop && test -f src/actions/auth.ts && test -f src/components/auth/AuthModalProvider.tsx && head -1 src/actions/auth.ts | grep -q "'use server'" && grep -q "export async function signOut" src/actions/auth.ts && grep -q "redirect('/?signed_out=1')" src/actions/auth.ts && grep -q "export function useAuthModal" src/components/auth/AuthModalProvider.tsx && grep -q "openAuthModal" src/components/auth/AuthModalProvider.tsx` | ⬜ pending | ⬜ pending |
+| 02-03 Task 2 | 02-03 | 2 | AUTH-01, AUTH-03, AUTH-05, AUTH-06 | T-02-10, T-02-13, T-02-15 | redirectTo uses window.location.origin (not hardcoded); no server client import in browser components; generic error copy only | static | `cd dealdrop && test -f src/components/auth/AuthModal.tsx && grep -q "Sign in to DealDrop" src/components/auth/AuthModal.tsx && grep -q "window.location.origin" src/components/auth/AuthModal.tsx && grep -q "from '@/lib/supabase/browser'" src/components/auth/AuthModal.tsx && ! grep -q "from '@/lib/supabase/server'" src/components/auth/AuthModal.tsx && grep -q 'variant="default"' src/components/auth/SignInButton.tsx && grep -q 'variant="outline"' src/components/auth/SignOutButton.tsx && npx tsc --noEmit` | ⬜ pending | ⬜ pending |
+| 02-03 Task 3 | 02-03 | 2 | AUTH-04 (partial), POL-01 | T-02-14 | toast from raw sonner (not server); router.replace cleans URL; no privileged action triggered by crafted query params | static | `cd dealdrop && test -f src/components/auth/AuthToastListener.tsx && grep -q "from 'sonner'" src/components/auth/AuthToastListener.tsx && grep -q "signed_out" src/components/auth/AuthToastListener.tsx && grep -q "auth_error" src/components/auth/AuthToastListener.tsx && grep -q "router.replace" src/components/auth/AuthToastListener.tsx && ! grep -q "from '@/components/ui/sonner'" src/components/auth/AuthToastListener.tsx && npx tsc --noEmit` | ⬜ pending | ⬜ pending |
+| 02-04 Task 1 | 02-04 | 3 | HERO-01, HERO-02, HERO-03, HERO-04, HERO-05 | T-02-19, T-02-20 | no client directive on RSC; aria-hidden on icons; no PII rendered in DashboardShell placeholder | static | `cd dealdrop && grep -q "Never miss a price drop" src/components/hero/Hero.tsx && grep -q "Made with love" src/components/hero/Hero.tsx && grep -q "DealDrop" src/components/header/Header.tsx && grep -q 'aria-hidden="true"' src/components/hero/FeatureCard.tsx && grep -q "Welcome back" src/components/dashboard/DashboardShell.tsx && npx tsc --noEmit` | ⬜ pending | ⬜ pending |
+| 02-04 Task 2 | 02-04 | 3 | AUTH-01, AUTH-03, AUTH-06, POL-01 | T-02-16, T-02-17, T-02-18, T-02-20 | getUser() (Auth-server verified) not getSession(); AuthToastListener wrapped in Suspense; no admin client; no service role key in any modified file | build + static | `cd dealdrop && grep -q "getUser" app/page.tsx && ! grep -q "getSession" app/page.tsx && grep -q "AuthModalProvider" app/layout.tsx && grep -q "Suspense fallback={null}" app/layout.tsx && grep -q "AuthToastListener" app/layout.tsx && grep -q 'position="top-center"' app/layout.tsx && npx tsc --noEmit && npm run build` | ⬜ pending | ⬜ pending |
+| 02-04 Task 3 | 02-04 | 3 | AUTH-01, AUTH-02, AUTH-03, AUTH-06, AUTH-07, HERO-01..05, POL-01 | All T-02-* | Full OAuth round-trip with real Google account; session persists across reload (AUTH-07 proxy); toasts fire; dark-mode zinc tokens; focus ring visible | checkpoint:human-verify | Manual — see Plan 04 Task 3 how-to-verify steps 1–14 and 02-SMOKE-TEST.md | ⬜ pending | ⬜ pending |
+| 02-05 Task 1 | 02-05 | 1 | AUTH-04, POL-01 | T-02-22 | REQUIREMENTS.md reflects D-07 AUTH-04 split and D-13 POL-01 move; no wrong phase assignment | static | `grep -q "POL-01 | Phase 2" .planning/REQUIREMENTS.md && ! grep -q "POL-01 | Phase 7" .planning/REQUIREMENTS.md && grep -q "AUTH-04.*Phase 2.*hook\|AUTH-04.*Phase 2 / Phase 4\|AUTH-04.*Phase 2 (hook)" .planning/REQUIREMENTS.md` | ⬜ pending | ⬜ pending |
+| 02-05 Task 2 | 02-05 | 1 | AUTH-08 | T-02-21, T-02-22, T-02-23 | Checklist does not ask user to commit secrets; URIs derived from verified RESEARCH.md; Supabase project ref from STATE.md | static | `test -f .planning/phases/02-authentication-landing/AUTH-08-OPS-CHECKLIST.md && grep -q "vhlbdcsxccaknccawfdj" .planning/phases/02-authentication-landing/AUTH-08-OPS-CHECKLIST.md && grep -q "supabase.co/auth/v1/callback" .planning/phases/02-authentication-landing/AUTH-08-OPS-CHECKLIST.md` | ⬜ pending | ⬜ pending |
+| 02-05 Task 3 | 02-05 | 1 | AUTH-08, AUTH-04, POL-01 | — | Standalone smoke-test document mirrors all locked copy strings from UI-SPEC Copywriting Contract | static | `test -f .planning/phases/02-authentication-landing/02-SMOKE-TEST.md && grep -q "Never miss a price drop" .planning/phases/02-authentication-landing/02-SMOKE-TEST.md && grep -q "Sign in to DealDrop" .planning/phases/02-authentication-landing/02-SMOKE-TEST.md` | ⬜ pending | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -61,9 +57,9 @@ Task IDs will be filled in after PLAN.md files are written. For now, requirement
 
 ## Wave 0 Requirements
 
-- [ ] No automated test framework install required (`tdd_mode: false`, portfolio bar)
-- [ ] AUTH-08 ops checklist must be produced as part of plans so user can execute the Google Cloud Console + Supabase dashboard configuration before the smoke test
-- [ ] Manual smoke test checklist (below) must be included in a phase plan's acceptance criteria so executor prints it for the user to run
+- [x] No automated test framework install required (`tdd_mode: false`, portfolio bar)
+- [x] AUTH-08 ops checklist must be produced as part of plans so user can execute the Google Cloud Console + Supabase dashboard configuration before the smoke test — delivered by Plan 02-05 Task 2
+- [x] Manual smoke test checklist (below) must be included in a phase plan's acceptance criteria so executor prints it for the user to run — delivered by Plan 02-04 Task 3 + Plan 02-05 Task 3
 
 *If scope expands to include Vitest: Wave 0 would add `npm install -D vitest @testing-library/react @testing-library/dom jsdom` + `vitest.config.ts` + `tests/setup.ts`. Not required for this phase.*
 
@@ -124,11 +120,11 @@ Responsive + theming:
 
 ## Validation Sign-Off
 
-- [ ] All tasks will have `<automated>` verify via lint/tsc/build OR are explicitly listed in Manual-Only Verifications above
-- [ ] Sampling continuity: lint + tsc run after every task commit; build runs after every wave
-- [ ] Wave 0 covers AUTH-08 ops checklist + smoke checklist delivery
-- [ ] No watch-mode flags in any automated command
-- [ ] Feedback latency < 90s
-- [ ] `nyquist_compliant: true` will be set when planner has mapped every task to a verification lane above
+- [x] All tasks will have `<automated>` verify via lint/tsc/build OR are explicitly listed in Manual-Only Verifications above
+- [x] Sampling continuity: lint + tsc run after every task commit; build runs after every wave
+- [x] Wave 0 covers AUTH-08 ops checklist + smoke checklist delivery
+- [x] No watch-mode flags in any automated command
+- [x] Feedback latency < 90s
+- [x] `nyquist_compliant: true` — every task mapped to a verification lane in the Per-Task Verification Map above
 
-**Approval:** pending
+**Approval:** approved 2026-04-18
