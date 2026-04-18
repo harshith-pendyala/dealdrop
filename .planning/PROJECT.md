@@ -84,9 +84,8 @@ Fresh greenfield scaffold. A `create-next-app` skeleton already exists in [deald
 ### Existing Codebase State
 See [.planning/codebase/](.planning/codebase/) for full map. Key points:
 - Zero testing infrastructure
-- Zero auth, DB, env-config, or API routes
-- Placeholder "Create Next App" metadata in [dealdrop/app/layout.tsx](dealdrop/app/layout.tsx)
-- All infrastructure must be established in early phases
+- Phase 1 complete: Supabase backend live (products + price_history + RLS + pg_cron/pg_net), typed env (Zod), three Supabase client factories (server/browser/admin), Shadcn UI (new-york/zinc), DealDrop metadata — see [01-VERIFICATION.md](.planning/phases/01-foundation-database/01-VERIFICATION.md)
+- No auth, product ingestion, cron jobs, or API routes yet (Phases 2–6)
 
 ### Intent
 Portfolio / demo project — the bar is "works end-to-end, looks decent, not production-hardened." Prioritize shipping a complete user journey over enterprise concerns.
@@ -153,7 +152,7 @@ Unique constraint: `(user_id, url)` — prevents duplicate tracking.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | — Pending |
+| Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | DB + RLS + pg_cron/pg_net live as of Phase 1; Auth + cron jobs pending Phase 2/6 |
 | Google OAuth only for v1 | One-click sign-in; no password/email verification UX to build | — Pending |
 | Firecrawl over per-site scrapers | Works on any e-commerce URL without site-specific code | — Pending |
 | Resend for transactional email | Generous free tier, clean SDK, aligns with Next.js ecosystem | — Pending |
@@ -182,4 +181,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after initialization*
+*Last updated: 2026-04-18 after Phase 1 (foundation-database) completion*
