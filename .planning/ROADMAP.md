@@ -32,7 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The Next.js app starts without errors when all 7 required env vars are present, and fails with a clear message when any are missing
   4. Three Supabase client factories exist (server, browser, admin) and the admin client is marked server-only
   5. Shadcn UI initializes with working theme tokens; a `npx shadcn add button` renders without Tailwind v4 style conflicts
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 01-01-PLAN.md — Wave 0: Dependencies + scaffold config (tsconfig paths, metadata, next.config.ts images, .env files, .gitignore)
+- [ ] 01-02-PLAN.md — Wave 1: Env validation (Zod) + three Supabase client factories + proxy.ts stub
+- [ ] 01-03-PLAN.md — Wave 1: Supabase project creation + CLI link + three schema migrations (schema, RLS, extensions)
+- [ ] 01-04-PLAN.md — Wave 2: [BLOCKING] supabase db push + type generation + RLS impersonation verification + Phase Gate
+- [ ] 01-05-PLAN.md — Wave 1: Shadcn UI init (new-york/zinc) + Button primitive + globals.css dark-mode media query merge
 
 ### Phase 2: Authentication & Landing
 **Goal**: Users can sign in with Google OAuth, stay signed in across page loads, and see a contextually correct UI — the hero for logged-out visitors and a dashboard shell for authenticated users
@@ -115,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Database | 0/TBD | Not started | - |
+| 1. Foundation & Database | 0/5 | Not started | - |
 | 2. Authentication & Landing | 0/TBD | Not started | - |
 | 3. Firecrawl Integration | 0/TBD | Not started | - |
 | 4. Product Tracking & Dashboard | 0/TBD | Not started | - |
