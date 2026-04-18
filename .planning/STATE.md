@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-05-PLAN.md (Shadcn UI init with zinc/new-york/cssVariables)
-last_updated: "2026-04-18T10:10:59.571Z"
+status: verifying
+stopped_at: Completed 01-04-PLAN.md — Phase 1 foundation 5/5 complete, all gates green
+last_updated: "2026-04-18T11:29:02.449Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 Phase: 01 (foundation-database) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-18
 
 Progress: [████████░░] 80%
@@ -56,6 +56,7 @@ Progress: [████████░░] 80%
 | Phase 01 P01-02 | 3 | 3 tasks | 5 files |
 | Phase 01 P03 | 5 | 6 tasks | 5 files |
 | Phase 01 P01-05 | 15min | 5 tasks | 6 files |
+| Phase 01 P04 | 39 | 7 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ Recent decisions affecting current work:
 - [Phase 01]: proxy.ts keeps typed NextRequest param even though unused in stub — Phase 2 consumes it for session refresh (ESLint warning is intentional)
 - [Phase 01]: Supabase project vhlbdcsxccaknccawfdj (dealdrop-dev, Tokyo) linked via CLI access-token flow; three migrations authored but deferred to Plan 04 for atomic push
 - [Phase 01]: Plan 01-05 (Shadcn init): 4 deviations auto-fixed — Shadcn 4.3 dropped interactive prompts (used --defaults --force -b radix), cn helper moved src/lib/utils.ts, globals.css fully rewritten (broken post-init), _shadcn-test→shadcn-test folder rename (underscore = Next.js private)
+- [Phase 01]: Plan 01-04 migrations pushed cleanly — Pitfall 8 did NOT fire on Tokyo Free-tier; pg_cron + pg_net enabled via SQL migration
+- [Phase 01]: Plan 01-04 handled both human-verify checkpoints automation-first: Task 4 via curl + npm run build; Task 5 via Supabase Management API with set local role authenticated + jwt.claim.sub — no Dashboard UI needed
+- [Phase 01]: Plan 01-04 Rule 1 auto-fix: renamed app/_debug → app/debug because Next.js 16 treats underscore-prefixed folders as private (404). Same bug Plan 01-05 hit with _shadcn-test
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T10:10:59.568Z
-Stopped at: Completed 01-05-PLAN.md (Shadcn UI init with zinc/new-york/cssVariables)
+Last session: 2026-04-18T11:29:02.446Z
+Stopped at: Completed 01-04-PLAN.md — Phase 1 foundation 5/5 complete, all gates green
 Resume file: None

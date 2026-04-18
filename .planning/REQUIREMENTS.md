@@ -26,7 +26,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 - [x] **DB-04**: `price_history` table created with columns: `id UUID PK`, `product_id UUID FK CASCADE`, `price NUMERIC`, `currency TEXT`, `checked_at TIMESTAMPTZ`
 - [x] **DB-05**: RLS enabled on `products` with policies: SELECT/INSERT/UPDATE/DELETE only where `user_id = auth.uid()`
 - [x] **DB-06**: RLS enabled on `price_history` with ownership-chain policy: `USING (product_id IN (SELECT id FROM products WHERE user_id = auth.uid()))` — read-only from user perspective
-- [ ] **DB-07**: Supabase-generated TypeScript types available via `supabase gen types typescript` integrated into the codebase
+- [x] **DB-07**: Supabase-generated TypeScript types available via `supabase gen types typescript` integrated into the codebase
 
 ### Authentication (AUTH)
 
@@ -167,7 +167,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | DB-04 | Phase 1 | Complete |
 | DB-05 | Phase 1 | Complete |
 | DB-06 | Phase 1 | Complete |
-| DB-07 | Phase 1 | Pending |
+| DB-07 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
