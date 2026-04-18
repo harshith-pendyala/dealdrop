@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md (Wave 0 scaffolding)
-last_updated: "2026-04-18T07:05:19.365Z"
+stopped_at: Completed 01-02-PLAN.md (env schema + Supabase client factories + proxy stub)
+last_updated: "2026-04-18T07:10:59.618Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 01 (foundation-database) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-04-18
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01-01 | 3 | 6 tasks | 8 files |
+| Phase 01 P01-02 | 3 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Resend domain DNS setup should begin at Phase 5 start (48h propagation window before Phase 6 needs it)
 - [Phase 01]: Permissive images.remotePatterns wildcard (https + http) for v1 — strict allowlist deferred to Phase 7
 - [Phase 01]: .env.local seeded with 48-char CRON_SECRET placeholder so build passes before real secret in Plan 03
+- [Phase 01]: Admin client line 1 is literally 'import server-only' (comment moved to line 2) to satisfy stricter awk-exact acceptance criterion
+- [Phase 01]: proxy.ts keeps typed NextRequest param even though unused in stub — Phase 2 consumes it for session refresh (ESLint warning is intentional)
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T07:05:19.363Z
-Stopped at: Completed 01-01-PLAN.md (Wave 0 scaffolding)
+Last session: 2026-04-18T07:10:59.616Z
+Stopped at: Completed 01-02-PLAN.md (env schema + Supabase client factories + proxy stub)
 Resume file: None
