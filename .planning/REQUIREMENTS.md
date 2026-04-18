@@ -171,7 +171,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 (hook) / Phase 4 (trigger) | Pending |
 | AUTH-05 | Phase 2 | Pending |
 | AUTH-06 | Phase 2 | Pending |
 | AUTH-07 | Phase 2 | Pending |
@@ -221,7 +221,7 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | EMAIL-04 | Phase 6 | Pending |
 | EMAIL-05 | Phase 6 | Pending |
 | EMAIL-06 | Phase 6 | Pending |
-| POL-01 | Phase 7 | Pending |
+| POL-01 | Phase 2 | Pending |
 | POL-02 | Phase 7 | Pending |
 | POL-03 | Phase 7 | Pending |
 | POL-04 | Phase 7 | Pending |
@@ -236,6 +236,10 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 **Coverage:** 76/76 v1 requirements mapped across 7 phases. No orphans.
 
+**Notes:**
+- **AUTH-04:** Split across phases per [Phase 2 CONTEXT.md D-07](phases/02-authentication-landing/02-CONTEXT.md). Phase 2 exports `useAuthModal()` + `openAuthModal()` hook infrastructure; Phase 4 wires the Add Product form submit-while-logged-out path to call it. Requirement is considered SATISFIED when both phases complete.
+- **POL-01:** Moved forward from Phase 7 to Phase 2 per [Phase 2 CONTEXT.md D-13](phases/02-authentication-landing/02-CONTEXT.md). Sonner toast infrastructure (`<Toaster />` in root layout + `npx shadcn@latest add sonner`) is installed in Phase 2 because the sign-out flow requires the "Signed out" toast (D-12). **Phase 7 Polish scope should exclude Sonner setup** — POL-01 will be marked complete after Phase 2 ships; Phase 7 planning should not re-cover it.
+
 ---
 
-*Last updated: 2026-04-17 — traceability populated by gsd-roadmapper*
+*Last updated: 2026-04-18 — AUTH-04 split (D-07) + POL-01 move (D-13) documented per Phase 2 CONTEXT*
