@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Three Supabase client factories exist (server, browser, admin) and the admin client is marked server-only
   5. Shadcn UI initializes with working theme tokens; a `npx shadcn add button` renders without Tailwind v4 style conflicts
 **Plans**: 5 plans
-- [ ] 01-01-PLAN.md — Wave 0: Dependencies + scaffold config (tsconfig paths, metadata, next.config.ts images, .env files, .gitignore)
+- [x] 01-01-PLAN.md — Wave 0: Dependencies + scaffold config (tsconfig paths, metadata, next.config.ts images, .env files, .gitignore)
 - [ ] 01-02-PLAN.md — Wave 1: Env validation (Zod) + three Supabase client factories + proxy.ts stub
 - [ ] 01-03-PLAN.md — Wave 1: Supabase project creation + CLI link + three schema migrations (schema, RLS, extensions)
 - [ ] 01-04-PLAN.md — Wave 2: [BLOCKING] supabase db push + type generation + RLS impersonation verification + Phase Gate

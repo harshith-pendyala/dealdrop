@@ -9,14 +9,14 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 ### Foundation (FND)
 
-- [ ] **FND-01**: Project uses Next.js 16 App Router with `proxy.ts` (not `middleware.ts`), Server Actions, and async Request APIs (`await cookies()`, `await headers()`)
-- [ ] **FND-02**: Environment variables validated at build time via `@t3-oss/env-nextjs` with Zod schemas (covers `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `FIRECRAWL_API_KEY`, `RESEND_API_KEY`, `CRON_SECRET`, `RESEND_FROM_EMAIL`)
-- [ ] **FND-03**: `next.config.ts` has `images.remotePatterns` wildcard to render scraped product images from any domain
+- [x] **FND-01**: Project uses Next.js 16 App Router with `proxy.ts` (not `middleware.ts`), Server Actions, and async Request APIs (`await cookies()`, `await headers()`)
+- [x] **FND-02**: Environment variables validated at build time via `@t3-oss/env-nextjs` with Zod schemas (covers `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `FIRECRAWL_API_KEY`, `RESEND_API_KEY`, `CRON_SECRET`, `RESEND_FROM_EMAIL`)
+- [x] **FND-03**: `next.config.ts` has `images.remotePatterns` wildcard to render scraped product images from any domain
 - [ ] **FND-04**: Supabase project created with `pg_cron` AND `pg_net` extensions enabled
 - [ ] **FND-05**: Three distinct Supabase clients exist: `createServerClient` (RSC + actions), `createBrowserClient` (auth modal), `createAdminClient` (cron only, service role)
 - [ ] **FND-06**: Tailwind v4 + Shadcn UI initialized via `npx shadcn@latest init` with working theme tokens
-- [ ] **FND-07**: `package.json` lint script uses ESLint CLI directly (not removed `next lint`)
-- [ ] **FND-08**: Project `CLAUDE.md` (or equivalent) replaces "Create Next App" placeholder metadata in [dealdrop/app/layout.tsx](dealdrop/app/layout.tsx)
+- [x] **FND-07**: `package.json` lint script uses ESLint CLI directly (not removed `next lint`)
+- [x] **FND-08**: Project `CLAUDE.md` (or equivalent) replaces "Create Next App" placeholder metadata in [dealdrop/app/layout.tsx](dealdrop/app/layout.tsx)
 
 ### Database & Security (DB)
 
@@ -153,14 +153,14 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FND-01 | Phase 1 | Pending |
-| FND-02 | Phase 1 | Pending |
-| FND-03 | Phase 1 | Pending |
+| FND-01 | Phase 1 | Complete |
+| FND-02 | Phase 1 | Complete |
+| FND-03 | Phase 1 | Complete |
 | FND-04 | Phase 1 | Pending |
 | FND-05 | Phase 1 | Pending |
 | FND-06 | Phase 1 | Pending |
-| FND-07 | Phase 1 | Pending |
-| FND-08 | Phase 1 | Pending |
+| FND-07 | Phase 1 | Complete |
+| FND-08 | Phase 1 | Complete |
 | DB-01 | Phase 1 | Pending |
 | DB-02 | Phase 1 | Pending |
 | DB-03 | Phase 1 | Pending |
