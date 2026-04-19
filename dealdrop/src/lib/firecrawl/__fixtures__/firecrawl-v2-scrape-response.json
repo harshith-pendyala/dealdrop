@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "data": {
+    "metadata": {
+      "robots": "NOARCHIVE,NOCACHE",
+      "title": "\n    A Light in the Attic | Books to Scrape - Sandbox\n",
+      "created": "24th Jun 2016 09:29",
+      "description": "\n    It's hard to imagine a world without A Light in the Attic. This now-classic collection of poetry and drawings from Shel Silverstein celebrates its 20th anniversary with this special edition. Silverstein's humorous and creative verse can amuse the dowdiest of readers. Lemon-faced adults and fidgety kids sit still and read these rhythmic words and laugh and smile and love th It's hard to imagine a world without A Light in the Attic. This now-classic collection of poetry and drawings from Shel Silverstein celebrates its 20th anniversary with this special edition. Silverstein's humorous and creative verse can amuse the dowdiest of readers. Lemon-faced adults and fidgety kids sit still and read these rhythmic words and laugh and smile and love that Silverstein. Need proof of his genius? RockabyeRockabye baby, in the treetopDon't you know a treetopIs no safe place to rock?And who put you up there,And your cradle, too?Baby, I think someone down here'sGot it in for you. Shel, you never sounded so good. ...more\n",
+      "viewport": "width=device-width",
+      "language": "en-us",
+      "favicon": "https://books.toscrape.com/static/oscar/favicon.ico",
+      "scrapeId": "019da605-fab0-764a-b2f5-38a613eef6ce",
+      "sourceURL": "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+      "url": "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+      "statusCode": 200,
+      "contentType": "text/html",
+      "proxyUsed": "basic",
+      "cacheState": "hit",
+      "cachedAt": "2026-04-18T21:00:11.773Z",
+      "creditsUsed": 5,
+      "concurrencyLimited": false
+    },
+    "json": {
+      "product_name": "A Light in the Attic",
+      "current_price": 51.77,
+      "currency_code": "GBP",
+      "product_image_url": "https://books.toscrape.com/media/cache/fe/72/fe72f0532301ec28892ae79a629a293c.jpg"
+    }
+  }
+}
