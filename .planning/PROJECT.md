@@ -16,20 +16,20 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+#### Auth & Access — Validated in Phase 2 (authentication-landing)
+- [x] User can sign in with Google OAuth (via Supabase Auth)
+- [x] User can sign out from the header
+- [x] Auth modal opens when user clicks "Sign In" (Phase 4 will extend to unauth product-add attempts via the locked `useAuthModal()` hook)
+- [x] RLS policies ensure users only see/modify their own products and price history *(validated in Phase 1; carried forward)*
+
+#### Landing — Validated in Phase 2
+- [x] Logged-out visitors see a hero section ("Never miss a price drop") with feature cards
 
 ### Active
 
 <!-- v1 scope. All hypotheses until shipped. -->
 
-#### Auth & Access
-- [ ] User can sign in with Google OAuth (via Supabase Auth)
-- [ ] User can sign out from the header
-- [ ] Auth modal opens when user clicks "Sign In" OR tries to track a product while logged out
-- [ ] RLS policies ensure users only see/modify their own products and price history
-
-#### Landing / Onboarding
-- [ ] Logged-out visitors see a hero section ("Never miss a price drop") with feature cards
+#### Onboarding
 - [ ] Logged-in users with zero products see an empty state prompting them to add their first product
 
 #### Product Tracking
@@ -85,7 +85,8 @@ Fresh greenfield scaffold. A `create-next-app` skeleton already exists in [deald
 See [.planning/codebase/](.planning/codebase/) for full map. Key points:
 - Zero testing infrastructure
 - Phase 1 complete: Supabase backend live (products + price_history + RLS + pg_cron/pg_net), typed env (Zod), three Supabase client factories (server/browser/admin), Shadcn UI (new-york/zinc), DealDrop metadata — see [01-VERIFICATION.md](.planning/phases/01-foundation-database/01-VERIFICATION.md)
-- No auth, product ingestion, cron jobs, or API routes yet (Phases 2–6)
+- Phase 2 complete: Google OAuth end-to-end on localhost (proxy session refresh + `/auth/callback` + AuthModal + Header + Hero + DashboardShell + Sonner toasts), user-approved 14-step smoke test. Vercel preview leg deferred to Phase 7. See [02-VERIFICATION.md](.planning/phases/02-authentication-landing/02-VERIFICATION.md)
+- No product ingestion, cron jobs, or API routes yet (Phases 3–6)
 
 ### Intent
 Portfolio / demo project — the bar is "works end-to-end, looks decent, not production-hardened." Prioritize shipping a complete user journey over enterprise concerns.
@@ -152,13 +153,13 @@ Unique constraint: `(user_id, url)` — prevents duplicate tracking.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | DB + RLS + pg_cron/pg_net live as of Phase 1; Auth + cron jobs pending Phase 2/6 |
-| Google OAuth only for v1 | One-click sign-in; no password/email verification UX to build | — Pending |
+| Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | DB + RLS + pg_cron/pg_net live (Phase 1); Google OAuth live on localhost (Phase 2); cron jobs pending Phase 6 |
+| Google OAuth only for v1 | One-click sign-in; no password/email verification UX to build | Shipped in Phase 2 — Vercel preview leg deferred to Phase 7 |
 | Firecrawl over per-site scrapers | Works on any e-commerce URL without site-specific code | — Pending |
 | Resend for transactional email | Generous free tier, clean SDK, aligns with Next.js ecosystem | — Pending |
 | Daily scrape at 9 AM | Matches "daily alert" expectation; keeps Firecrawl costs predictable | — Pending |
 | "Any price drop" alert rule | Simpler than target price or % threshold; ships faster | — Pending |
-| Auth via modal, not a route | Single dynamic page; fewer routes to manage | — Pending |
+| Auth via modal, not a route | Single dynamic page; fewer routes to manage | Shipped in Phase 2 (AuthModal + AuthModalProvider) |
 | Keep price history forever | Low volume in portfolio use; retention policy unnecessary for v1 | — Pending |
 | Show scrape failure in UI (not email) | Avoids email noise; user sees state on the product card | — Pending |
 | Currency displayed as scraped (no FX) | Conversion adds complexity; original currency is accurate | — Pending |
@@ -181,4 +182,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 1 (foundation-database) completion*
+*Last updated: 2026-04-19 after Phase 2 (authentication-landing) completion*
