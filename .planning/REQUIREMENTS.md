@@ -51,9 +51,9 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 - [ ] **TRACK-01**: Logged-in user with no products sees an empty state with "No products yet" copy and prompt to add first product
 - [ ] **TRACK-02**: Add Product form accepts a URL string and submits via Server Action
-- [ ] **TRACK-03**: Server Action validates URL format with Zod before scraping
-- [ ] **TRACK-04**: Server Action calls Firecrawl `scrape` with JSON schema extracting `product_name`, `current_price`, `currency_code`, `product_image_url`
-- [ ] **TRACK-05**: Scraped payload validated with Zod — null/missing fields reject the insert with a user-facing error
+- [x] **TRACK-03**: Server Action validates URL format with Zod before scraping
+- [x] **TRACK-04**: Server Action calls Firecrawl `scrape` with JSON schema extracting `product_name`, `current_price`, `currency_code`, `product_image_url`
+- [x] **TRACK-05**: Scraped payload validated with Zod — null/missing fields reject the insert with a user-facing error
 - [ ] **TRACK-06**: Successful scrape inserts one row into `products` AND one row into `price_history` (initial data point)
 - [ ] **TRACK-07**: Duplicate URL for same user returns a friendly error (caught via unique constraint)
 - [ ] **TRACK-08**: Successful add triggers `revalidatePath('/')` so dashboard reflects new product without reload
@@ -181,9 +181,9 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | HERO-03 | Phase 2 | Pending |
 | HERO-04 | Phase 2 | Pending |
 | HERO-05 | Phase 2 | Pending |
-| TRACK-03 | Phase 3 | Pending |
-| TRACK-04 | Phase 3 | Pending |
-| TRACK-05 | Phase 3 | Pending |
+| TRACK-03 | Phase 3 | Complete |
+| TRACK-04 | Phase 3 | Complete |
+| TRACK-05 | Phase 3 | Complete |
 | TRACK-01 | Phase 4 | Pending |
 | TRACK-02 | Phase 4 | Pending |
 | TRACK-06 | Phase 4 | Pending |

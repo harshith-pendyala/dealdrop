@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-04-19T11:15:51.020Z"
+stopped_at: Completed 03-01-PLAN.md — Wave 0 test infrastructure + live Firecrawl fixture
+last_updated: "2026-04-19T17:40:56.627Z"
 last_activity: 2026-04-19
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
+  total_plans: 14
+  completed_plans: 11
+  percent: 79
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Users never miss a price drop on products they care about — regardless of which e-commerce site the product lives on.
-**Current focus:** Phase 02 — authentication-landing
+**Current focus:** Phase 03 — firecrawl-integration
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
-Status: Executing Phase 02
+Phase: 03 (firecrawl-integration) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-04-19
 
 Progress: [████████░░] 80%
@@ -58,6 +58,7 @@ Progress: [████████░░] 80%
 | Phase 01 P03 | 5 | 6 tasks | 5 files |
 | Phase 01 P01-05 | 15min | 5 tasks | 6 files |
 | Phase 01 P04 | 39 | 7 tasks | 2 files |
+| Phase 03 P01 | 122 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Plan 01-04 migrations pushed cleanly — Pitfall 8 did NOT fire on Tokyo Free-tier; pg_cron + pg_net enabled via SQL migration
 - [Phase 01]: Plan 01-04 handled both human-verify checkpoints automation-first: Task 4 via curl + npm run build; Task 5 via Supabase Management API with set local role authenticated + jwt.claim.sub — no Dashboard UI needed
 - [Phase 01]: Plan 01-04 Rule 1 auto-fix: renamed app/_debug → app/debug because Next.js 16 treats underscore-prefixed folders as private (404). Same bug Plan 01-05 hit with _shadcn-test
+- [Phase 03]: [Phase 03]: Plan 03-01 Task 3 deviation — Amazon B08N5WRWNW returned HTTP 404; swapped fixture target to books.toscrape.com (intentional scraping sandbox). A1/A2/A5 all PASS with real payload — current_price is a JSON number, currency_code is 3-letter ISO (GBP inferred from £), product_image_url observed as string URL (null branch still possible, covered by Plan 02 unit test).
+- [Phase 03]: [Phase 03]: Plan 03-01 — Vitest 3.2.4 pinned at ^3.2.4 with minimal config (node env, @→./src alias mirrors tsconfig). describe.skip() skeletons chosen over empty describe/deferred creation because Plans 02/03 will Edit (needs prior Read) rather than Write.
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T11:15:51.014Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-firecrawl-integration/03-CONTEXT.md
+Last session: 2026-04-19T17:40:44.726Z
+Stopped at: Completed 03-01-PLAN.md — Wave 0 test infrastructure + live Firecrawl fixture
+Resume file: None
