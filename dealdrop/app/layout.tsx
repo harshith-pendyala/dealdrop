@@ -34,11 +34,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AuthModalProvider>
           {children}
+          <Suspense fallback={null}>
+            <AuthToastListener />
+          </Suspense>
         </AuthModalProvider>
         <Toaster position="top-center" richColors />
-        <Suspense fallback={null}>
-          <AuthToastListener />
-        </Suspense>
       </body>
     </html>
   );
