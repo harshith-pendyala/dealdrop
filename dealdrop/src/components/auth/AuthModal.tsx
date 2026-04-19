@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/browser'
 import { useAuthModal } from './AuthModalProvider'
 import {
@@ -20,12 +21,18 @@ export function AuthModal() {
   async function handleGoogleSignIn() {
     setIsLoading(true)
     const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     })
+    if (error) {
+      toast.error('Could not start Google sign-in. Please try again.')
+      setIsLoading(false)
+    }
+    // On success the browser is navigating away; leave isLoading=true so the
+    // button stays disabled during the redirect.
   }
 
   return (
