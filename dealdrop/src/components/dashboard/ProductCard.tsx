@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { RemoveProductDialog } from './RemoveProductDialog'
+import { PriceChart } from './PriceChart'
 import type { Product } from '@/lib/products/get-user-products'
 
 type ProductCardProps = Readonly<{ product: Product }>
@@ -57,10 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       {chartOpen && (
         <div className="px-4 pb-4">
-          <div
-            className="min-h-[200px] bg-muted rounded-lg"
-            aria-hidden="true"
-          />
+          <PriceChart history={product.price_history} currency={product.currency} />
         </div>
       )}
     </Card>
