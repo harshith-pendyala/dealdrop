@@ -62,10 +62,11 @@ export function AddProductForm({ authed, formAction, state, pending, onSuccess }
   const { openAuthModal } = useAuthModal()
 
   // Ref-dedupe: only react to state identity changes, regardless of how many times
-  // the parent re-renders with a new onSuccess reference. Toast dispatch lives in
-  // the wrapper that owns useActionState so two AddProductForm instances sharing
-  // one state don't double-fire the toast.
-  const lastHandledStateRef = useRef<AddProductActionResult | null>(null)
+  // the parent re-renders with a new onSuccess reference. Initialize the ref to the
+  // current state at mount so a Dialog re-open (which unmounts+remounts this form)
+  // doesn't treat a persisted `{ ok: true }` from a prior submit as a new transition
+  // and fire onSuccess immediately — that bug closed the dialog on re-open.
+  const lastHandledStateRef = useRef<AddProductActionResult | null>(state)
   const onSuccessRef = useRef(onSuccess)
   useEffect(() => {
     onSuccessRef.current = onSuccess
