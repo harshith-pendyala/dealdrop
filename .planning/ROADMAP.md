@@ -104,7 +104,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 05-00-PLAN.md — Wave 0: Red-state test stubs (PriceChart.test.tsx + get-user-products.test.ts) + Risk 4 ProductCard.test.tsx makeProduct() fix + makeSupabaseMock double-order chain extension
 - [x] 05-01-PLAN.md — Wave 1: Install recharts@3.8.1 (exact-pinned, React 19-compatible) + extend getUserProducts DAL with nested price_history select + widen Product type + export PricePoint
 - [x] 05-02-PLAN.md — Wave 2: Create PriceChart.tsx client component (locked UI-SPEC Recharts skeleton, exported xTickFormatter/yTickFormatter, PriceTooltip subcomponent, empty-state guard) — turns 5/5 PriceChart tests green
-- [ ] 05-03-PLAN.md — Wave 3: ProductCard slot swap (placeholder div → <PriceChart>) + full suite + npm run build Risk 5 audit + human-verify mobile/desktop/dark-mode smoke (CHART-05, CHART-06)
+- [x] 05-03-PLAN.md — Wave 3: ProductCard slot swap (placeholder div → <PriceChart>) + full suite + npm run build Risk 5 audit + human-verify mobile/desktop/dark-mode smoke (CHART-05, CHART-06)
 **UI hint**: yes
 
 ### Phase 6: Automated Monitoring & Email Alerts
@@ -144,6 +144,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. Authentication & Landing | 0/5 | Not started | - |
 | 3. Firecrawl Integration | 0/TBD | Not started | - |
 | 4. Product Tracking & Dashboard | 0/TBD | Not started | - |
-| 5. Price History Chart | 0/4 | Not started | - |
+| 5. Price History Chart | 4/4 | Complete | 2026-04-20 |
 | 6. Automated Monitoring & Email Alerts | 0/TBD | Not started | - |
 | 7. Polish & Deployment | 0/TBD | Not started | - |
