@@ -69,11 +69,19 @@ describe('addProduct', () => {
     const res = await mod.addProduct(null, fd)
 
     expect(res).toEqual({ ok: true })
-    // Currency key rename assertion
-    const insertCalls = (supabase.from as any).mock.results
+    // Currency key rename assertion: check insert call arguments across all from() calls
+    // supabase.from() returns a builder mock; each builder has an insert mock.
+    // Collect all insert call arguments by inspecting mock.calls for insert on each builder.
+    const fromMock = (supabase.from as any)
+    const allInsertArgs = fromMock.mock.calls.flatMap((_: unknown, idx: number) => {
+      const builder = fromMock.mock.results[idx]?.value
+      if (!builder || !builder.insert) return []
+      return builder.insert.mock?.calls ?? []
+    })
+    const allInsertArgsJson = JSON.stringify(allInsertArgs)
     // products.insert called with currency: 'GBP' (not currency_code)
-    expect(JSON.stringify(insertCalls)).toContain('"currency":"GBP"')
-    expect(JSON.stringify(insertCalls)).not.toContain('"currency_code":"GBP"')
+    expect(allInsertArgsJson).toContain('"currency":"GBP"')
+    expect(allInsertArgsJson).not.toContain('"currency_code":"GBP"')
     expect(revalidatePath).toHaveBeenCalledWith('/')
   })
 
@@ -185,6 +193,34 @@ describe('addProduct', () => {
     expect(supabase.from).toHaveBeenCalledWith('products')
     expect(errSpy).toHaveBeenCalled()
     void deleteMock // used only for demonstration
+  })
+
+  it('currency mapping (Pitfall 1) — insert payload contains currency:"EUR", NOT currency_code:"EUR"', async () => {
+    const { scrapeProduct } = await import('@/lib/firecrawl/scrape-product')
+    const { createClient } = await import('@/lib/supabase/server')
+
+    vi.mocked(scrapeProduct).mockResolvedValue({
+      ok: true,
+      data: { name: 'Gadget', current_price: 49.99, currency_code: 'EUR', image_url: null },
+    })
+    const supabase = makeSupabaseMock()
+    vi.mocked(createClient).mockResolvedValue(supabase as any)
+
+    const fd = new FormData()
+    fd.set('url', 'https://example.com/product')
+    const res = await mod.addProduct(null, fd)
+
+    expect(res).toEqual({ ok: true })
+    // Extract insert call arguments from the products builder
+    const fromMock = (supabase.from as any)
+    const allInsertArgs = fromMock.mock.calls.flatMap((_: unknown, idx: number) => {
+      const builder = fromMock.mock.results[idx]?.value
+      if (!builder || !builder.insert) return []
+      return builder.insert.mock?.calls ?? []
+    })
+    const allInsertArgsJson = JSON.stringify(allInsertArgs)
+    expect(allInsertArgsJson).toContain('"currency":"EUR"')
+    expect(allInsertArgsJson).not.toContain('"currency_code"')
   })
 
   it('revalidatePath spy — called with "/" exactly once on success; NOT called on any failure branch', async () => {
