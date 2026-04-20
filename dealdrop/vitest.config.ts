@@ -25,16 +25,21 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+    alias: [
+      // tsconfig paths: "@/*": ["./*", "./src/*"]
+      // Shadcn primitives live at dealdrop/components/ui/ (not under src/).
+      // Specific prefix alias for @/components must come before the catch-all @ alias
+      // so that `@/components/ui/card` resolves to ./components/ui/card correctly.
+      { find: /^@\/components(.*)$/, replacement: path.resolve(__dirname, './components$1') },
+      { find: '@', replacement: path.resolve(__dirname, './src') },
       // NOTE: Aliases map the import *specifier* — this does not modify the server-only
       // package on disk. `npm run build` still resolves the real package via Next.js's
       // own resolver (where the react-server condition is set), so the production guard
       // behavior is unchanged.
-      'server-only': path.resolve(
-        __dirname,
-        './node_modules/server-only/empty.js',
-      ),
-    },
+      {
+        find: 'server-only',
+        replacement: path.resolve(__dirname, './node_modules/server-only/empty.js'),
+      },
+    ],
   },
 })
