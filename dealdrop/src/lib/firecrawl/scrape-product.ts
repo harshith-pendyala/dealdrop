@@ -10,7 +10,7 @@ import 'server-only'
 // for expected failures. Server-side console.error's each failure with full context (D-04);
 // the public return carries ONLY the coarse reason code (no detail, no HTTP status, no stack).
 
-import { env } from '@/lib/env'
+import { env } from '@/lib/env.server'
 import { validateUrl, normalizeUrl } from './url'
 import {
   FirecrawlScrapeResponseSchema,
