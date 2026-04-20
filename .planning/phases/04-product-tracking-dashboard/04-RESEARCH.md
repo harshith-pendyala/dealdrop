@@ -806,31 +806,31 @@ export async function removeProduct(productId: string): Promise<{ ok: boolean }>
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the skeleton card show the pasted URL?**
    - What we know: D-02 says "shimmer placeholder" without specifying content. UI-SPEC §SkeletonCard shows pure gray blocks — no content.
    - What's unclear: Users might appreciate seeing the URL they pasted mid-scrape for reassurance.
-   - Recommendation: Follow UI-SPEC (pure gray blocks). Deviation only if user testing shows it feels broken.
+   - RESOLVED: Follow UI-SPEC (pure gray blocks). Deviation only if user testing shows it feels broken.
 
 2. **Should `removeProduct` log the product name before deleting (for audit)?**
    - What we know: Phase 6 cron will log scrape failures. Remove is user-initiated.
    - What's unclear: Phase 4 has no audit-log infrastructure. Portfolio bar.
-   - Recommendation: `console.log({ action: 'removeProduct', productId, userId })` at minimum. No separate audit table needed.
+   - RESOLVED: `console.log({ action: 'removeProduct', productId, userId })` at minimum. No separate audit table needed.
 
 3. **What happens if a logged-out user's sessionStorage URL becomes stale (they abandon the tab, come back a day later, sign in via a different flow)?**
    - What we know: sessionStorage expires when the tab closes. But if the tab stays open, the URL persists.
    - What's unclear: Auto-submitting a URL the user forgot about might feel magical or creepy.
-   - Recommendation: Ship D-03 as-written; surface as a Phase 7 polish question if user testing shows confusion.
+   - RESOLVED: Ship D-03 as-written; surface as a Phase 7 polish question if user testing shows confusion.
 
 4. **Should `addProduct` return the new product ID so the optimistic card can transition to the real card without a full revalidation?**
    - What we know: `revalidatePath('/')` triggers a full RSC re-render; `useOptimistic` handles the transition automatically.
    - What's unclear: Whether returning the ID enables a smoother animation.
-   - Recommendation: Defer — portfolio bar. Return `{ ok: true }` only.
+   - RESOLVED: Defer — portfolio bar. Return `{ ok: true }` only.
 
 5. **Does Phase 4 need to handle a user deleting their Supabase auth account mid-session?**
    - What we know: `auth.users` CASCADE deletes `products` (FK). `getUser()` would return null on the next request.
-   - Recommendation: Out of scope. The sign-out button handles the normal case; account deletion is a Phase 7+ concern.
+   - RESOLVED: Out of scope. The sign-out button handles the normal case; account deletion is a Phase 7+ concern.
 
 ---
 
