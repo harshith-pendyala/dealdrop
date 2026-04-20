@@ -39,7 +39,14 @@ export function makeSupabaseMock(overrides: SupabaseMockOverrides = {}) {
         eq: vi.fn().mockResolvedValue({ error: deleteError }),
       })),
       select: vi.fn((_cols?: string) => ({
-        order: vi.fn().mockResolvedValue(selectProducts),
+        // Supports both single .order() (Phase 4 flat select) and
+        // double .order() (Phase 5 nested select with referencedTable).
+        // The inner .order() resolves to selectProducts regardless of chain depth.
+        order: vi.fn().mockReturnValue({
+          then: (onFulfilled: (v: typeof selectProducts) => unknown) =>
+            Promise.resolve(selectProducts).then(onFulfilled),
+          order: vi.fn().mockResolvedValue(selectProducts),
+        }),
       })),
     })),
   }

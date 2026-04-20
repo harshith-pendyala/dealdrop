@@ -34,6 +34,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     created_at: '2026-04-20T00:00:00Z',
     updated_at: '2026-04-20T00:00:00Z',
     last_scrape_failed_at: null,
+    price_history: [],
     ...overrides,
   } as Product
 }
