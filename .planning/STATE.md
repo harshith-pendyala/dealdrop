@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 03-03-PLAN.md — Wave 2 scrapeProduct(url) shipped (179 lines server-only), 16 passing branch tests, server-only aliased in vitest
-last_updated: "2026-04-20T06:08:07.313Z"
+status: verifying
+stopped_at: Completed 03-04-PLAN.md — Phase 3 complete. env.ts split refactor eliminated server env-var name leak; bundle grep both 0; server-only guard verified via adversarial build. Ready for /gsd-verify-work.
+last_updated: "2026-04-20T06:45:28.281Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 14
-  completed_plans: 13
-  percent: 93
+  completed_plans: 14
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 Phase: 03 (firecrawl-integration) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-20
 
 Progress: [████████░░] 80%
@@ -61,6 +61,7 @@ Progress: [████████░░] 80%
 | Phase 03 P01 | 122 | 3 tasks | 5 files |
 | Phase 03 P02 | 38 | 3 tasks | 5 files |
 | Phase 03 P03 | 31 | 2 tasks | 3 files |
+| Phase 03 P04 | 8min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,7 @@ Recent decisions affecting current work:
 - [Phase 03]: [Phase 03]: Plan 03-01 — Vitest 3.2.4 pinned at ^3.2.4 with minimal config (node env, @→./src alias mirrors tsconfig). describe.skip() skeletons chosen over empty describe/deferred creation because Plans 02/03 will Edit (needs prior Read) rather than Write.
 - [Phase 03]: Plan 03-02: types.ts split from scrape-product.ts (supersedes 03-PATTERNS.md recommendation) — exhaustiveness-check module stays self-contained; url.ts deliberately omits server-only to reserve client-paste optionality for Phase 4; parseProductResponse branch-ordered in schema.ts (not scrape-product.ts) so Plan 03 only owns HTTP orchestration.
 - [Phase 03]: Plan 03-03: scrapeProduct shipped verbatim from plan action. Rule 3 auto-fix — aliased 'server-only' package to empty.js in vitest.config.ts so DAL code is unit-testable; production guard unchanged (Plan 04 regression-tests it). 40/40 Firecrawl tests pass in 269ms; tsc + build + eslint all green.
+- [Phase 03]: Plan 03-04: T-3-01 verified via adversarial build (server-only guard fires) + belt-and-suspenders via env.ts split refactor. env.server.ts holds the 5 server vars behind 'import server-only' line 1; env.ts is now client-only. Bundle grep counts FIRECRAWL_API_KEY=0 and fc-pattern=0 in .next/static/**. User chose Option B (refactor) over Option A (accept name leak).
 
 ### Pending Todos
 
@@ -105,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T06:08:07.311Z
-Stopped at: Completed 03-03-PLAN.md — Wave 2 scrapeProduct(url) shipped (179 lines server-only), 16 passing branch tests, server-only aliased in vitest
+Last session: 2026-04-20T06:45:28.273Z
+Stopped at: Completed 03-04-PLAN.md — Phase 3 complete. env.ts split refactor eliminated server env-var name leak; bundle grep both 0; server-only guard verified via adversarial build. Ready for /gsd-verify-work.
 Resume file: None

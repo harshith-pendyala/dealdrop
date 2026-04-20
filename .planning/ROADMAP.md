@@ -69,7 +69,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 03-01-PLAN.md — Wave 0: Vitest install + vitest.config.ts + skeleton test files + live Firecrawl v2 fixture capture (closes A1/A2/A5)
 - [x] 03-02-PLAN.md — Wave 1: types.ts (closed ScrapeFailureReason + ProductData + ScrapeResult) + url.ts (validateUrl + normalizeUrl per D-05/D-06/D-07/D-08) + schema.ts (PRODUCT_JSON_SCHEMA + branch-ordered parseProductResponse) with full unit-test coverage
 - [x] 03-03-PLAN.md — Wave 2: scrape-product.ts (server-only guard + env.FIRECRAWL_API_KEY + Firecrawl v2 fetch + AbortSignal.timeout + targeted retry) with 15 mocked-fetch branch tests
-- [ ] 03-04-PLAN.md — Wave 3: Build-time server-only guard regression test (import scrapeProduct from a throwaway 'use client' page, assert npm run build fails, cleanup, post-build grep confirms no FIRECRAWL_API_KEY in .next/static/)
+- [x] 03-04-PLAN.md — Wave 3: Build-time server-only guard regression test (import scrapeProduct from a throwaway 'use client' page, assert npm run build fails, cleanup, post-build grep confirms no FIRECRAWL_API_KEY in .next/static/)
 
 ### Phase 4: Product Tracking & Dashboard
 **Goal**: An authenticated user can paste any e-commerce URL, see it scraped and saved to their dashboard, and remove products they no longer want to track — the complete user-facing product management loop
