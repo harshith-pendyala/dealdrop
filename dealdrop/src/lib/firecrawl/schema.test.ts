@@ -1,4 +1,97 @@
-// Skeleton — Plan 02 fills in test cases per 03-VALIDATION.md §"Seam 2 — Firecrawl Response Exit Guard"
-import { describe } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import {
+  FirecrawlScrapeResponseSchema,
+  parseProductResponse,
+} from './schema'
+import fixture from './__fixtures__/firecrawl-v2-scrape-response.json'
 
-describe.skip('product-schema validation (filled in by Plan 02)', () => {})
+// Silence the D-04 server-side logs during tests — they fire on every failure branch.
+let errSpy: ReturnType<typeof vi.spyOn>
+beforeEach(() => {
+  errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+})
+afterEach(() => {
+  errSpy.mockRestore()
+})
+
+// Extract the inner product payload once — tests clone + mutate.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const baseline = (fixture as any).data.json as Record<string, unknown>
+
+describe('FirecrawlScrapeResponseSchema', () => {
+  it('accepts the captured v2 fixture', () => {
+    const result = FirecrawlScrapeResponseSchema.safeParse(fixture)
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('parseProductResponse branch order', () => {
+  it('happy path from fixture', () => {
+    const out = parseProductResponse(baseline)
+    expect(out.ok).toBe(true)
+    if (out.ok) {
+      expect(typeof out.data.name).toBe('string')
+      expect(out.data.name.length).toBeGreaterThan(0)
+      expect(out.data.current_price).toBeGreaterThan(0)
+      expect(out.data.currency_code).toMatch(/^[A-Z]{3}$/)
+    }
+  })
+
+  it('image_url null is accepted (DB-01 nullable)', () => {
+    const mutated = { ...baseline, product_image_url: null }
+    const out = parseProductResponse(mutated)
+    expect(out).toEqual({
+      ok: true,
+      data: expect.objectContaining({ image_url: null }),
+    })
+  })
+
+  it('missing_name: null product_name', () => {
+    const out = parseProductResponse({ ...baseline, product_name: null })
+    expect(out).toEqual({ ok: false, reason: 'missing_name' })
+  })
+
+  it('missing_name: whitespace-only product_name', () => {
+    const out = parseProductResponse({ ...baseline, product_name: '   ' })
+    expect(out).toEqual({ ok: false, reason: 'missing_name' })
+  })
+
+  it('missing_price: null current_price', () => {
+    const out = parseProductResponse({ ...baseline, current_price: null })
+    expect(out).toEqual({ ok: false, reason: 'missing_price' })
+  })
+
+  it('missing_price: zero current_price', () => {
+    const out = parseProductResponse({ ...baseline, current_price: 0 })
+    expect(out).toEqual({ ok: false, reason: 'missing_price' })
+  })
+
+  it('missing_price: negative current_price', () => {
+    const out = parseProductResponse({ ...baseline, current_price: -10 })
+    expect(out).toEqual({ ok: false, reason: 'missing_price' })
+  })
+
+  it('invalid_currency: dollar sign', () => {
+    const out = parseProductResponse({ ...baseline, currency_code: '$' })
+    expect(out).toEqual({ ok: false, reason: 'invalid_currency' })
+  })
+
+  it('invalid_currency: lowercase', () => {
+    const out = parseProductResponse({ ...baseline, currency_code: 'usd' })
+    expect(out).toEqual({ ok: false, reason: 'invalid_currency' })
+  })
+
+  it('invalid_currency: too long', () => {
+    const out = parseProductResponse({ ...baseline, currency_code: 'USDXY' })
+    expect(out).toEqual({ ok: false, reason: 'invalid_currency' })
+  })
+
+  it('branch order: missing name AND missing price → missing_name fires first', () => {
+    const out = parseProductResponse({
+      ...baseline,
+      product_name: null,
+      current_price: null,
+    })
+    expect(out).toEqual({ ok: false, reason: 'missing_name' })
+  })
+})
