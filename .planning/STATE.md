@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 UI-SPEC approved
-last_updated: "2026-04-20T14:29:08.664Z"
-last_activity: 2026-04-20 -- Phase 05 planning complete
+stopped_at: Completed 05-00-PLAN.md (Wave 0 test infrastructure)
+last_updated: "2026-04-20T14:41:48.980Z"
+last_activity: 2026-04-20
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 25
-  completed_plans: 21
-  percent: 84
+  completed_plans: 22
+  percent: 88
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Users never miss a price drop on products they care about — regardless of which e-commerce site the product lives on.
-**Current focus:** Phase 04 — product-tracking-dashboard
+**Current focus:** Phase 05 — price-history-chart
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
+Phase: 05 (price-history-chart) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-04-20 -- Phase 05 planning complete
+Last activity: 2026-04-20
 
 Progress: [████████░░] 80%
 
@@ -64,6 +64,7 @@ Progress: [████████░░] 80%
 | Phase 03 P02 | 38 | 3 tasks | 5 files |
 | Phase 03 P03 | 31 | 2 tasks | 3 files |
 | Phase 03 P04 | 8min | 1 tasks | 4 files |
+| Phase 05 P00 | 2 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,7 @@ Recent decisions affecting current work:
 - [Phase 03]: Plan 03-02: types.ts split from scrape-product.ts (supersedes 03-PATTERNS.md recommendation) — exhaustiveness-check module stays self-contained; url.ts deliberately omits server-only to reserve client-paste optionality for Phase 4; parseProductResponse branch-ordered in schema.ts (not scrape-product.ts) so Plan 03 only owns HTTP orchestration.
 - [Phase 03]: Plan 03-03: scrapeProduct shipped verbatim from plan action. Rule 3 auto-fix — aliased 'server-only' package to empty.js in vitest.config.ts so DAL code is unit-testable; production guard unchanged (Plan 04 regression-tests it). 40/40 Firecrawl tests pass in 269ms; tsc + build + eslint all green.
 - [Phase 03]: Plan 03-04: T-3-01 verified via adversarial build (server-only guard fires) + belt-and-suspenders via env.ts split refactor. env.server.ts holds the 5 server vars behind 'import server-only' line 1; env.ts is now client-only. Bundle grep counts FIRECRAWL_API_KEY=0 and fc-pattern=0 in .next/static/**. User chose Option B (refactor) over Option A (accept name leak).
+- [Phase 05]: Plan 05-00 (Wave 0 test infra): makeSupabaseMock extended with thenable-on-first-.order so Phase 4 single-.order callers keep awaiting while Phase 5 nested-.order callers can chain — zero Phase 4 regression. PriceChart formatters (xTickFormatter/yTickFormatter) locked as top-level named exports so Wave 2 unit-tests them without rendering. Red state for get-user-products.test.ts is 2/5 not 3/5 (plan text overcounted); the 2 red tests fully cover CHART-02 novel contract (nested-select string + referencedTable order), the 3 green tests are the Phase 4 preserved-behavior regression guard Wave 1 must keep green.
 
 ### Pending Todos
 
@@ -109,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T13:52:41.872Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-price-history-chart/05-UI-SPEC.md
+Last session: 2026-04-20T14:41:48.977Z
+Stopped at: Completed 05-00-PLAN.md (Wave 0 test infrastructure)
+Resume file: None

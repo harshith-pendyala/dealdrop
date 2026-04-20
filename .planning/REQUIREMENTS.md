@@ -72,10 +72,10 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 
 ### Price History Chart (CHART)
 
-- [ ] **CHART-01**: Client component `PriceChart` uses Recharts to render a line chart of price over time
-- [ ] **CHART-02**: Chart reads from `price_history` rows scoped to the product via RLS
-- [ ] **CHART-03**: X-axis shows formatted dates, Y-axis shows formatted currency values
-- [ ] **CHART-04**: Chart has at least one data point (seeded on product creation via TRACK-06)
+- [x] **CHART-01**: Client component `PriceChart` uses Recharts to render a line chart of price over time
+- [x] **CHART-02**: Chart reads from `price_history` rows scoped to the product via RLS
+- [x] **CHART-03**: X-axis shows formatted dates, Y-axis shows formatted currency values
+- [x] **CHART-04**: Chart has at least one data point (seeded on product creation via TRACK-06)
 - [ ] **CHART-05**: Chart renders correctly on mobile and desktop viewports
 - [ ] **CHART-06**: Recharts version compatible with React 19 strict mode
 
@@ -198,10 +198,10 @@ Scope bar: **Portfolio / demo project** — works end-to-end, looks decent, not 
 | DASH-06 | Phase 4 | Pending |
 | DASH-07 | Phase 4 | Pending |
 | DASH-08 | Phase 4 | Pending |
-| CHART-01 | Phase 5 | Pending |
-| CHART-02 | Phase 5 | Pending |
-| CHART-03 | Phase 5 | Pending |
-| CHART-04 | Phase 5 | Pending |
+| CHART-01 | Phase 5 | Complete |
+| CHART-02 | Phase 5 | Complete |
+| CHART-03 | Phase 5 | Complete |
+| CHART-04 | Phase 5 | Complete |
 | CHART-05 | Phase 5 | Pending |
 | CHART-06 | Phase 5 | Pending |
 | CRON-01 | Phase 6 | Pending |
