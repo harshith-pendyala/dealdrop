@@ -81,7 +81,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Submitting the same URL a second time shows a friendly duplicate error toast instead of a silent failure
   4. Clicking Remove on a product card opens a confirmation dialog; confirming deletes the product and its price history from the grid
   5. A product whose last scrape returned invalid data shows a "tracking failed" status badge on its card
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 04-01-PLAN.md — Wave 0: Component-test infra (testing-library + jsdom) + Shadcn primitives (alert-dialog, badge, input, label) + shared Supabase mock factory
+- [ ] 04-02-PLAN.md — Wave 0: Migration 0004_last_scrape_failed_at.sql + [BLOCKING] supabase db push + type regeneration
+- [ ] 04-03-PLAN.md — Wave 0 (TDD): toast-messages module + exhaustive reason→copy test
+- [ ] 04-04-PLAN.md — Wave 1: addProduct + removeProduct Server Actions + getUserProducts DAL + action tests
+- [ ] 04-05-PLAN.md — Wave 2: EmptyState, SkeletonCard, ProductCard + placeholder SVG + component tests (DASH-03/04/05/08)
+- [ ] 04-06-PLAN.md — Wave 3: AddProductForm (useActionState + sessionStorage D-03), AddProductDialog, RemoveProductDialog + component tests
+- [ ] 04-07-PLAN.md — Wave 4: ProductGrid (useOptimistic) + DashboardShell rewrite + human-verify end-to-end smoke
 **UI hint**: yes
 
 ### Phase 5: Price History Chart
