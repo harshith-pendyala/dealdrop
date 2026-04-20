@@ -86,7 +86,8 @@ See [.planning/codebase/](.planning/codebase/) for full map. Key points:
 - Zero testing infrastructure
 - Phase 1 complete: Supabase backend live (products + price_history + RLS + pg_cron/pg_net), typed env (Zod), three Supabase client factories (server/browser/admin), Shadcn UI (new-york/zinc), DealDrop metadata — see [01-VERIFICATION.md](.planning/phases/01-foundation-database/01-VERIFICATION.md)
 - Phase 2 complete: Google OAuth end-to-end on localhost (proxy session refresh + `/auth/callback` + AuthModal + Header + Hero + DashboardShell + Sonner toasts), user-approved 14-step smoke test. Vercel preview leg deferred to Phase 7. See [02-VERIFICATION.md](.planning/phases/02-authentication-landing/02-VERIFICATION.md)
-- No product ingestion, cron jobs, or API routes yet (Phases 3–6)
+- Phase 3 complete: `scrapeProduct(url)` public function with `import 'server-only'` guard, AbortSignal-based 60s timeout, targeted retry on 5xx/network, closed `ScrapeFailureReason` union, branch-ordered Zod validation, and a live Firecrawl v2 fixture for deterministic tests (40 passing). `env.ts` split into client-safe `env.ts` + server-only `env.server.ts` so server-key NAMES never reach the client bundle. See [03-VERIFICATION.md](.planning/phases/03-firecrawl-integration/03-VERIFICATION.md)
+- No DB ingestion, add-product UI, cron jobs, or email alerts yet (Phases 4–6)
 
 ### Intent
 Portfolio / demo project — the bar is "works end-to-end, looks decent, not production-hardened." Prioritize shipping a complete user journey over enterprise concerns.
@@ -182,4 +183,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-19 after Phase 2 (authentication-landing) completion*
+*Last updated: 2026-04-20 after Phase 3 (firecrawl-integration) completion*
