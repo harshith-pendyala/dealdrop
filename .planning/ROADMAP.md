@@ -103,7 +103,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 - [x] 05-00-PLAN.md — Wave 0: Red-state test stubs (PriceChart.test.tsx + get-user-products.test.ts) + Risk 4 ProductCard.test.tsx makeProduct() fix + makeSupabaseMock double-order chain extension
 - [x] 05-01-PLAN.md — Wave 1: Install recharts@3.8.1 (exact-pinned, React 19-compatible) + extend getUserProducts DAL with nested price_history select + widen Product type + export PricePoint
-- [ ] 05-02-PLAN.md — Wave 2: Create PriceChart.tsx client component (locked UI-SPEC Recharts skeleton, exported xTickFormatter/yTickFormatter, PriceTooltip subcomponent, empty-state guard) — turns 5/5 PriceChart tests green
+- [x] 05-02-PLAN.md — Wave 2: Create PriceChart.tsx client component (locked UI-SPEC Recharts skeleton, exported xTickFormatter/yTickFormatter, PriceTooltip subcomponent, empty-state guard) — turns 5/5 PriceChart tests green
 - [ ] 05-03-PLAN.md — Wave 3: ProductCard slot swap (placeholder div → <PriceChart>) + full suite + npm run build Risk 5 audit + human-verify mobile/desktop/dark-mode smoke (CHART-05, CHART-06)
 **UI hint**: yes
 
