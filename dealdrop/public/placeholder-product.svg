@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="No product image available">
+  <rect width="400" height="300" fill="#e4e4e7"/>
+  <path d="M100 120 L150 170 L200 130 L300 210 L300 250 L100 250 Z" fill="#a1a1aa"/>
+  <circle cx="250" cy="100" r="20" fill="#a1a1aa"/>
+</svg>
