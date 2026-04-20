@@ -1,19 +1,20 @@
 import type { User } from '@supabase/supabase-js'
+import { getUserProducts } from '@/lib/products/get-user-products'
+import { EmptyState } from './EmptyState'
+import { ProductGrid } from './ProductGrid'
 
-type DashboardShellProps = Readonly<{
-  user: User
-}>
+type DashboardShellProps = Readonly<{ user: User }>
 
-export function DashboardShell({ user: _user }: DashboardShellProps) {
+export async function DashboardShell({ user: _user }: DashboardShellProps) {
+  const products = await getUserProducts()
+  const authed = true  // DashboardShell is only rendered inside the `if (user)` branch of app/page.tsx
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <div className="rounded-lg border bg-card p-6">
-        <h1 className="text-xl font-semibold leading-snug">Welcome back</h1>
-        <p className="mt-2 text-base leading-relaxed text-muted-foreground max-w-xl">
-          You&apos;re signed in. Your product tracker shows up here — adding
-          products unlocks in the next update.
-        </p>
-      </div>
+      {products.length === 0 ? (
+        <EmptyState authed={authed} />
+      ) : (
+        <ProductGrid products={products} authed={authed} />
+      )}
     </div>
   )
 }
