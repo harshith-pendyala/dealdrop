@@ -88,7 +88,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 04-04-PLAN.md — Wave 1: addProduct + removeProduct Server Actions + getUserProducts DAL + action tests
 - [x] 04-05-PLAN.md — Wave 2: EmptyState, SkeletonCard, ProductCard + placeholder SVG + component tests (DASH-03/04/05/08)
 - [x] 04-06-PLAN.md — Wave 3: AddProductForm (useActionState + sessionStorage D-03), AddProductDialog, RemoveProductDialog + component tests
-- [ ] 04-07-PLAN.md — Wave 4: ProductGrid (useOptimistic) + DashboardShell rewrite + human-verify end-to-end smoke
+- [x] 04-07-PLAN.md — Wave 4: ProductGrid (useOptimistic) + DashboardShell rewrite + human-verify end-to-end smoke
 **UI hint**: yes
 
 ### Phase 5: Price History Chart
