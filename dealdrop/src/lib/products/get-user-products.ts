@@ -5,18 +5,29 @@ import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 import type { Tables } from '@/types/database'
 
-export type Product = Tables<'products'>
+export type PricePoint = {
+  price: number
+  currency: string
+  checked_at: string
+}
+
+export type Product = Tables<'products'> & {
+  price_history: PricePoint[]
+}
 
 export async function getUserProducts(): Promise<Product[]> {
   const supabase = await createClient()
-  // RLS policy products_select_own enforces user_id = auth.uid() — no manual .eq needed.
+  // RLS policy products_select_own enforces user_id = auth.uid() on the outer table.
+  // DB-06 ownership-chain policy on price_history applies automatically to the nested
+  // embedded resource via PostgREST — no manual equality filter on user id is needed. Per D-02.
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select('*, price_history(price, currency, checked_at)')
     .order('created_at', { ascending: false })
+    .order('checked_at', { ascending: true, referencedTable: 'price_history' })
   if (error) {
     console.error('getUserProducts: select failed', { err: error })
     return []  // fail-open to empty grid rather than crash the dashboard
   }
-  return data ?? []
+  return (data ?? []) as Product[]
 }
