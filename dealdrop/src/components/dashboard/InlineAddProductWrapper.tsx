@@ -1,15 +1,41 @@
 'use client'
-// STUB — Plan 06 Task 1 overwrites this file with the real useActionState wrapper.
-// Mirrors the RemoveProductDialog stub/overwrite pattern in this same plan.
-// Until Plan 06 lands, rendering InlineAddProductWrapper produces nothing — EmptyState
-// still renders its heading + subtitle + sample-URL hint, so visual layout is preserved
-// in the interim. Plan 06 replaces this with a real AddProductForm-bearing wrapper.
+import { useActionState } from 'react'
+import { addProduct } from '@/actions/products'
+import { AddProductForm, type AddProductActionResult } from './AddProductForm'
 
 type InlineAddProductWrapperProps = Readonly<{
   authed: boolean
   onSuccess?: () => void
 }>
 
-export function InlineAddProductWrapper(_props: InlineAddProductWrapperProps) {
-  return null
+/**
+ * Empty-state client boundary consumed by EmptyState (Plan 05).
+ *
+ * Why own useActionState here (and not in EmptyState):
+ *   EmptyState is an RSC. Post-B1, AddProductForm is a pure renderer that requires
+ *   formAction + state + pending from the caller. RSCs cannot call useActionState,
+ *   so we need a client-boundary wrapper. This is the empty-state analogue of
+ *   AddProductDialog's internal wrapper and ProductGrid's wrapper (Plan 07).
+ *
+ * Why no optimistic UI here:
+ *   The empty-state path has no grid to prepend a skeleton into. On {ok:true}, the
+ *   Server Action calls revalidatePath('/'); DashboardShell re-renders, EmptyState
+ *   is replaced by ProductGrid, and the added product appears as a real ProductCard.
+ *   An optimistic skeleton inside EmptyState would only flash for the window between
+ *   submit and response, and would require a custom render branch that EmptyState
+ *   doesn't have. Cheaper to let the server re-render happen.
+ */
+export function InlineAddProductWrapper({ authed, onSuccess }: InlineAddProductWrapperProps) {
+  const initial: AddProductActionResult | null = null
+  const [state, formAction, pending] = useActionState(addProduct, initial)
+
+  return (
+    <AddProductForm
+      authed={authed}
+      formAction={formAction}
+      state={state}
+      pending={pending}
+      onSuccess={onSuccess}
+    />
+  )
 }

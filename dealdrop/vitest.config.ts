@@ -28,9 +28,10 @@ export default defineConfig({
     alias: [
       // tsconfig paths: "@/*": ["./*", "./src/*"]
       // Shadcn primitives live at dealdrop/components/ui/ (not under src/).
-      // Specific prefix alias for @/components must come before the catch-all @ alias
-      // so that `@/components/ui/card` resolves to ./components/ui/card correctly.
-      { find: /^@\/components(.*)$/, replacement: path.resolve(__dirname, './components$1') },
+      // Only map @/components/ui/* to ./components/ui/* (the Shadcn root).
+      // All other @/components/* (auth, dashboard, etc.) live in ./src/components/*
+      // and are resolved by the catch-all @ -> ./src alias below.
+      { find: /^@\/components\/ui(.*)$/, replacement: path.resolve(__dirname, './components/ui$1') },
       { find: '@', replacement: path.resolve(__dirname, './src') },
       // NOTE: Aliases map the import *specifier* — this does not modify the server-only
       // package on disk. `npm run build` still resolves the real package via Next.js's
