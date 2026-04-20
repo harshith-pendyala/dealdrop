@@ -41,11 +41,13 @@ created: 2026-04-20
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 04-05-01 | 05 | 2 | TRACK-01 | — | Empty state renders when RLS returns zero products | unit (component) | `npx vitest run src/components/dashboard/EmptyState.test.tsx` | ✅ Plan 05 Task 1 | ⬜ pending |
+| 04-05-01 | 05 | 2 | TRACK-01 | — | Empty state renders when RLS returns zero products AND delegates add-path to InlineAddProductWrapper (B-NEW — no direct AddProductForm import) | unit (component) | `npx vitest run src/components/dashboard/EmptyState.test.tsx` | ✅ Plan 05 Task 1 | ⬜ pending |
 | 04-06-01 | 06 | 3 | TRACK-02 | — | Form submits URL via Server Action (no separate POST) | unit (component) | `npx vitest run src/components/dashboard/AddProductForm.test.tsx` | ✅ Plan 06 Task 1 | ⬜ pending |
+| 04-06-01 | 06 | 3 | TRACK-01 / TRACK-02 (empty-state path) | T-04-37 | **B-NEW:** InlineAddProductWrapper (overwrites Plan 05 stub) owns useActionState(addProduct) and forwards a real function as `formAction` to AddProductForm — asserts `data-has-formaction="true"` so EmptyState's add path is not silently broken | unit (component) | `npx vitest run src/components/dashboard/InlineAddProductWrapper.test.tsx` | ✅ Plan 06 Task 1 (2 B-NEW tests) | ⬜ pending |
 | 04-04-01 / 04-04-02 | 04 | 1 | TRACK-06 | T-04-11 / T-04-17 | `addProduct` writes `products` + `price_history` atomically on success | unit (action) | `npx vitest run src/actions/products.test.ts -t "happy path"` | ✅ Plan 04 Tasks 1+2 | ⬜ pending |
 | 04-04-01 / 04-04-02 | 04 | 1 | TRACK-07 | T-04-13 | `addProduct` returns `duplicate_url` when PostgrestError code is `23505` | unit (action) | `npx vitest run src/actions/products.test.ts -t "duplicate"` | ✅ Plan 04 Tasks 1+2 | ⬜ pending |
 | 04-04-01 / 04-04-02 | 04 | 1 | TRACK-08 | — | `addProduct` calls `revalidatePath('/')` on success | unit (spy) | `npx vitest run src/actions/products.test.ts -t "revalidate"` | ✅ Plan 04 Tasks 1+2 | ⬜ pending |
+| 04-04-01 / 04-04-02 | 04 | 1 | — (I-NEW-1 audit) | T-04-15 | **I-NEW-1:** `removeProduct` emits exactly one `console.log({ action: 'removeProduct', productId, userId })` on success, BEFORE `revalidatePath('/')`; does NOT emit on unauth or DB-error branches (aligns with RESEARCH.md Open Q#2) | unit (spy) | `npx vitest run src/actions/products.test.ts -t "audit"` | ✅ Plan 04 Tasks 1+2 (3 audit tests) | ⬜ pending |
 | 04-06-01 | 06 | 3 | TRACK-09 | — | `dispatchToastForState` fires toast.success on `{ok:true}` + toast.error with `REASON_TO_TOAST[reason]` on each failure reason (B2 fix — extracted pure helper, directly tested) | unit (pure helper) | `npx vitest run src/components/dashboard/AddProductForm.test.tsx -t "toast"` | ✅ Plan 06 Task 1 (6 toast: tests) | ⬜ pending |
 | 04-07-01 | 07 | 4 | DASH-01 | — | Count renders above grid with correct pluralization (1→"product tracked", 0/2+→"products tracked") | unit (component) | `npx vitest run src/components/dashboard/ProductGrid.test.tsx -t "count"` | ✅ Plan 07 Task 1 | ⬜ pending |
 | 04-07-01 | 07 | 4 | DASH-02 | — | Grid renders one `ProductCard` per product row | unit (component) | `npx vitest run src/components/dashboard/ProductGrid.test.tsx -t "grid"` | ✅ Plan 07 Task 1 | ⬜ pending |
@@ -72,12 +74,13 @@ created: 2026-04-20
 
 - [ ] Add dev deps: `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom` (Vitest is already installed; jsdom env enabled per-file via `// @vitest-environment jsdom`).
 - [ ] `dealdrop/src/__mocks__/supabase-server.ts` — shared configurable Supabase client mock (success / PostgrestError 23505 / generic DB error / unauthenticated).
-- [ ] `dealdrop/src/actions/products.test.ts` — stubs for TRACK-02, TRACK-06, TRACK-07, TRACK-08, plus unauth + DB-error rollback + `removeProduct` happy / unauth.
+- [ ] `dealdrop/src/actions/products.test.ts` — stubs for TRACK-02, TRACK-06, TRACK-07, TRACK-08, plus unauth + DB-error rollback + `removeProduct` happy / unauth + **I-NEW-1 audit-log** (3 `audit:` tests covering success-emits / unauth-does-not / error-does-not branches).
 - [ ] `dealdrop/src/components/dashboard/AddProductForm.test.tsx` — stubs for TRACK-02, TRACK-09 (via the 6 `toast:` tests on the extracted `dispatchToastForState` helper, B2 fix), unauth→`openAuthModal` branch, `sessionStorage` auto-submit on remount.
+- [ ] `dealdrop/src/components/dashboard/InlineAddProductWrapper.test.tsx` — **B-NEW:** stubs for TRACK-01/TRACK-02 empty-state add path. Asserts the wrapper forwards a real `formAction` function to AddProductForm (via `data-has-formaction="true"` attribute on the stub). Covers authed=true and authed=false.
 - [ ] `dealdrop/src/components/dashboard/ProductCard.test.tsx` — stubs for DASH-03, DASH-04, DASH-05, DASH-08.
 - [ ] `dealdrop/src/components/dashboard/RemoveProductDialog.test.tsx` — stubs for DASH-06, DASH-07.
 - [ ] `dealdrop/src/components/dashboard/ProductGrid.test.tsx` — stubs for DASH-01, DASH-02, plus the B1 fix test (dispatching the wrapping action inserts a SkeletonCard within one render).
-- [ ] `dealdrop/src/components/dashboard/EmptyState.test.tsx` — stub for TRACK-01 (copy matches CONTEXT.md D-04 verbatim).
+- [ ] `dealdrop/src/components/dashboard/EmptyState.test.tsx` — stub for TRACK-01 (copy matches CONTEXT.md D-04 verbatim; renders InlineAddProductWrapper NOT AddProductForm directly per B-NEW).
 - [ ] `dealdrop/src/lib/firecrawl/toast-messages.test.ts` — exhaustive reason-to-copy coverage.
 - [ ] `dealdrop/src/__probes__/product-type.probe.ts` — W5 fix: permanent type-level probe for `Product.last_scrape_failed_at`.
 - [ ] Mock `next/cache` (`revalidatePath`) and `@/lib/firecrawl/scrape-product` via `vi.mock` in action tests, reusing the Phase 3 Plan 03-03 `vi.stubEnv` + dynamic-import pattern.
@@ -108,5 +111,10 @@ created: 2026-04-20
 - [x] W1 fix acceptance criteria present in Plan 04 Tasks 2 & 3 (`import 'server-only'` grep)
 - [x] W4 fix applied — migration filename `0004_add_last_scrape_failed_at.sql` aligns with RESEARCH.md + PATTERNS.md in all 8 occurrences in Plan 02
 - [x] W5 fix applied — `src/__probes__/product-type.probe.ts` present as a permanent type-level regression guard
+- [x] **B-NEW fix applied** — `InlineAddProductWrapper.tsx` stubbed in Plan 05 (Task 1) + overwritten with real impl in Plan 06 (Task 1); EmptyState renders the wrapper (not AddProductForm directly); dedicated `InlineAddProductWrapper.test.tsx` row added to Per-Task Verification Map; acceptance criteria assert `data-has-formaction="true"` so the empty-state add path cannot silently break
+- [x] **W-NEW-1 fix applied** — Plan 02 Task 1 verify replaces broken `| xargs test 1 = ` with reliable `grep -Fq ... && ...` composition
+- [x] **I-NEW-1 fix applied** — Plan 04 Task 2 `removeProduct` emits `console.log({ action: 'removeProduct', productId, userId })` before `revalidatePath('/')` on success; 3 dedicated `-t "audit"` tests in Plan 04 Task 1 cover success-emits / unauth-does-not / error-does-not branches; aligns with RESEARCH.md Open Q#2 resolution
 
 **Approval:** ready
+</content>
+</invoke>
