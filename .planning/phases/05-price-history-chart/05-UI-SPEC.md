@@ -1,10 +1,11 @@
 ---
 phase: 5
 slug: price-history-chart
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "new-york/zinc"
 created: 2026-04-20
+reviewed_at: 2026-04-20
 ---
 
 # Phase 5 — UI Design Contract
