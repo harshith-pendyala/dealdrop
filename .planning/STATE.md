@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md — Wave 0 test infrastructure + live Firecrawl fixture
-last_updated: "2026-04-19T17:40:56.627Z"
-last_activity: 2026-04-19
+stopped_at: Completed 03-02-PLAN.md — Wave 1 type contracts + URL + schema validation (24 passing tests, Seams 1+2 closed)
+last_updated: "2026-04-20T05:22:28.148Z"
+last_activity: 2026-04-20
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 12
+  percent: 86
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 03 (firecrawl-integration) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
-Last activity: 2026-04-19
+Last activity: 2026-04-20
 
 Progress: [████████░░] 80%
 
@@ -59,6 +59,7 @@ Progress: [████████░░] 80%
 | Phase 01 P01-05 | 15min | 5 tasks | 6 files |
 | Phase 01 P04 | 39 | 7 tasks | 2 files |
 | Phase 03 P01 | 122 | 3 tasks | 5 files |
+| Phase 03 P02 | 38 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,7 @@ Recent decisions affecting current work:
 - [Phase 01]: Plan 01-04 Rule 1 auto-fix: renamed app/_debug → app/debug because Next.js 16 treats underscore-prefixed folders as private (404). Same bug Plan 01-05 hit with _shadcn-test
 - [Phase 03]: [Phase 03]: Plan 03-01 Task 3 deviation — Amazon B08N5WRWNW returned HTTP 404; swapped fixture target to books.toscrape.com (intentional scraping sandbox). A1/A2/A5 all PASS with real payload — current_price is a JSON number, currency_code is 3-letter ISO (GBP inferred from £), product_image_url observed as string URL (null branch still possible, covered by Plan 02 unit test).
 - [Phase 03]: [Phase 03]: Plan 03-01 — Vitest 3.2.4 pinned at ^3.2.4 with minimal config (node env, @→./src alias mirrors tsconfig). describe.skip() skeletons chosen over empty describe/deferred creation because Plans 02/03 will Edit (needs prior Read) rather than Write.
+- [Phase 03]: Plan 03-02: types.ts split from scrape-product.ts (supersedes 03-PATTERNS.md recommendation) — exhaustiveness-check module stays self-contained; url.ts deliberately omits server-only to reserve client-paste optionality for Phase 4; parseProductResponse branch-ordered in schema.ts (not scrape-product.ts) so Plan 03 only owns HTTP orchestration.
 
 ### Pending Todos
 
@@ -101,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19T17:40:44.726Z
-Stopped at: Completed 03-01-PLAN.md — Wave 0 test infrastructure + live Firecrawl fixture
+Last session: 2026-04-20T05:22:28.143Z
+Stopped at: Completed 03-02-PLAN.md — Wave 1 type contracts + URL + schema validation (24 passing tests, Seams 1+2 closed)
 Resume file: None
