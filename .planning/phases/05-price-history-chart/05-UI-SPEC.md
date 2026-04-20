@@ -62,16 +62,18 @@ Exceptions: Chart container uses 200px fixed pixel height (not a spacing token) 
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 16px (text-base) | 400 (regular) | 1.5 | General prose, description text |
-| Label | 14px (text-sm) | 400 (regular) | 1.5 | Chart axis tick labels, muted helper text |
+| Label | 14px (text-sm) | 400 (regular) | 1.5 | Chart axis tick labels, tooltip values, muted helper text, empty-state copy |
 | Heading | 20px (text-xl) | 600 (semibold) | 1.2 | Product price in card header |
 | Display | 28px (text-2xl) | 600 (semibold) | 1.2 | Dashboard count heading |
 
-**Chart-specific typography:**
-- X-axis tick labels: 12px (`text-xs`), weight 400, color `var(--muted-foreground)`
-- Y-axis tick labels: 12px (`text-xs`), weight 400, color `var(--muted-foreground)` — formatter uses `maximumFractionDigits: 0` to prevent crowding on narrow mobile cards
-- Tooltip heading (date): 12px (`text-xs`), weight 600 (semibold)
-- Tooltip value (price): 14px (`text-sm`), weight 400, full-precision `Intl.NumberFormat` currency format
+**Chart-specific typography (all at Label / 14px):**
+- X-axis tick labels: 14px, weight 400, color `var(--muted-foreground)`
+- Y-axis tick labels: 14px, weight 400, color `var(--muted-foreground)` — formatter uses `maximumFractionDigits: 0` to prevent crowding on narrow mobile cards
+- Tooltip heading (date): 14px, weight 600 (semibold)
+- Tooltip value (price): 14px, weight 400, full-precision `Intl.NumberFormat` currency format
 - Empty-state copy inside chart slot: 14px (`text-sm`), weight 400, color `var(--muted-foreground)`, centered
+
+Scale: 14 / 16 / 20 / 28 px — four sizes, two weights.
 
 **Source:** Existing ProductCard.tsx type scale (L27: text-base font-semibold, L29: text-xl font-semibold); globals.css base tokens.
 
@@ -114,6 +116,8 @@ Props: { history: PricePoint[]; currency: string }
 Directive: 'use client'
 ```
 
+**Focal point (expanded card state):** The `--primary` line stroke is the primary visual anchor within the expanded chart slot. All other chart elements (axis labels, tooltip chrome, dot outlines) are subordinate to it in visual weight.
+
 **Recharts structure:**
 
 ```
@@ -122,11 +126,11 @@ Directive: 'use client'
     <XAxis
       dataKey="checked_at"
       tickFormatter={xTickFormatter}   // "MMM d" via Intl.DateTimeFormat
-      tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+      tick={{ fontSize: 14, fill: 'var(--muted-foreground)' }}
     />
     <YAxis
       tickFormatter={yTickFormatter}   // Intl.NumberFormat, maximumFractionDigits: 0
-      tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+      tick={{ fontSize: 14, fill: 'var(--muted-foreground)' }}
       domain={['auto', 'auto']}
       width={60}                       // leave room for formatted currency ticks
     />
