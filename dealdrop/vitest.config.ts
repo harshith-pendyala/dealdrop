@@ -5,7 +5,7 @@ import path from 'node:path'
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     globals: false,
     // The 'server-only' npm package uses export conditions { 'react-server': empty.js,
     // default: index.js (which throws) }. Under `next build`, the react-server condition
