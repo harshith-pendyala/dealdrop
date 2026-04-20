@@ -12,9 +12,6 @@ export function EmptyState({ authed }: EmptyStateProps) {
       <div className="w-full max-w-md">
         <InlineAddProductWrapper authed={authed} />
       </div>
-      <p className="text-sm text-muted-foreground">
-        e.g., https://www.amazon.com/dp/XXXXXXXXXX
-      </p>
     </section>
   )
 }

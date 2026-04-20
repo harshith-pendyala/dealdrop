@@ -32,11 +32,6 @@ describe('EmptyState', () => {
     )
   })
 
-  it('renders the sample URL helper hint', () => {
-    render(<EmptyState authed={true} />)
-    expect(document.body.textContent).toContain('e.g., https://www.amazon.com/dp/XXXXXXXXXX')
-  })
-
   it('renders InlineAddProductWrapper and passes authed prop through', () => {
     render(<EmptyState authed={false} />)
     const wrapper = screen.getByTestId('inline-add-product-wrapper')
