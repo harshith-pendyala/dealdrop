@@ -1,7 +1,11 @@
 'use client'
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 import { addProduct } from '@/actions/products'
-import { AddProductForm, type AddProductActionResult } from './AddProductForm'
+import {
+  AddProductForm,
+  dispatchToastForState,
+  type AddProductActionResult,
+} from './AddProductForm'
 
 type InlineAddProductWrapperProps = Readonly<{
   authed: boolean
@@ -28,6 +32,15 @@ type InlineAddProductWrapperProps = Readonly<{
 export function InlineAddProductWrapper({ authed, onSuccess }: InlineAddProductWrapperProps) {
   const initial: AddProductActionResult | null = null
   const [state, formAction, pending] = useActionState(addProduct, initial)
+
+  // Toast dispatch lives here (not in AddProductForm) so two AddProductForm
+  // instances sharing one state can't double-fire. Ref-dedupe on state identity.
+  const lastToastedStateRef = useRef<AddProductActionResult | null>(null)
+  useEffect(() => {
+    if (state === lastToastedStateRef.current) return
+    lastToastedStateRef.current = state
+    dispatchToastForState(state)
+  }, [state])
 
   return (
     <AddProductForm

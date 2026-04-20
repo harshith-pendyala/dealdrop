@@ -1,16 +1,22 @@
 'use client'
-import { useActionState, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { addProduct } from '@/actions/products'
 import { AddProductForm, type AddProductActionResult } from './AddProductForm'
 
-type AddProductDialogProps = Readonly<{ authed: boolean }>
+type AddProductDialogProps = Readonly<{
+  authed: boolean
+  // Action state supplied by parent (ProductGrid) so the dialog submit goes
+  // through the same useActionState+useOptimistic wrapper that drives the
+  // SkeletonCard insertion. Without sharing the action, dialog submits bypass
+  // the optimistic reducer and no skeleton appears.
+  formAction: (formData: FormData) => void
+  state: AddProductActionResult | null
+  pending: boolean
+}>
 
-export function AddProductDialog({ authed }: AddProductDialogProps) {
+export function AddProductDialog({ authed, formAction, state, pending }: AddProductDialogProps) {
   const [open, setOpen] = useState(false)
-  const initial: AddProductActionResult | null = null
-  const [state, formAction, pending] = useActionState(addProduct, initial)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

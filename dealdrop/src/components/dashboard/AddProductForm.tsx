@@ -61,14 +61,24 @@ export function AddProductForm({ authed, formAction, state, pending, onSuccess }
   const formRef = useRef<HTMLFormElement>(null)
   const { openAuthModal } = useAuthModal()
 
-  // Toast dispatch on action state change (B2 fix — extracted helper).
+  // Ref-dedupe: only react to state identity changes, regardless of how many times
+  // the parent re-renders with a new onSuccess reference. Toast dispatch lives in
+  // the wrapper that owns useActionState so two AddProductForm instances sharing
+  // one state don't double-fire the toast.
+  const lastHandledStateRef = useRef<AddProductActionResult | null>(null)
+  const onSuccessRef = useRef(onSuccess)
   useEffect(() => {
-    dispatchToastForState(state)
+    onSuccessRef.current = onSuccess
+  }, [onSuccess])
+
+  useEffect(() => {
+    if (state === lastHandledStateRef.current) return
+    lastHandledStateRef.current = state
     if (state?.ok) {
-      onSuccess?.()
+      onSuccessRef.current?.()
       formRef.current?.reset()
     }
-  }, [state, onSuccess])
+  }, [state])
 
   // D-03: on mount, if authed AND sessionStorage has a pending URL, auto-submit.
   useEffect(() => {

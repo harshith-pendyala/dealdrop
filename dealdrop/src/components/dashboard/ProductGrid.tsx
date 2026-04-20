@@ -1,5 +1,5 @@
 'use client'
-import { useActionState, useEffect, useOptimistic } from 'react'
+import { useActionState, useEffect, useOptimistic, useRef } from 'react'
 import type { Product } from '@/lib/products/get-user-products'
 import { ProductCard } from './ProductCard'
 import { SkeletonCard } from './SkeletonCard'
@@ -48,8 +48,13 @@ export function ProductGrid({ products, authed }: ProductGridProps) {
     initial,
   )
 
-  // 3. Toast dispatch on action completion. Delegates to the Plan 06 pure helper.
+  // 3. Toast dispatch on action completion. Ref-dedupe ensures one toast per
+  //    unique state reference — protects against React re-renders that replay
+  //    the effect with the same persisted useActionState result.
+  const lastToastedStateRef = useRef<AddProductActionResult | null>(null)
   useEffect(() => {
+    if (state === lastToastedStateRef.current) return
+    lastToastedStateRef.current = state
     dispatchToastForState(state)
   }, [state])
 
@@ -62,7 +67,12 @@ export function ProductGrid({ products, authed }: ProductGridProps) {
         <h1 className="text-xl font-semibold leading-snug">
           {count} {label}
         </h1>
-        <AddProductDialog authed={authed} />
+        <AddProductDialog
+          authed={authed}
+          formAction={formAction}
+          state={state}
+          pending={pending}
+        />
       </div>
       {/*
         Inline AddProductForm hidden from populated layout by UI-SPEC — dialog is the
