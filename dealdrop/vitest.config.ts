@@ -5,7 +5,9 @@ import path from 'node:path'
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['src/**/*.test.{ts,tsx}'],
+    // Pick up tests in both src/ (lib + actions) and app/ (Route Handler tests live
+    // co-located with handlers, e.g. app/api/cron/check-prices/route.test.ts).
+    include: ['src/**/*.test.{ts,tsx}', 'app/**/*.test.{ts,tsx}'],
     globals: false,
     // The 'server-only' npm package uses export conditions { 'react-server': empty.js,
     // default: index.js (which throws) }. Under `next build`, the react-server condition
