@@ -119,9 +119,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. A failed scrape is logged and skipped; the cron run continues for remaining products and the product card shows the "tracking failed" badge
   6. The CRON_SECRET never appears in plaintext in the `cron.job` table or any migration file
 **Plans**: 5 plans
-- [ ] 06-01-PLAN.md — Wave 0: Install resend@^6.12.2 + p-limit@^3.1.0 (CJS) + new makeSupabaseAdminMock factory + 4 RED-state test skeletons (resend.test.ts, cron/auth.test.ts, cron/check-prices.test.ts, route.test.ts)
-- [ ] 06-02-PLAN.md — Wave 1: lib/resend.ts — HTML email template (D-05/06/07) + Resend SDK wrapper + flip resend.test.ts to GREEN (EMAIL-01/02/03/05/06)
-- [ ] 06-03-PLAN.md — Wave 1: Migration 0005_cron_daily_price_check.sql — Vault-backed secret + SECURITY DEFINER wrapper + pg_cron schedule (CRON-10, CRON-11)
+- [x] 06-01-PLAN.md — Wave 0: Install resend@^6.12.2 + p-limit@^3.1.0 (CJS) + new makeSupabaseAdminMock factory + 4 RED-state test skeletons (resend.test.ts, cron/auth.test.ts, cron/check-prices.test.ts, route.test.ts)
+- [x] 06-02-PLAN.md — Wave 1: lib/resend.ts — HTML email template (D-05/06/07) + Resend SDK wrapper + flip resend.test.ts to GREEN (EMAIL-01/02/03/05/06)
+- [x] 06-03-PLAN.md — Wave 1: Migration 0005_cron_daily_price_check.sql — Vault-backed secret + SECURITY DEFINER wrapper + pg_cron schedule (CRON-10, CRON-11)
 - [ ] 06-04-PLAN.md — Wave 2: lib/cron/auth.ts (constant-time verifyCronBearer) + lib/cron/check-prices.ts (runPriceCheck orchestrator, p-limit 3, price-change gate, email branch) + green tests (CRON-02/03/04/06/07/08/09, EMAIL-01/05/06)
 - [ ] 06-05-PLAN.md — Wave 3: app/api/cron/check-prices/route.ts (GET+POST+maxDuration=300) + route.test.ts green + [BLOCKING] supabase db push + CRON-11 grep-cleanliness SQL verification + local curl smoke test + human-verify (CRON-01/05, Phase 6 gate)
 
