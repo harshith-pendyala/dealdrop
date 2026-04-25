@@ -46,13 +46,13 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 - [ ] Product card has a "View Product" link to the original e-commerce site
 - [ ] Product card has a "Remove" button with confirmation, cascade-deletes history
 
-#### Automated Monitoring
-- [ ] Daily cron (pg_cron in Supabase, e.g. 9:00 AM) triggers `/api/cron/check-prices` POST
-- [ ] Cron endpoint protected by Bearer token (CRON_SECRET in Authorization header)
-- [ ] GET endpoint on same route returns health-check response
-- [ ] Cron iterates all products, re-scrapes with Firecrawl, writes new row to `price_history` when price changes
-- [ ] When new price < last recorded price → sends Resend email with image, % drop, old vs new price
-- [ ] When scrape fails, product card shows a "tracking failed" status badge
+#### Automated Monitoring — Validated in Phase 6 (automated-monitoring-email-alerts)
+- [x] Daily cron (pg_cron in Supabase, 9:00 AM UTC) triggers `/api/cron/check-prices` POST
+- [x] Cron endpoint protected by Bearer token (CRON_SECRET in Authorization header)
+- [x] GET endpoint on same route returns health-check response
+- [x] Cron iterates all products, re-scrapes with Firecrawl, writes new row to `price_history` when price changes
+- [x] When new price < last recorded price → sends Resend email with image, % drop, old vs new price
+- [x] When scrape fails, product card shows a "tracking failed" status badge
 
 #### Polish
 - [ ] Toast notifications (Sonner) for add, remove, errors
@@ -183,4 +183,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-20 after Phase 3 (firecrawl-integration) completion*
+*Last updated: 2026-04-25 after Phase 6 (automated-monitoring-email-alerts) completion*
