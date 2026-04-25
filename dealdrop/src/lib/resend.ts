@@ -173,6 +173,17 @@ export async function sendPriceDropAlert(input: PriceDropInput): Promise<SendRes
     return { ok: false, reason }
   }
 
-  // data is { id: string } on success per SDK types.
-  return { ok: true, messageId: data!.id }
+  // WR-02 fix: defensive guard against the impossible-but-not-prevented
+  // { data: null, error: null } SDK response (a future SDK regression, an
+  // unexpected 200 with empty body, or a proxy mangling the response). Without
+  // this guard, the non-null assertion would throw TypeError at runtime and
+  // bubble to the cron orchestrator. Phase 6 is the core-value loop, so the
+  // defensive guard has high ROI.
+  if (!data || typeof data.id !== 'string') {
+    console.error('resend: send_returned_no_data', {
+      productUrl: input.product.url,
+    })
+    return { ok: false, reason: 'unknown' }
+  }
+  return { ok: true, messageId: data.id }
 }
