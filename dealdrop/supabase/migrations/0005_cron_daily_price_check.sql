@@ -71,7 +71,7 @@ returns bigint
 language plpgsql
 security definer
 set search_path = public, vault, net
-as $fn$
+as $func$
 declare
   v_secret text;
   v_request_id bigint;
@@ -107,7 +107,7 @@ begin
 
   return v_request_id;
 end
-$fn$;
+$func$;
 
 revoke execute on function public.trigger_price_check_cron() from public;
 revoke execute on function public.trigger_price_check_cron() from anon;
