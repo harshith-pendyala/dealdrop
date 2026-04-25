@@ -20,3 +20,13 @@ score: pending
 | POL-05 | Metadata title + description reflect DealDrop | VERIFIED | `dealdrop/app/layout.tsx:20` — `title: "DealDrop — Universal Price Tracker"`. Line 21 — `description: "Track products from any e-commerce site. Get email alerts the moment the price drops."` (grep confirms both). No "Create Next App" placeholders. |
 
 (POL-03, POL-04, POL-06, DEP-01..06 to be appended by their respective plans.)
+
+## POL-02 Manual UAT
+
+| Step | Action | Observed | Expected | Status |
+|------|--------|----------|----------|--------|
+| 1 | Open AddProductDialog, paste books.toscrape.com URL, click Track | SkeletonCard appears in grid while scrape in flight | SkeletonCard appears | PASS |
+| 2 | Wait for scrape to complete | SkeletonCard replaced by real ProductCard with name + price + image | Replaced cleanly | PASS |
+
+**Date:** 2026-04-25
+**Operator:** operator
