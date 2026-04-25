@@ -123,7 +123,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 06-02-PLAN.md — Wave 1: lib/resend.ts — HTML email template (D-05/06/07) + Resend SDK wrapper + flip resend.test.ts to GREEN (EMAIL-01/02/03/05/06)
 - [x] 06-03-PLAN.md — Wave 1: Migration 0005_cron_daily_price_check.sql — Vault-backed secret + SECURITY DEFINER wrapper + pg_cron schedule (CRON-10, CRON-11)
 - [x] 06-04-PLAN.md — Wave 2: lib/cron/auth.ts (constant-time verifyCronBearer) + lib/cron/check-prices.ts (runPriceCheck orchestrator, p-limit 3, price-change gate, email branch) + green tests (CRON-02/03/04/06/07/08/09, EMAIL-01/05/06)
-- [ ] 06-05-PLAN.md — Wave 3: app/api/cron/check-prices/route.ts (GET+POST+maxDuration=300) + route.test.ts green + [BLOCKING] supabase db push + CRON-11 grep-cleanliness SQL verification + local curl smoke test + human-verify (CRON-01/05, Phase 6 gate)
+- [x] 06-05-PLAN.md — Wave 3: app/api/cron/check-prices/route.ts (GET+POST+maxDuration=300) + route.test.ts green + [BLOCKING] supabase db push + CRON-11 grep-cleanliness SQL verification + local curl smoke test + human-verify (CRON-01/05, Phase 6 gate)
 
 ### Phase 7: Polish & Deployment
 **Goal**: DealDrop is deployed to Vercel production, looks professional on mobile and desktop, handles errors gracefully, and passes an end-to-end manual test of the full sign-up → add product → price-drop alert flow
