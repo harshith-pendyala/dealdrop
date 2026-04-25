@@ -16,30 +16,51 @@
 -- ---------------------------------------------------------------------------
 -- Step 1: Create the Vault secret (idempotent).
 --
+-- WR-03 fix: the entire do$$...$$ block is COMMENTED OUT by default (the
+-- "preferred" path documented below). This eliminates the T-6-01 / T-6-03
+-- footgun where an operator could run `npx supabase db push` without first
+-- substituting the placeholder string and accidentally persist
+-- 'CRON_SECRET-value-goes-here' as the registered Vault secret — which
+-- would (a) cause every legitimate cron POST to be rejected and
+-- (b) hand any attacker who guesses the placeholder string a working
+-- Bearer token.
+--
+-- ============================================================================
+-- !! DO NOT UNCOMMENT THIS BLOCK BEFORE REPLACING THE PLACEHOLDER STRING !!
+-- ============================================================================
+--
 -- The committed placeholder 'CRON_SECRET-value-goes-here' is load-bearing:
--- it guarantees the file is grep-clean of any real token. The operator
--- REPLACES the placeholder string with the real CRON_SECRET value from
--- env.server.ts (matching `z.string().min(32)`) before running this
--- migration, OR — preferred — leaves this block commented-out and runs
--- vault.create_secret() directly in the Supabase SQL Editor as a one-shot
--- out-of-band operation. Either way, the committed SQL file must never
--- contain a real 48+ char random-looking token.
+-- it guarantees the file is grep-clean of any real token. PREFERRED PATH:
+-- run vault.create_secret() directly in the Supabase SQL Editor as a
+-- one-shot out-of-band operation, leaving this block commented-out.
+-- Example for one-shot SQL Editor invocation:
+--
+--   select vault.create_secret(
+--     '<paste real CRON_SECRET (>=32 chars) here>',
+--     'dealdrop_cron_secret',
+--     'Bearer token for DealDrop /api/cron/check-prices (Phase 6 CRON-11)'
+--   );
+--
+-- ALTERNATE PATH: replace 'CRON_SECRET-value-goes-here' below with the real
+-- token, uncomment the do$$...$$ block, run `npx supabase db push`, and
+-- IMMEDIATELY revert the local edit before committing. The committed SQL
+-- file must never contain a real 48+ char random-looking token.
 --
 -- Verification post-apply:
 --   SELECT name FROM vault.secrets WHERE name = 'dealdrop_cron_secret';
 --   -- Expected: exactly one row
 -- ---------------------------------------------------------------------------
 
-do $$
-begin
-  if not exists (select 1 from vault.secrets where name = 'dealdrop_cron_secret') then
-    perform vault.create_secret(
-      'CRON_SECRET-value-goes-here',   -- PLACEHOLDER — replace before applying
-      'dealdrop_cron_secret',
-      'Bearer token for DealDrop /api/cron/check-prices (Phase 6 CRON-11)'
-    );
-  end if;
-end $$;
+-- do $$
+-- begin
+--   if not exists (select 1 from vault.secrets where name = 'dealdrop_cron_secret') then
+--     perform vault.create_secret(
+--       'CRON_SECRET-value-goes-here',   -- PLACEHOLDER — replace before applying
+--       'dealdrop_cron_secret',
+--       'Bearer token for DealDrop /api/cron/check-prices (Phase 6 CRON-11)'
+--     );
+--   end if;
+-- end $$;
 
 -- ---------------------------------------------------------------------------
 -- Step 2: SECURITY DEFINER wrapper function.
