@@ -136,8 +136,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The end-to-end flow completes: sign up → add product → verify initial price history row → trigger cron manually → verify price-drop email received in a non-owner inbox
   5. The pg_cron job is active and pointing at the production endpoint; the "Looks Done But Isn't" checklist from PITFALLS.md is fully verified
 **Plans**: 8 plans
-- [ ] 07-01-PLAN.md — Wave 1: POL-03 error boundaries — app/error.tsx + app/global-error.tsx + tests (uses Next.js 16.2 `unstable_retry` per installed docs)
-- [ ] 07-02-PLAN.md — Wave 1: POL-06 dynamic icon — app/icon.tsx via ImageResponse + delete app/favicon.ico
+- [x] 07-01-PLAN.md — Wave 1: POL-03 error boundaries — app/error.tsx + app/global-error.tsx + tests (uses Next.js 16.2 `unstable_retry` per installed docs)
+- [x] 07-02-PLAN.md — Wave 1: POL-06 dynamic icon — app/icon.tsx via ImageResponse + delete app/favicon.ico
 - [ ] 07-03-PLAN.md — Wave 1: POL-01/02/05 verification sweep (no code changes; appends to 07-VERIFICATION.md)
 - [ ] 07-04-PLAN.md — Wave 2: POL-04 mobile audit pass at 320 / 375 / 768 / desktop with empirical Tailwind tweaks (depends on 07-01, 07-03)
 - [ ] 07-05-PLAN.md — Wave 3: DEP-02/03 — Vercel project + 7 prod env vars + fresh Supabase prod project + Vault secret + first deploy (depends on 07-04)
