@@ -194,25 +194,42 @@ async function processOneProduct(
       }
     }
 
-    const sendResult = await sendPriceDropAlert({
-      to: userData.user.email,
-      product: {
-        name: product.name,
-        url: product.url,
-        image_url: product.image_url,
-        currency: product.currency,
-      },
-      oldPrice: product.current_price,
-      newPrice: scraped.current_price,
-    })
-    // EMAIL-06: log but don't abort. sendPriceDropAlert already logged the
-    // 'resend: send_failed' structured entry on its failure branch.
+    // WR-01 fix: Resend SDK contract is "never throws for API errors", but the
+    // SDK can still throw on lower-level network failures (DNS, TLS, socket
+    // reset). Without this try/catch, such a throw would propagate to
+    // Promise.allSettled in runPriceCheck and produce a 'failed/unknown'
+    // summary entry — even though price_history was already INSERTed and
+    // products.current_price was already UPDATEd. Convert any throw into a
+    // truthful { kind: 'drop', emailOk: false } outcome.
+    let emailOk = false
+    try {
+      const sendResult = await sendPriceDropAlert({
+        to: userData.user.email,
+        product: {
+          name: product.name,
+          url: product.url,
+          image_url: product.image_url,
+          currency: product.currency,
+        },
+        oldPrice: product.current_price,
+        newPrice: scraped.current_price,
+      })
+      // EMAIL-06: log but don't abort. sendPriceDropAlert already logged the
+      // 'resend: send_failed' structured entry on its failure branch.
+      emailOk = sendResult.ok
+    } catch (err) {
+      console.error('cron: resend_threw', {
+        productId: product.id,
+        err,
+      })
+      emailOk = false
+    }
     return {
       kind: 'drop',
       productId: product.id,
       oldPrice: product.current_price,
       newPrice: scraped.current_price,
-      emailOk: sendResult.ok,
+      emailOk,
     }
   }
 
