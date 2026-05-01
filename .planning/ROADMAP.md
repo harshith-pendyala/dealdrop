@@ -139,7 +139,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 07-01-PLAN.md — Wave 1: POL-03 error boundaries — app/error.tsx + app/global-error.tsx + tests (uses Next.js 16.2 `unstable_retry` per installed docs)
 - [x] 07-02-PLAN.md — Wave 1: POL-06 dynamic icon — app/icon.tsx via ImageResponse + delete app/favicon.ico
 - [x] 07-03-PLAN.md — Wave 1: POL-01/02/05 verification sweep (no code changes; appends to 07-VERIFICATION.md)
-- [ ] 07-04-PLAN.md — Wave 2: POL-04 mobile audit pass at 320 / 375 / 768 / desktop with empirical Tailwind tweaks (depends on 07-01, 07-03)
+- [x] 07-04-PLAN.md — Wave 2: POL-04 mobile audit pass at 320 / 375 / 768 / desktop with empirical Tailwind tweaks (depends on 07-01, 07-03)
 - [ ] 07-05-PLAN.md — Wave 3: DEP-02/03 — Vercel project + 7 prod env vars + fresh Supabase prod project + Vault secret + first deploy (depends on 07-04)
 - [ ] 07-06-PLAN.md — Wave 4: DEP-04 — Google + Supabase prod OAuth registration + fresh-account smoke test (depends on 07-05)
 - [ ] 07-07-PLAN.md — Wave 5: DEP-05 — migration 0006_cron_prod_url_cutover.sql + apply to prod (depends on 07-06)
