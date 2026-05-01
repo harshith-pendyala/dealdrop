@@ -60,3 +60,53 @@ The first walk attempt used Chrome DevTools "iPhone SE" / "iPhone 12" device pre
 - Repo-wide lint baseline (246 pre-existing errors) — unchanged by this plan ✓
 - `git diff --stat src/components/` — empty (zero source modifications) ✓
 - Temporary `throw new Error('test')` debug injection in ProductGrid.tsx (Task 1 step 9) — REVERTED before stopping dev server ✓ (T-07-08 mitigated)
+
+## DEP-03: Production Supabase Project
+
+| Item | Value | Status |
+|------|-------|--------|
+| Project ref | `gltwnfnkodzkupkxwpro` | created |
+| Region | Tokyo | matches dev |
+| Migrations applied | 0001 / 0002 / 0003 / 0004 / 0005 | green (operator-confirmed via `npx supabase db push --linked`) |
+| Vault `dealdrop_cron_secret` | seeded with 48-char prod token | verified (1 row in `vault.secrets`) |
+| service_role exists | yes | verified |
+| Plaintext CRON_SECRET committed to repo | no | verified — only Vault + Vercel `--sensitive` |
+
+## DEP-02: Vercel Production Env Vars
+
+| Variable | Scope | Sensitive | Status |
+|----------|-------|-----------|--------|
+| NEXT_PUBLIC_SUPABASE_URL | production | no | set |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | production | no | set |
+| SUPABASE_SERVICE_ROLE_KEY | production | yes (`--sensitive`) | set |
+| FIRECRAWL_API_KEY | production | yes (`--sensitive`) | set |
+| RESEND_API_KEY | production | yes (`--sensitive`) | set |
+| RESEND_FROM_EMAIL | production | no | set |
+| CRON_SECRET | production | yes (`--sensitive`) | set; matches Vault `dealdrop_cron_secret` value bit-for-bit |
+
+**Total:** 7 production-scope env vars (verified via `npx vercel@latest env ls production`)
+**Preview scope:** Option A — preview env vars skipped per CONTEXT.md guidance (preview deploys won't have functioning auth/scrape; acceptable for portfolio bar).
+**Fluid Compute:** confirmed ON (Vercel Settings → Functions). Required for `maxDuration = 300` in `app/api/cron/check-prices/route.ts:28`.
+
+## DEP-01: First Production Deploy
+
+| Item | Value |
+|------|-------|
+| Vercel project | `dealdrop` |
+| Stable production alias | `https://dealdrop-khaki.vercel.app` |
+| Initial deployment URL | `https://dealdrop-pyyc6dlpa-harshithpendyala777-7300s-projects.vercel.app` (immutable per deploy) |
+| `curl -I /` | HTTP/2 200 |
+| `curl GET /api/cron/check-prices` | 200 + `{"status":"ok"}` |
+| `curl POST /api/cron/check-prices` (no auth) | 401 + `{"error":"Unauthorized"}` (app-level guard, not Vercel SSO wall) |
+
+### Deviation — Vercel Deployment Protection
+
+First smoke test attempt returned `HTTP/2 401` (HTML page, not JSON). Root cause: Vercel project had **Deployment Protection / Vercel Authentication** enabled for "All Deployments" by default. This blocks public traffic AND server-to-server cron calls (the Supabase pg_cron job has no SSO cookie).
+
+**Fix applied:** Vercel Dashboard → Settings → Deployment Protection → set scope to "Only Preview Deployments" (or Disabled). Production is now publicly reachable. No redeploy required — setting is live immediately.
+
+**Why this matters for Plan 07-07:** the pg_cron `net.http_post` call from Supabase to `/api/cron/check-prices` would 401 against a Vercel SSO wall. Auth wall must remain off for production for the daily price-check loop to work.
+
+### Stable Alias vs Deployment URL — Use the Alias for Plan 07-07
+
+`https://dealdrop-khaki.vercel.app` is the stable alias and is what Plan 07-07 (migration 0006 cron URL cutover) MUST hardcode. The deployment-hash URL (`-pyyc6dlpa-`) is immutable but tied to a single deployment — every new prod deploy gets a new hash, breaking the cron if hardcoded.
