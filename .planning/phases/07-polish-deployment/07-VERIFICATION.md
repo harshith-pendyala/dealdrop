@@ -30,3 +30,33 @@ score: pending
 
 **Date:** 2026-04-25
 **Operator:** operator
+
+## POL-04 Mobile Audit
+
+**First walk:** 2026-05-01
+**Operator:** operator
+**Tooling:** Chrome DevTools "Responsive" mode (NOT iPhone preset — see methodology note below)
+
+| Viewport | Component | Observed break | Fix shipped |
+|----------|-----------|----------------|-------------|
+| 320px | (all) | None — top-to-bottom walk produced zero visible breaks | n/a |
+| 375px | (all) | None | n/a |
+| 768px | (all) | None | n/a |
+| Desktop | (all) | None | n/a |
+
+**Pass 2:** Not required — first walk produced zero breaks. Audit complete.
+
+**Total breaks at 320px:** 0 (limit: 6) ✓
+**Files modified by this plan:** 0 (no Tailwind tweaks needed)
+
+### Methodology Note — Chrome DevTools Device Preset vs Responsive Mode
+
+The first walk attempt used Chrome DevTools "iPhone SE" / "iPhone 12" device presets, which spoof the mobile User-Agent string. Google OAuth returned `Error 403: disallowed_useragent` because Google treats certain mobile UA strings inside desktop Chrome as embedded webviews (a known Google identity policy, NOT a DealDrop bug). Switching DevTools to **"Responsive" mode** sets viewport size only without UA spoofing, allowing the OAuth flow to complete normally. This is an audit-tooling caveat — real iPhone Safari produces a valid UA and works fine. To be re-validated on a real device during the DEP-06 prod smoke test in Plan 07-08.
+
+### Regression Sweep
+
+- `cd dealdrop && npm run build` — green ✓
+- Lint on Phase 7 new files (`error.tsx`, `error.test.tsx`, `global-error.tsx`, `global-error.test.tsx`, `icon.tsx`) — zero errors ✓
+- Repo-wide lint baseline (246 pre-existing errors) — unchanged by this plan ✓
+- `git diff --stat src/components/` — empty (zero source modifications) ✓
+- Temporary `throw new Error('test')` debug injection in ProductGrid.tsx (Task 1 step 9) — REVERTED before stopping dev server ✓ (T-07-08 mitigated)
