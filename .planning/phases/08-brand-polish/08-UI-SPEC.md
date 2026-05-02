@@ -1,10 +1,11 @@
 ---
 phase: 8
 slug: brand-polish
-status: draft
+status: approved
 shadcn_initialized: true
 preset: new-york / zinc / css-variables
 created: 2026-05-02
+reviewed_at: 2026-05-02
 ---
 
 # Phase 8 — UI Design Contract
@@ -61,12 +62,15 @@ no regressions are introduced during the brand restyle.
 Exactly 4 semantic roles are declared. "Price" is an alias of Subheading — same
 size and weight, accent color applied — and is NOT a fifth independent role.
 
+Exactly 2 font weights are declared: 600 (font-semibold) for display/heading roles
+and 400 (font-normal) for all text and label roles.
+
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Display | `text-3xl md:text-5xl` (30px mobile / 48px desktop) | 600 (font-semibold) | 1.1–1.2 (leading-tight on mobile, leading-[1.1] on desktop) | Hero h1 headline — single responsive rule, not two separate roles |
 | Subheading | 20px (text-xl) | 600 (font-semibold) | snug (~1.375) | FeatureCard title, EmptyState h1; **Price alias:** ProductCard current price in `text-primary` — same 20px/600 spec, orange accent applied |
 | Body | 16px (text-base) | 400 (font-normal) | 1.625 (leading-relaxed) | Hero paragraph, FeatureCard blurb, EmptyState body |
-| Label / Caption | 14px (text-sm) | 500 (font-medium) | default | Header wordmark, button labels, SignIn/Out buttons |
+| Label / Caption | 14px (text-sm) | 400 (font-normal) | default | Header wordmark, button labels, SignIn/Out buttons |
 
 Note: orange-700 small-text accent (per D-05) is applied to FeatureCard blurb text
 (`text-muted-foreground` override → `text-orange-700` in light mode) as the
