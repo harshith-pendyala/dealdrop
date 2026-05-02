@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Brand Polish & Email Config
 status: executing
-stopped_at: Completed 08-04-PLAN.md (Hero cleanup + orange gradient)
-last_updated: "2026-05-02T14:28:59.165Z"
+stopped_at: Completed 08-05-PLAN.md (Add Product -> Track Price copy rename)
+last_updated: "2026-05-02T14:33:19.489Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-02)
 ## Current Position
 
 Phase: 08 (brand-polish) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-05-02
 
@@ -77,6 +77,7 @@ Progress: [░░░░░░░░░░] 0% (0/2 v1.1 phases complete)
 | Phase 08 P02 | 2min | 2 tasks | 2 files |
 | Phase 08 P03 | 1min | 2 tasks | 1 files |
 | Phase 08 P04 | 2min | 2 tasks | 2 files |
+| Phase 08 P05 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,8 @@ Recent decisions affecting current work:
 - [Phase 08]: [08-03] Deleted dealdrop/app/favicon.ico via rm -f (no git rm) — file was never git-tracked; Phase 7 D-07 directive lands
 - [Phase 08]: [08-04] Followed plan exactly (zero deviations) — gradient utility string and 'Made with love' deletion converged across PATTERNS/CONTEXT/UI-SPEC, no judgment call required at execution
 - [Phase 08]: [08-04] dark:from-transparent paired with from-orange-50 — required to suppress near-invisible warm wash on near-black dark-mode background (RESEARCH.md Pitfall 5)
+- [Phase 08]: [08-05] Followed plan exactly (zero deviations) — D-11 copy rename across 4 files, repo-wide grep audits clean, full vitest suite 173/173 green
+- [Phase 08]: [08-05] Toast copy chosen as 'Now tracking' (no product-name interpolation) — dispatchToastForState's { ok: true } payload carries no name; portfolio-bar simplification per RESEARCH.md Example 7
 
 ### Pending Todos
 
@@ -121,6 +124,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-02T14:28:59.163Z
-Stopped at: Completed 08-04-PLAN.md (Hero cleanup + orange gradient)
+Last session: 2026-05-02T14:33:19.486Z
+Stopped at: Completed 08-05-PLAN.md (Add Product -> Track Price copy rename)
 Resume file: None
