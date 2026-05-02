@@ -60,7 +60,11 @@
   3. With `RESEND_TEST_RECIPIENT` unset, alerts deliver to the user-of-record's email (production code path preserved — same behavior as v1.0).
   4. App fails fast at boot if a required new env var is missing — typed env schema (`env.server.ts`) gates startup.
   5. README (or equivalent docs) clearly explains the one-env-var flip from test-recipient mode to production mode for the future domain-verification milestone.
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 09-01-PLAN.md — env.server.ts schema extension: add RESEND_TEST_RECIPIENT: z.string().email().optional() to server + runtimeEnv blocks (EMAIL-02, EMAIL-04)
+  - [ ] 09-02-PLAN.md — resend.ts override: replace to: input.to with to: env.RESEND_TEST_RECIPIENT ?? input.to + module-load console.warn for observability (EMAIL-01, EMAIL-02, EMAIL-03, D-01, D-02)
+  - [ ] 09-03-PLAN.md — resend.test.ts: nested override describe (override-set + override-unset SDK assertions) + top-level env-validation rejection tests for malformed + mailbox-format values (EMAIL-02, EMAIL-03, EMAIL-04, D-04, D-06)
+  - [ ] 09-04-PLAN.md — Docs: append RESEND_TEST_RECIPIENT= to .env.example with usage comment + replace README scaffold with real DealDrop README including Email recipient modes section (EMAIL-01, EMAIL-05, D-07)
 
 ## Progress
 
@@ -74,4 +78,4 @@
 | 6. Automated Monitoring & Email Alerts      | v1.0      | 5/5            | Complete    | 2026-04-25 |
 | 7. Polish & Deployment                      | v1.0      | 8/8            | Complete    | 2026-05-02 |
 | 8. Brand Polish                             | v1.1      | 6/6            | Plans Complete (BRAND-05 → HUMAN-UAT) | 2026-05-02 |
-| 9. Resend Env Config                        | v1.1      | 0/?            | Not started | -          |
+| 9. Resend Env Config                        | v1.1      | 0/4            | Plans Complete | -          |
