@@ -17,6 +17,7 @@ export const env = createEnv({
     RESEND_API_KEY: z.string().min(1),
     RESEND_FROM_EMAIL: z.string().email(),
     CRON_SECRET: z.string().min(32), // enforce length to discourage weak secrets
+    RESEND_TEST_RECIPIENT: z.string().email().optional(),
   },
   runtimeEnv: {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -24,6 +25,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
     CRON_SECRET: process.env.CRON_SECRET,
+    RESEND_TEST_RECIPIENT: process.env.RESEND_TEST_RECIPIENT,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
