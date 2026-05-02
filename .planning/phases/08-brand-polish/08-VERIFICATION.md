@@ -1,16 +1,17 @@
 ---
 phase: 08-brand-polish
-verified: in_progress
-status: in_progress
-score: 4/5 verified — BRAND-05 pending human visual walk
+verified: 2026-05-02
+status: human_needed
+score: 4/5 verified — BRAND-05 visual walk deferred to HUMAN-UAT
 automated_sweep_completed_at: 2026-05-02T20:07:00Z
+brand05_disposition: deferred-to-human-uat
 ---
 
 # Phase 8: Brand Polish — Verification Report
 
 **Phase Goal:** Logged-in and logged-out users see a coherent DealDrop brand — logo in the header, branded favicon, a single accent color across primary buttons/links/highlights, and no leftover "Made with love" footer copy.
-**Verified:** automated sweep complete 2026-05-02T20:07Z; BRAND-05 awaiting human visual walk
-**Status:** in_progress (awaiting BRAND-05 human visual walk per D-08)
+**Verified:** automated sweep complete 2026-05-02T20:07Z; BRAND-05 visual walk deferred to operator-driven HUMAN-UAT (per checkpoint resolution).
+**Status:** human_needed — BRAND-01..04 closed via automated evidence; BRAND-05 visual walk tracked separately via 08-HUMAN-UAT.md (created by phase verifier).
 
 ## Requirement Verification
 
@@ -20,7 +21,7 @@ automated_sweep_completed_at: 2026-05-02T20:07:00Z
 | BRAND-02 | DealDrop logo image in app header | VERIFIED (automated) | `grep -F "deal-drop-logo.png" dealdrop/src/components/header/Header.tsx` → match on `src="/deal-drop-logo.png"`. Header.test.tsx 5/5 tests passing — asserts `<img alt="DealDrop">` rendered inside Link to `/`. Crispness at 32px / 2x DPR is BRAND-05 visual-walk territory (pending). |
 | BRAND-03 | Browser tab favicon shows DealDrop orange | VERIFIED (automated, partial) | `grep -F "background: '#f97316'" dealdrop/app/icon.tsx` → match (Tailwind v4 orange-500 hex). `test ! -f dealdrop/app/favicon.ico` → exit 1 = absent (Phase 7 D-07 + Plan 03 directive landed). `npm run build` route table includes `○ /icon`. Visual confirmation in Chrome + Safari tabs is BRAND-05 visual-walk territory (pending). |
 | BRAND-04 | Single accent color via CSS custom property; consistent across surfaces | VERIFIED (automated) | `grep -F "oklch(70.5% 0.213 47.604)" dealdrop/app/globals.css` → match (light `:root --primary` = orange-500). `grep -F "oklch(75% 0.183 55.934)" dealdrop/app/globals.css` → match (dark `@media --primary` = orange-400). ProductCard price uses `text-primary` (Plan 01 cascade); PriceChart line uses `stroke="var(--primary)"` (auto-cascade); FeatureCard icons use `text-primary` (auto-cascade). Cross-surface visual consistency is BRAND-05 visual-walk territory (pending). |
-| BRAND-05 | Accent legibility in light + dark / default + hover + focus | PENDING — awaiting human visual walk (D-08) | Visual walk rows below are populated as `pending — awaiting human visual walk`. Per D-08 portfolio-bar discipline, BRAND-05 is verified by manual walk + spot-check WCAG, not by automated tooling. |
+| BRAND-05 | Accent legibility in light + dark / default + hover + focus | DEFERRED-TO-HUMAN-UAT (D-08) | Operator deferred the in-plan visual walk per checkpoint resolution on 2026-05-02. BRAND-05 is now tracked separately via `.planning/phases/08-brand-polish/08-HUMAN-UAT.md` (file created by the phase verifier when running `/gsd-verify-work 8`). Per D-08 portfolio-bar discipline, BRAND-05 is verified by manual walk + spot-check WCAG, not by automated tooling — the deferral preserves that requirement, it does not waive it. The visual-walk rows below remain `pending — awaiting human visual walk` and will be populated by the operator from the HUMAN-UAT companion file once the walk is executed. |
 
 ## Automated Regression Sweep
 
@@ -46,11 +47,25 @@ Run BEFORE the visual walk begins. All commands evaluated 2026-05-02T20:05–20:
 
 ## BRAND-05 Manual Visual Walk
 
-**First walk:** pending — awaiting human visual walk
+**First walk:** pending — awaiting human visual walk (DEFERRED to HUMAN-UAT)
 **Operator:** pending
 **Tooling:** Chrome DevTools "Responsive" mode at desktop and 375px breakpoints; manual color toggle in OS settings or `prefers-color-scheme` devtools emulation; spot-check WCAG via DevTools Inspect → Computed → Contrast.
 
-> **Note:** All BRAND-05 visual-walk rows below remain `pending — awaiting human visual walk` per the orchestrator's checkpoint protocol. The automated regression sweep above has confirmed the code is ready for the walk. The user (operator) must run `npm run dev` and walk the surfaces below in light + dark mode at desktop and 375px. Findings get recorded into the `Result` and `Fix Shipped` columns by the operator (or by a continuation agent receiving operator-recorded notes).
+> **🚧 BRAND-05 VISUAL WALK DEFERRED — TRACKED VIA HUMAN-UAT 🚧**
+>
+> Per the operator's checkpoint resolution on 2026-05-02 (during plan 08-06 execution), the in-plan BRAND-05 manual visual walk has been **deferred** rather than executed inline. BRAND-05 is now tracked separately via `.planning/phases/08-brand-polish/08-HUMAN-UAT.md`, which the **phase verifier creates when running `/gsd-verify-work 8`**.
+>
+> **What this means concretely:**
+>
+> 1. The 24 BRAND-05 visual-walk rows below remain `pending — awaiting human visual walk` and are NOT populated by this plan.
+> 2. The phase verifier (`/gsd-verify-work 8`) will detect `status: human_needed` + `brand05_disposition: deferred-to-human-uat` in the frontmatter and emit `08-HUMAN-UAT.md` with the same surface list and methodology.
+> 3. The operator runs `npm run dev`, walks each surface at desktop + 375px in light + dark mode, and records the findings into `08-HUMAN-UAT.md` (and optionally back-fills these rows here for unified history).
+> 4. Phase 8 is **complete from a code/automated standpoint** — the BRAND-05 deferral is purely a verification-cadence shift, not a scope reduction. Plan 09 (Resend Env Config) is unblocked because Phase 8 introduces no functional dependency on the visual walk.
+> 5. The deferral is documented in `08-06-SUMMARY.md` and in STATE.md decisions for traceability.
+>
+> Automated regression sweep above is fully green; the code is ready for the walk whenever the operator runs HUMAN-UAT.
+
+> **Note:** All BRAND-05 visual-walk rows below remain `pending — awaiting human visual walk` per the orchestrator's checkpoint protocol. The automated regression sweep above has confirmed the code is ready for the walk. The user (operator) must run `npm run dev` and walk the surfaces below in light + dark mode at desktop and 375px. Findings get recorded into the `Result` and `Fix Shipped` columns by the operator (or by a continuation agent receiving operator-recorded notes) — same row content as `08-HUMAN-UAT.md`.
 
 | Viewport | Mode | Surface | Result | Fix Shipped |
 |----------|------|---------|--------|-------------|
@@ -123,10 +138,11 @@ Run BEFORE the visual walk begins. All commands evaluated 2026-05-02T20:05–20:
 
 - [x] All automated regression sweep commands recorded (PASS or PASS-with-documented-baseline)
 - [x] BRAND-01..04 verified via grep + automated test evidence
-- [ ] BRAND-05 visual-walk rows populated by operator
-- [ ] All requirement-verification rows show `pass` or `pass (fix shipped)`
-- [ ] Frontmatter `status` updated from `in_progress` to `passed`
-- [ ] Frontmatter `verified` updated to ISO timestamp
-- [ ] Frontmatter `score` updated to `5/5` (or `5/5 with N fix-shipped`)
+- [x] BRAND-05 disposition recorded: **DEFERRED to HUMAN-UAT** (per operator checkpoint resolution 2026-05-02)
+- [x] Frontmatter `status` set to `human_needed` (BRAND-01..04 closed; BRAND-05 tracked via 08-HUMAN-UAT.md)
+- [x] Frontmatter `verified` set to `2026-05-02`
+- [x] Frontmatter `score` set to `4/5 verified — BRAND-05 visual walk deferred to HUMAN-UAT`
+- [ ] BRAND-05 visual-walk rows populated by operator (post-HUMAN-UAT)
+- [ ] After HUMAN-UAT: Frontmatter `status` flipped from `human_needed` to `passed` and `score` updated to `5/5`
 
-**Approval:** pending — awaiting human visual walk per D-08
+**Approval:** Plan 08-06 complete; phase 08 ready for verifier (`/gsd-verify-work 8`) which will materialize 08-HUMAN-UAT.md from this deferral.
