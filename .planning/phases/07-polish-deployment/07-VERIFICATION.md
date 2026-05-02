@@ -170,3 +170,47 @@ Plan 07-06 acceptance specified a "fresh Google account that has never signed in
 **Date:** 2026-05-02
 **Operator:** operator
 **Account used:** `<operator-google@redacted>` — same account will be reused for DEP-06 non-owner email test in Plan 07-08 per the same-account deviation above.
+
+## DEP-05: pg_cron Prod Cutover
+
+**Migration applied:** `0006_cron_prod_url_cutover.sql` to `gltwnfnkodzkupkxwpro`
+**Date:** 2026-05-02
+
+**Vault precondition (R-03):** `SELECT name FROM vault.secrets WHERE name = 'dealdrop_cron_secret'` returns 1 row (seeded in Plan 07-05 Task 1 Step 5; operator-confirmed before applying 0006).
+
+**`supabase db push --linked` outcome:** `Applying migration 0006_cron_prod_url_cutover.sql ... done` (operator-confirmed). Migrations 0001..0005 already present and skipped.
+
+**`cron.job` verification:**
+
+| Column | Value |
+|--------|-------|
+| jobname | `dealdrop-daily-price-check` |
+| schedule | `0 9 * * *` |
+| command | `select public.trigger_price_check_cron()` |
+
+**Wrapper function URL (prod-URL assertion):** the operator ran the boolean variant of the verification query (Option B):
+
+```sql
+SELECT pg_get_functiondef(oid) LIKE '%dealdrop-khaki.vercel.app/api/cron/check-prices%' AS url_is_prod
+FROM pg_proc
+WHERE proname = 'trigger_price_check_cron'
+  AND pronamespace = 'public'::regnamespace;
+```
+
+`url_is_prod = true` — confirmed the `net.http_post` line targets the prod stable alias (https://dealdrop-khaki.vercel.app/api/cron/check-prices), not the dev placeholder.
+
+**Grep-cleanliness (CRON-11 carryover):** `cron.job.command` contains only `select public.trigger_price_check_cron()` — no inline secret. Wrapper reads Vault internally inside SECURITY DEFINER scope.
+
+### Deviation — `regprocedure` cast format
+
+Initial verification query `SELECT pg_get_functiondef('public.trigger_price_check_cron'::regprocedure)` returned a syntax error in the Supabase SQL Editor because `regprocedure` requires the function signature including arg types — the bare name without `()` is ambiguous. Fix: switched to `'public.trigger_price_check_cron()'::regprocedure` OR the `oid`-from-`pg_proc` lookup pattern. The plan's verification block has been recorded with the working query for future operators.
+
+### Deviation — Result truncation in Supabase SQL Editor cell view
+
+`pg_get_functiondef` returns a multi-line text body that the Supabase SQL Editor truncates in the row-view cell (only the trailing `end if;` was visible). Workaround: used the `LIKE '%dealdrop-khaki.vercel.app%'` boolean variant (Option B) which returns a single boolean per row — visible without expanding the cell. Recorded as Option B in the plan's verification queries for future operators.
+
+### Optional Step 5 (manual trigger) — not run
+
+The optional `SELECT public.trigger_price_check_cron()` smoke test was skipped. Function definition + cron.job inspection are sufficient proof of the cutover. The end-to-end loop will be exercised for real either at the next 09:00 UTC daily fire OR during Plan 07-08's DEP-06 prod smoke test (which forces a price drop and observes the email).
+
+If the daily-fire fails with 401 in Vercel logs, the symptom is a CRON_SECRET mismatch between Vercel `production` env and Supabase prod Vault `dealdrop_cron_secret` — re-paste both with the same 48-char value (Plan 07-05 Task 2 Step 3).
