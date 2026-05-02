@@ -3,7 +3,7 @@ import { FeatureCard } from './FeatureCard'
 
 export function Hero() {
   return (
-    <section className="flex-1 flex flex-col items-center text-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-12 sm:pb-16">
+    <section className="flex-1 flex flex-col items-center text-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-12 sm:pb-16 bg-gradient-to-b from-orange-50 via-background to-background dark:from-transparent">
       <h1 className="text-3xl sm:text-5xl font-semibold leading-tight sm:leading-[1.1] tracking-tight max-w-2xl">
         Never miss a price drop
       </h1>
@@ -28,9 +28,6 @@ export function Hero() {
           blurb="See every price change on a clean chart."
         />
       </div>
-      <p className="mt-16 text-xs text-muted-foreground">
-        Made with love
-      </p>
     </section>
   )
 }
