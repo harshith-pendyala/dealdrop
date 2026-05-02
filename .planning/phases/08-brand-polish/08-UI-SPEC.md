@@ -58,24 +58,37 @@ Existing type scale is preserved — Phase 8 does not change font sizes or weigh
 The scale is catalogued here as a reference contract so the checker can confirm
 no regressions are introduced during the brand restyle.
 
+Exactly 4 semantic roles are declared. "Price" is an alias of Subheading — same
+size and weight, accent color applied — and is NOT a fifth independent role.
+
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
-| Display | 48px (text-5xl on sm) | 600 (font-semibold) | 1.1 (leading-[1.1]) | Hero h1 headline |
-| Heading | 30px (text-3xl on mobile) | 600 (font-semibold) | 1.2 (leading-tight) | Hero h1 mobile, dashboard section titles |
-| Subheading | 20px (text-xl) | 600 (font-semibold) | snug (~1.375) | FeatureCard title, EmptyState h1 |
+| Display | `text-3xl md:text-5xl` (30px mobile / 48px desktop) | 600 (font-semibold) | 1.1–1.2 (leading-tight on mobile, leading-[1.1] on desktop) | Hero h1 headline — single responsive rule, not two separate roles |
+| Subheading | 20px (text-xl) | 600 (font-semibold) | snug (~1.375) | FeatureCard title, EmptyState h1; **Price alias:** ProductCard current price in `text-primary` — same 20px/600 spec, orange accent applied |
 | Body | 16px (text-base) | 400 (font-normal) | 1.625 (leading-relaxed) | Hero paragraph, FeatureCard blurb, EmptyState body |
 | Label / Caption | 14px (text-sm) | 500 (font-medium) | default | Header wordmark, button labels, SignIn/Out buttons |
-| Price | 20px (text-xl) | 600 (font-semibold) | default | ProductCard current price — accent color applied here per D-05 |
-| Micro | 12px (text-xs) | 400 (font-normal) | default | Currently used only by "Made with love" line — that line is deleted per BRAND-01 |
 
 Note: orange-700 small-text accent (per D-05) is applied to FeatureCard blurb text
 (`text-muted-foreground` override → `text-orange-700` in light mode) as the
 primary surface for small-text brand warmth after the "Made with love" line is
-deleted. FeatureCard card titles stay at `text-foreground`.
+deleted. FeatureCard card titles stay at `text-foreground`. The 12px Micro role
+is deleted along with the "Made with love" line per BRAND-01.
 
 ---
 
 ## Color
+
+### Visual Hierarchy
+
+**Logged-out hero view:** The primary focal point is the Hero h1 headline
+("Never miss a price drop") set in Display type on the orange-50 gradient
+section. The eye travels from the headline → subline paragraph → "Track Price"
+CTA button (orange-500 fill). Feature cards below are secondary reading.
+
+**Logged-in dashboard view:** The primary focal point is the product grid. Within
+each ProductCard, the orange-500 price figure is the dominant accent — it draws
+the eye before the product title or action buttons. The header logo anchors top-
+left; all other chrome is neutral zinc.
 
 ### Token Redefinition (BRAND-04 / D-06)
 
