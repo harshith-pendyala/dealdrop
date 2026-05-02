@@ -64,9 +64,9 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 
 ### Active
 
-<!-- No active v1 requirements remain. Next milestone scope TBD. -->
+<!-- v1.1 polish requirements — populated by REQUIREMENTS.md -->
 
-(All v1 requirements shipped. Define v1.1 scope via `/gsd-new-milestone`.)
+See [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for milestone v1.1 scope.
 
 ### Out of Scope
 
@@ -183,13 +183,30 @@ Unique constraint: `(user_id, url)` — prevents duplicate tracking.
 | Single Google OAuth client serves dev + prod Supabase | Portfolio bar; production-hardening would split into two clients with separate quotas | Phase 7 Plan 07-06 — both Supabase projects share the same Client ID/Secret |
 | Vercel Deployment Protection scoped to Preview only | Production must be public for both real users and Supabase pg_cron `net.http_post` (no SSO cookie) | Phase 7 Plan 07-05 deviation; documented for future redeploys |
 
-## Next Milestone Goals
+## Current Milestone: v1.1 Brand Polish & Email Config
 
-v1.0 is shipped. Possible directions for v1.1+ (TBD via `/gsd-new-milestone`):
+**Goal:** Tighten v1.0's portfolio polish — replace generic footer/branding with a DealDrop logo + accent color, and refactor Resend wiring so it's env-configurable (unblocking real-recipient sends once a domain is verified later).
 
-- **v1.1 Polish & Hardening** — close residual tech debt: Nyquist gaps, formal HUMAN-UAT closures (Phase 01/02), `proxy.ts` env convention, repo-wide lint baseline cleanup (246 pre-existing).
-- **v1.1 Smarter Alerts** — target-price thresholds, percentage thresholds, per-product cadence settings, weekly digest opt-in.
-- **v1.2 Multi-currency** — FX conversion for cross-currency price comparison (currently each product's currency is shown as scraped).
+**Target features:**
+- Remove the "Made with Love" footer line.
+- Add DealDrop logo image (asset provided by user) — header placement + favicon refresh.
+- Add an accent color applied across buttons, links, and highlights (Tailwind theme token).
+- Refactor Resend to env-configurable from-address + recipient, with a test-recipient override for demos. Domain verification (DNS records, custom Vercel domain) deferred to a future milestone.
+
+**Key context:**
+- User has a logo asset to drop in (no design work needed).
+- User does not own a custom domain yet — domain purchase + Resend domain verification + Vercel custom domain are explicitly **out of scope** for v1.1.
+- Resend account email differs from user's DealDrop OAuth email — this is solved by the env-configurable test-recipient override (production code path stays intact for when a domain is verified later).
+- Bar remains portfolio/demo: works end-to-end, looks polished, not production-hardened.
+
+## Future Milestone Goals
+
+Possible directions after v1.1 (TBD):
+
+- **v1.2 Custom Domain + Real Email** — buy a domain, verify it in Resend, point Vercel at it. Unlocks alerts to any recipient and a real portfolio URL.
+- **v1.3 Polish & Hardening** — close residual v1.0 tech debt: Nyquist gaps, formal HUMAN-UAT closures (Phase 01/02), `proxy.ts` env convention, repo-wide lint baseline cleanup (246 pre-existing).
+- **v1.4 Smarter Alerts** — target-price thresholds, percentage thresholds, per-product cadence settings, weekly digest opt-in.
+- **v1.5 Multi-currency** — FX conversion for cross-currency price comparison.
 - **v2.0 Browser extension** — paste-URL friction → "Track this page" button on any e-commerce site.
 
 ## Evolution
@@ -210,4 +227,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-02 after v1.0 milestone complete — DealDrop MVP shipped to `https://dealdrop-khaki.vercel.app`; all 7 phases (5+5+4+7+4+5+8 = 38 plans) verified end-to-end*
+*Last updated: 2026-05-02 — milestone v1.1 (Brand Polish & Email Config) initialized; v1.0 (DealDrop MVP) shipped 2026-05-02 to `https://dealdrop-khaki.vercel.app`*
