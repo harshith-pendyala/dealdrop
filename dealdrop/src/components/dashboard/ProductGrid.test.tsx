@@ -15,7 +15,7 @@ vi.mock('./SkeletonCard', () => ({
 vi.mock('./AddProductDialog', () => ({
   AddProductDialog: (props: { authed: boolean }) => (
     <button data-testid="add-dialog-stub" data-authed={String(props.authed)}>
-      + Add Product
+      + Track Price
     </button>
   ),
 }))

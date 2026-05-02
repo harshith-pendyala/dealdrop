@@ -90,10 +90,10 @@ describe('dispatchToastForState (toast dispatcher)', () => {
     expect(toastError).not.toHaveBeenCalled()
   })
 
-  it('toast: { ok: true } fires toast.success once with "Product added!"', () => {
+  it('toast: { ok: true } fires toast.success once with "Now tracking"', () => {
     dispatchToastForState({ ok: true })
     expect(toastSuccess).toHaveBeenCalledTimes(1)
-    expect(toastSuccess).toHaveBeenCalledWith('Product added!')
+    expect(toastSuccess).toHaveBeenCalledWith('Now tracking')
     expect(toastError).not.toHaveBeenCalled()
   })
 
