@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Brand Polish & Email Config
 status: executing
-stopped_at: Completed 08-01-PLAN.md (brand token foundation)
-last_updated: "2026-05-02T14:14:59.133Z"
+stopped_at: Completed 08-02-PLAN.md (header logo + click-home link)
+last_updated: "2026-05-02T14:21:10.871Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 6
-  completed_plans: 1
-  percent: 17
+  completed_plans: 2
+  percent: 33
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-02)
 ## Current Position
 
 Phase: 08 (brand-polish) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-05-02
 
@@ -74,6 +74,7 @@ Progress: [░░░░░░░░░░] 0% (0/2 v1.1 phases complete)
 | Phase 05 P02 | 2 | 1 tasks | 1 files |
 | Phase 05 P03 | 2min | 2 tasks | 1 files |
 | Phase 08 P01 | 2 | 2 tasks | 2 files |
+| Phase 08 P02 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Roadmap v1.1]: New env vars (`RESEND_FROM_EMAIL`, `RESEND_TEST_RECIPIENT`) flow through existing `env.server.ts` typed schema — missing required vars fail fast at boot.
 - [Phase 08]: [08-01] Used verified Tailwind v4.2.2 oklch values from node_modules (orange-500=70.5% 0.213 47.604, orange-400=75% 0.183 55.934) — UI-SPEC line 108 had orange-600 by mistake; RESEARCH caught it.
 - [Phase 08]: [08-01] Light --primary-foreground left at zinc-50 (passes AA on orange-500); dark --primary-foreground flipped to zinc-950 for AA on lighter dark-mode orange-400.
+- [Phase 08]: [08-02] Header logo width=95 derived from intrinsic 620x210 PNG ratio at height=32 (32 * 620/210 = 94.48 → rounded up to 95)
+- [Phase 08]: [08-02] Header.tsx remains a server component — Link from next/link and Image from next/image are RSC-safe per RESEARCH.md Pattern 4; adding 'use client' would be an anti-pattern
+- [Phase 08]: [08-02] next/link test stub written from scratch (no analog in dashboard tests) — minimal pass-through anchor forwarding href, aria-label, className, children
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-02T14:14:59.130Z
-Stopped at: Completed 08-01-PLAN.md (brand token foundation)
+Last session: 2026-05-02T14:21:10.869Z
+Stopped at: Completed 08-02-PLAN.md (header logo + click-home link)
 Resume file: None

@@ -11,7 +11,7 @@
 ### Branding
 
 - [ ] **BRAND-01**: User no longer sees the "Made with Love" line in the rendered app footer.
-- [ ] **BRAND-02**: User sees a DealDrop logo image in the application header (asset provided by user, dropped in as PNG/SVG).
+- [x] **BRAND-02**: User sees a DealDrop logo image in the application header (asset provided by user, dropped in as PNG/SVG).
 - [ ] **BRAND-03**: Browser tab shows the DealDrop logo as the favicon — replacing the generic v1.0 icon at `app/icon.tsx`.
 - [x] **BRAND-04**: A single accent color is applied consistently across primary buttons, links, and key UI highlights, defined as a Tailwind theme token / CSS custom property (so future palette changes are one-line).
 - [ ] **BRAND-05**: Accent color renders correctly in both light and dark mode with no contrast regression vs v1.0 (legibility preserved on hover/focus states).
