@@ -45,7 +45,7 @@
   - [x] 08-01-PLAN.md — Token cascade: redefine --primary in globals.css to verified Tailwind v4 orange-500/-400 oklch + apply text-primary to ProductCard price (BRAND-04 foundation)
   - [x] 08-02-PLAN.md — Header logo: replace text wordmark with next/image of /deal-drop-logo.png at 32px, wrapped in next/link to / with aria-label='DealDrop home'; new Header.test.tsx Wave 0 (BRAND-02)
   - [x] 08-03-PLAN.md — Favicon refresh (D-12 Path B): swap app/icon.tsx ImageResponse background from zinc-900 to orange-500 hex; delete dealdrop/app/favicon.ico working-tree leftover (BRAND-03)
-  - [ ] 08-04-PLAN.md — Hero polish: delete 'Made with love' <p>; add bg-gradient-to-b from-orange-50 with dark:from-transparent suppressor; new Hero.test.tsx Wave 0 (BRAND-01 + BRAND-04)
+  - [x] 08-04-PLAN.md — Hero polish: delete 'Made with love' <p>; add bg-gradient-to-b from-orange-50 with dark:from-transparent suppressor; new Hero.test.tsx Wave 0 (BRAND-01 + BRAND-04)
   - [ ] 08-05-PLAN.md — 'Add Product' → 'Track Price' rename across AddProductDialog, AddProductForm, AddProductForm.test.tsx, ProductGrid.test.tsx (per D-11; component file names + backend identifiers preserved)
   - [ ] 08-06-PLAN.md — Verification + visual walk: scaffold 08-VERIFICATION.md, run automated regression sweep + manual walk per D-08, fill audit rows (BRAND-05)
 **UI hint**: yes
