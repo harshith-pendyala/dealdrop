@@ -60,17 +60,17 @@ Explicit exclusions with reasoning:
 
 ## Traceability
 
-<!-- Filled in by /gsd-roadmapper after roadmap is created. -->
-
 | REQ-ID | Phase | Plan | Verification |
 |--------|-------|------|--------------|
-| BRAND-01 | TBD | TBD | TBD |
-| BRAND-02 | TBD | TBD | TBD |
-| BRAND-03 | TBD | TBD | TBD |
-| BRAND-04 | TBD | TBD | TBD |
-| BRAND-05 | TBD | TBD | TBD |
-| EMAIL-01 | TBD | TBD | TBD |
-| EMAIL-02 | TBD | TBD | TBD |
-| EMAIL-03 | TBD | TBD | TBD |
-| EMAIL-04 | TBD | TBD | TBD |
-| EMAIL-05 | TBD | TBD | TBD |
+| BRAND-01 | Phase 8 — Brand Polish | TBD | TBD |
+| BRAND-02 | Phase 8 — Brand Polish | TBD | TBD |
+| BRAND-03 | Phase 8 — Brand Polish | TBD | TBD |
+| BRAND-04 | Phase 8 — Brand Polish | TBD | TBD |
+| BRAND-05 | Phase 8 — Brand Polish | TBD | TBD |
+| EMAIL-01 | Phase 9 — Resend Env Config | TBD | TBD |
+| EMAIL-02 | Phase 9 — Resend Env Config | TBD | TBD |
+| EMAIL-03 | Phase 9 — Resend Env Config | TBD | TBD |
+| EMAIL-04 | Phase 9 — Resend Env Config | TBD | TBD |
+| EMAIL-05 | Phase 9 — Resend Env Config | TBD | TBD |
+
+**Coverage:** 10/10 v1.1 requirements mapped ✓ (no orphans, no duplicates)
