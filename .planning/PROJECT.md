@@ -25,26 +25,22 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 #### Landing — Validated in Phase 2
 - [x] Logged-out visitors see a hero section ("Never miss a price drop") with feature cards
 
-### Active
+#### Onboarding — Validated in Phase 4 (product-tracking-dashboard)
+- [x] Logged-in users with zero products see an empty state prompting them to add their first product
 
-<!-- v1 scope. All hypotheses until shipped. -->
+#### Product Tracking — Validated in Phases 3 + 4
+- [x] User pastes any e-commerce product URL into an "Add Product" form
+- [x] App uses Firecrawl to scrape structured JSON (name, current_price, currency_code, image_url)
+- [x] Scraped product is stored in Postgres with unique constraint on (user_id, url)
+- [x] Initial price is recorded in `price_history` table
+- [x] Toast notification confirms successful add
 
-#### Onboarding
-- [ ] Logged-in users with zero products see an empty state prompting them to add their first product
-
-#### Product Tracking
-- [ ] User pastes any e-commerce product URL into an "Add Product" form
-- [ ] App uses Firecrawl to scrape structured JSON (name, current_price, currency_code, image_url)
-- [ ] Scraped product is stored in Postgres with unique constraint on (user_id, url)
-- [ ] Initial price is recorded in `price_history` table
-- [ ] Toast notification confirms successful add
-
-#### Dashboard
-- [ ] Dashboard shows total count of tracked products
-- [ ] Dashboard renders a responsive grid of product cards (name, current price with currency, image)
-- [ ] Product card has a toggleable "Show Chart" line chart (Recharts) of price history
-- [ ] Product card has a "View Product" link to the original e-commerce site
-- [ ] Product card has a "Remove" button with confirmation, cascade-deletes history
+#### Dashboard — Validated in Phases 4 + 5
+- [x] Dashboard shows total count of tracked products
+- [x] Dashboard renders a responsive grid of product cards (name, current price with currency, image)
+- [x] Product card has a toggleable "Show Chart" line chart (Recharts) of price history
+- [x] Product card has a "View Product" link to the original e-commerce site
+- [x] Product card has a "Remove" button with confirmation, cascade-deletes history
 
 #### Automated Monitoring — Validated in Phase 6 (automated-monitoring-email-alerts)
 - [x] Daily cron (pg_cron in Supabase, 9:00 AM UTC) triggers `/api/cron/check-prices` POST
@@ -54,11 +50,23 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 - [x] When new price < last recorded price → sends Resend email with image, % drop, old vs new price
 - [x] When scrape fails, product card shows a "tracking failed" status badge
 
-#### Polish
-- [ ] Toast notifications (Sonner) for add, remove, errors
-- [ ] Shadcn UI components for buttons, cards, modal
-- [ ] Lucide icons
-- [ ] Tailwind responsive layout works on mobile browsers
+#### Polish & Deployment — Validated in Phase 7 (polish-deployment)
+- [x] Toast notifications (Sonner) for add, remove, errors
+- [x] Shadcn UI components for buttons, cards, modal
+- [x] Lucide icons
+- [x] Tailwind responsive layout works on mobile browsers (zero breaks at 320 / 375 / 768)
+- [x] Two-tier error boundary (page-level + root) with `unstable_retry` per Next.js 16.2 docs
+- [x] Branded `app/icon.tsx` favicon
+- [x] DealDrop deployed to Vercel production at `https://dealdrop-khaki.vercel.app`
+- [x] OAuth registered for prod URL in Google + Supabase Auth
+- [x] pg_cron daily job points at prod URL (migration 0006)
+- [x] DEP-06 end-to-end smoke test passes on prod (sign-in → add product → forced price drop → email + chart)
+
+### Active
+
+<!-- No active v1 requirements remain. Next milestone scope TBD. -->
+
+(All v1 requirements shipped. Define v1.1 scope via `/gsd-new-milestone`.)
 
 ### Out of Scope
 
@@ -81,13 +89,20 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 ### Project Type
 Fresh greenfield scaffold. A `create-next-app` skeleton already exists in [dealdrop/](dealdrop/) — Next.js 16.2.4, React 19, TypeScript strict, Tailwind v4, ESLint flat config. No custom business logic yet.
 
+### Current State (after v1.0)
+
+**Shipped:** DealDrop v1.0 MVP — live in production at `https://dealdrop-khaki.vercel.app`. The full sign-up → add product → daily cron → price-drop email loop works end-to-end on prod, verified by DEP-06 walk on 2026-05-02.
+
+**Stack as built:** Next.js 16.2.4 + React 19 + TypeScript strict + Tailwind v4 / Supabase (Postgres + Auth + Vault + pg_cron + pg_net) / Firecrawl v2 / Resend / Recharts 3.x / Shadcn UI new-york-zinc / Vercel hosting with Fluid Compute.
+
+**Code:** ~5,657 LOC TS/TSX/SQL across `dealdrop/`. Six SQL migrations (0001–0006). Three Supabase client factories (server/browser/admin) with split env (`env.ts` client-safe, `env.server.ts` server-only via `import 'server-only'`).
+
+**Testing:** Vitest with jsdom for client components and node env for server logic. ~108 unit tests across DAL, scraper, optimistic UI, error boundaries, and price-drop email path.
+
+**Per-phase artifacts:** All 7 phase VERIFICATION.md and SUMMARY.md files retained under [.planning/phases/](.planning/phases/) (or moved to `milestones/v1.0-phases/` if archived).
+
 ### Existing Codebase State
-See [.planning/codebase/](.planning/codebase/) for full map. Key points:
-- Zero testing infrastructure
-- Phase 1 complete: Supabase backend live (products + price_history + RLS + pg_cron/pg_net), typed env (Zod), three Supabase client factories (server/browser/admin), Shadcn UI (new-york/zinc), DealDrop metadata — see [01-VERIFICATION.md](.planning/phases/01-foundation-database/01-VERIFICATION.md)
-- Phase 2 complete: Google OAuth end-to-end on localhost (proxy session refresh + `/auth/callback` + AuthModal + Header + Hero + DashboardShell + Sonner toasts), user-approved 14-step smoke test. Vercel preview leg deferred to Phase 7. See [02-VERIFICATION.md](.planning/phases/02-authentication-landing/02-VERIFICATION.md)
-- Phase 3 complete: `scrapeProduct(url)` public function with `import 'server-only'` guard, AbortSignal-based 60s timeout, targeted retry on 5xx/network, closed `ScrapeFailureReason` union, branch-ordered Zod validation, and a live Firecrawl v2 fixture for deterministic tests (40 passing). `env.ts` split into client-safe `env.ts` + server-only `env.server.ts` so server-key NAMES never reach the client bundle. See [03-VERIFICATION.md](.planning/phases/03-firecrawl-integration/03-VERIFICATION.md)
-- No DB ingestion, add-product UI, cron jobs, or email alerts yet (Phases 4–6)
+See [.planning/codebase/](.planning/codebase/) for full map.
 
 ### Intent
 Portfolio / demo project — the bar is "works end-to-end, looks decent, not production-hardened." Prioritize shipping a complete user journey over enterprise concerns.
@@ -154,9 +169,9 @@ Unique constraint: `(user_id, url)` — prevents duplicate tracking.
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | DB + RLS + pg_cron/pg_net live (Phase 1); Google OAuth live on localhost (Phase 2); cron jobs pending Phase 6 |
-| Google OAuth only for v1 | One-click sign-in; no password/email verification UX to build | Shipped in Phase 2 — Vercel preview leg deferred to Phase 7 |
-| Firecrawl over per-site scrapers | Works on any e-commerce URL without site-specific code | — Pending |
+| Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | ✓ Validated end-to-end across Phases 1, 2, 6, 7 (DB + RLS + Auth + pg_cron all live in prod) |
+| Google OAuth only for v1 | One-click sign-in; no password/email verification UX to build | ✓ Validated in Phase 7 (DEP-04 fresh-on-prod sign-in PASS on stable alias `dealdrop-khaki.vercel.app`) |
+| Firecrawl over per-site scrapers | Works on any e-commerce URL without site-specific code | ✓ Validated in Phase 3 (typed scraper) + Phase 7 (DEP-06 books.toscrape end-to-end on prod) |
 | Resend for transactional email | Generous free tier, clean SDK, aligns with Next.js ecosystem | Validated in Phase 6 (sendPriceDropAlert) and Phase 7 (DEP-06 prod email) |
 | Daily scrape at 9 AM | Matches "daily alert" expectation; keeps Firecrawl costs predictable | Validated in Phase 6 (pg_cron 0 9 * * * UTC) and Phase 7 (prod cutover) |
 | "Any price drop" alert rule | Simpler than target price or % threshold; ships faster | Validated in Phase 6 (price-change gate D-02) and Phase 7 (DEP-06 dropped:1) |
@@ -167,6 +182,15 @@ Unique constraint: `(user_id, url)` — prevents duplicate tracking.
 | `unstable_retry` over `reset` for error boundaries | Installed Next.js 16.2.4 docs renamed the prop; CONTEXT.md D-02 used the older name | Phase 7 Plan 07-01 — recorded as `overrides_applied: 1` in 07-VERIFICATION.md |
 | Single Google OAuth client serves dev + prod Supabase | Portfolio bar; production-hardening would split into two clients with separate quotas | Phase 7 Plan 07-06 — both Supabase projects share the same Client ID/Secret |
 | Vercel Deployment Protection scoped to Preview only | Production must be public for both real users and Supabase pg_cron `net.http_post` (no SSO cookie) | Phase 7 Plan 07-05 deviation; documented for future redeploys |
+
+## Next Milestone Goals
+
+v1.0 is shipped. Possible directions for v1.1+ (TBD via `/gsd-new-milestone`):
+
+- **v1.1 Polish & Hardening** — close residual tech debt: Nyquist gaps, formal HUMAN-UAT closures (Phase 01/02), `proxy.ts` env convention, repo-wide lint baseline cleanup (246 pre-existing).
+- **v1.1 Smarter Alerts** — target-price thresholds, percentage thresholds, per-product cadence settings, weekly digest opt-in.
+- **v1.2 Multi-currency** — FX conversion for cross-currency price comparison (currently each product's currency is shown as scraped).
+- **v2.0 Browser extension** — paste-URL friction → "Track this page" button on any e-commerce site.
 
 ## Evolution
 
@@ -186,4 +210,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-02 after Phase 7 (polish-deployment) completion — milestone v1.0 fully shipped: prod URL `https://dealdrop-khaki.vercel.app` live, OAuth + cron + email loop verified end-to-end*
+*Last updated: 2026-05-02 after v1.0 milestone complete — DealDrop MVP shipped to `https://dealdrop-khaki.vercel.app`; all 7 phases (5+5+4+7+4+5+8 = 38 plans) verified end-to-end*
