@@ -110,3 +110,63 @@ First smoke test attempt returned `HTTP/2 401` (HTML page, not JSON). Root cause
 ### Stable Alias vs Deployment URL — Use the Alias for Plan 07-07
 
 `https://dealdrop-khaki.vercel.app` is the stable alias and is what Plan 07-07 (migration 0006 cron URL cutover) MUST hardcode. The deployment-hash URL (`-pyyc6dlpa-`) is immutable but tied to a single deployment — every new prod deploy gets a new hash, breaking the cron if hardcoded.
+
+## DEP-04: Production OAuth Registration (Google Cloud Console)
+
+**Authorized redirect URIs (final state — both entries):**
+
+| URI | Scope | Status |
+|-----|-------|--------|
+| `https://vhlbdcsxccaknccawfdj.supabase.co/auth/v1/callback` | dev | preserved |
+| `https://gltwnfnkodzkupkxwpro.supabase.co/auth/v1/callback` | prod | added |
+
+**Authorized JavaScript origins:**
+
+| Origin | Status |
+|--------|--------|
+| `https://vhlbdcsxccaknccawfdj.supabase.co` | preserved |
+| `https://gltwnfnkodzkupkxwpro.supabase.co` | added |
+
+Screenshot: see `screenshots/dep-04-google-redirects.png` (operator-captured).
+
+## DEP-04: Production OAuth Registration (Supabase Auth — prod project `gltwnfnkodzkupkxwpro`)
+
+| Setting | Value | Status |
+|---------|-------|--------|
+| Auth → Providers → Google | Enabled with rotated Client ID + Secret (see deviation below) | enabled |
+| Auth → URL Configuration → Site URL | `https://dealdrop-khaki.vercel.app` | set |
+| Auth → URL Configuration → Redirect URLs | `https://dealdrop-khaki.vercel.app/auth/callback` AND `https://*.vercel.app/auth/callback` | set |
+
+Dev project (`vhlbdcsxccaknccawfdj`) Auth config: Site URL + Redirect URLs unchanged. **Client Secret rotated** — see deviation below.
+
+### Deviation — `Unable to exchange external code` 500 → Client Secret Rotation
+
+First smoke-test attempt returned the redirect chain ending at:
+
+```
+https://dealdrop-khaki.vercel.app/auth/callback?error=server_error&error_code=unexpected_failure&error_description=Unable+to+exchange+external+code%3A+4%2F0A
+```
+
+Root cause: the Client Secret pasted into Supabase prod's Google provider didn't match the Client Secret Google had on file (probable cause: original dev secret had drifted, or paste truncation hid the mismatch behind Supabase's `••••••` masking).
+
+**Fix applied:** Operator generated a fresh Client Secret in Google Cloud Console (`+ ADD SECRET`), pasted into Supabase prod's Google provider, AND re-pasted into Supabase dev's Google provider so dev OAuth keeps working. Both projects now share the same active secret. Smoke test passes.
+
+**Operational follow-up:** Both Supabase projects' Google provider Client Secret values are now tied to the same Google OAuth client secret. If that secret is ever regenerated again, BOTH Supabase projects must be re-pasted — single source of truth = the Google OAuth client.
+
+### Deviation — Same Account for Smoke Test (No Fresh Account Available)
+
+Plan 07-06 acceptance specified a "fresh Google account that has never signed in to DealDrop". Operator has only one Google account and reused the existing one. This is acceptable for the prod-OAuth-works proof because the **prod Supabase project** (`gltwnfnkodzkupkxwpro`) is a brand-new database with zero pre-existing users — the dev users live in the dev project. Signing in with the existing Google account on prod still inserts a fresh row in prod's `auth.users` table, validating the create-user-on-first-OAuth flow. This deviation also applies to Plan 07-08's DEP-06 email test — same account will be used (alert email lands in the same inbox as sign-up, which is the canonical end-user flow anyway).
+
+## DEP-04: Production OAuth Smoke Test
+
+| Step | Action | Observed | Expected | Status |
+|------|--------|----------|----------|--------|
+| 1 | Open `https://dealdrop-khaki.vercel.app/` in incognito | Hero page renders, 200 | Hero | PASS |
+| 2 | Click Sign In → Continue with Google | Google consent screen shown | Consent | PASS |
+| 3 | Complete consent with operator's Google account | Browser redirects through `/auth/v1/callback` to `/` | Land at `/` with session | PASS |
+| 4 | Header shows "Sign Out" instead of "Sign In" | Yes | Yes | PASS |
+| 5 | `SELECT id, email, last_sign_in_at FROM auth.users ORDER BY last_sign_in_at DESC LIMIT 1` in PROD SQL | 1 row, operator's Google email, recent timestamp | 1 row, recent | PASS |
+
+**Date:** 2026-05-02
+**Operator:** operator
+**Account used:** `<operator-google@redacted>` — same account will be reused for DEP-06 non-owner email test in Plan 07-08 per the same-account deviation above.
