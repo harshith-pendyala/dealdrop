@@ -26,7 +26,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       <div className="flex flex-col flex-1 p-4 gap-2">
         <p className="text-base font-semibold line-clamp-2">{product.name}</p>
-        <p className="text-xl font-semibold">
+        <p className="text-xl font-semibold text-primary">
           {formatPrice(product.current_price, product.currency)}
         </p>
         {product.last_scrape_failed_at !== null && (
