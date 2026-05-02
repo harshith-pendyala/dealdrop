@@ -35,13 +35,13 @@ export const REASON_TO_TOAST = {
  *
  * Semantics:
  *   - null           → no-op (no toast)
- *   - { ok: true }   → toast.success('Product added!')
+ *   - { ok: true }   → toast.success('Now tracking')
  *   - { ok: false }  → toast.error(REASON_TO_TOAST[state.reason])
  */
 export function dispatchToastForState(state: AddProductActionResult | null): void {
   if (!state) return
   if (state.ok) {
-    toast.success('Product added!')
+    toast.success('Now tracking')
   } else {
     toast.error(REASON_TO_TOAST[state.reason])
   }
@@ -129,7 +129,7 @@ export function AddProductForm({ authed, formAction, state, pending, onSuccess }
         />
         <Button type="submit" variant="default" disabled={pending}>
           {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Track
+          Track Price
         </Button>
       </div>
     </form>

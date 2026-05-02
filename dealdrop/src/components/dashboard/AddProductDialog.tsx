@@ -21,11 +21,11 @@ export function AddProductDialog({ authed, formAction, state, pending }: AddProd
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">+ Add Product</Button>
+        <Button variant="default">+ Track Price</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add a product</DialogTitle>
+          <DialogTitle>Track a price</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           <AddProductForm
