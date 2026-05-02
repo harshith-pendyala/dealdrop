@@ -47,7 +47,7 @@
   - [x] 08-03-PLAN.md — Favicon refresh (D-12 Path B): swap app/icon.tsx ImageResponse background from zinc-900 to orange-500 hex; delete dealdrop/app/favicon.ico working-tree leftover (BRAND-03)
   - [x] 08-04-PLAN.md — Hero polish: delete 'Made with love' <p>; add bg-gradient-to-b from-orange-50 with dark:from-transparent suppressor; new Hero.test.tsx Wave 0 (BRAND-01 + BRAND-04)
   - [x] 08-05-PLAN.md — 'Add Product' → 'Track Price' rename across AddProductDialog, AddProductForm, AddProductForm.test.tsx, ProductGrid.test.tsx (per D-11; component file names + backend identifiers preserved)
-  - [ ] 08-06-PLAN.md — Verification + visual walk: scaffold 08-VERIFICATION.md, run automated regression sweep + manual walk per D-08, fill audit rows (BRAND-05)
+  - [x] 08-06-PLAN.md — Verification + visual walk: scaffold 08-VERIFICATION.md, run automated regression sweep + manual walk per D-08, fill audit rows (BRAND-05)
 **UI hint**: yes
 
 ### Phase 9: Resend Env Config
@@ -73,5 +73,5 @@
 | 5. Price History Chart                      | v1.0      | 4/4            | Complete    | 2026-04-20 |
 | 6. Automated Monitoring & Email Alerts      | v1.0      | 5/5            | Complete    | 2026-04-25 |
 | 7. Polish & Deployment                      | v1.0      | 8/8            | Complete    | 2026-05-02 |
-| 8. Brand Polish                             | v1.1      | 0/?            | Not started | -          |
+| 8. Brand Polish                             | v1.1      | 6/6            | Plans Complete (BRAND-05 → HUMAN-UAT) | 2026-05-02 |
 | 9. Resend Env Config                        | v1.1      | 0/?            | Not started | -          |
