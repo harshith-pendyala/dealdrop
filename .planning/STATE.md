@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Brand Polish & Email Config
 status: executing
-stopped_at: Completed 08-02-PLAN.md (header logo + click-home link)
-last_updated: "2026-05-02T14:21:10.871Z"
+stopped_at: Completed 08-03-PLAN.md (favicon orange + favicon.ico delete)
+last_updated: "2026-05-02T14:25:04.256Z"
 last_activity: 2026-05-02
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 6
-  completed_plans: 2
-  percent: 33
+  completed_plans: 3
+  percent: 50
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-05-02)
 ## Current Position
 
 Phase: 08 (brand-polish) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-05-02
 
@@ -75,6 +75,7 @@ Progress: [░░░░░░░░░░] 0% (0/2 v1.1 phases complete)
 | Phase 05 P03 | 2min | 2 tasks | 1 files |
 | Phase 08 P01 | 2 | 2 tasks | 2 files |
 | Phase 08 P02 | 2min | 2 tasks | 2 files |
+| Phase 08 P03 | 1min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,9 @@ Recent decisions affecting current work:
 - [Phase 08]: [08-02] Header logo width=95 derived from intrinsic 620x210 PNG ratio at height=32 (32 * 620/210 = 94.48 → rounded up to 95)
 - [Phase 08]: [08-02] Header.tsx remains a server component — Link from next/link and Image from next/image are RSC-safe per RESEARCH.md Pattern 4; adding 'use client' would be an anti-pattern
 - [Phase 08]: [08-02] next/link test stub written from scratch (no analog in dashboard tests) — minimal pass-through anchor forwarding href, aria-label, className, children
+- [Phase 08]: [08-03] Chose D-12 Path B (modify ImageResponse) over Path A — wordmark PNG (620x210, ~2.95:1) doesn't reduce legibly to 32x32
+- [Phase 08]: [08-03] Used hex #f97316 (Tailwind v4 orange-500 canonical hex) inline because Satori (ImageResponse engine) does not support oklch() or CSS custom properties
+- [Phase 08]: [08-03] Deleted dealdrop/app/favicon.ico via rm -f (no git rm) — file was never git-tracked; Phase 7 D-07 directive lands
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-02T14:21:10.869Z
-Stopped at: Completed 08-02-PLAN.md (header logo + click-home link)
+Last session: 2026-05-02T14:24:57.037Z
+Stopped at: Completed 08-03-PLAN.md (favicon orange + favicon.ico delete)
 Resume file: None
