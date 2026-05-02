@@ -62,6 +62,14 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 - [x] pg_cron daily job points at prod URL (migration 0006)
 - [x] DEP-06 end-to-end smoke test passes on prod (sign-in → add product → forced price drop → email + chart)
 
+#### Brand Polish — Validated in Phase 8 (brand-polish, v1.1)
+- [x] BRAND-01: "Made with love" footer removed from Hero
+- [x] BRAND-02: Header text wordmark replaced with `/deal-drop-logo.png` via `next/image`, click-home `Link` to `/`
+- [x] BRAND-03: Browser-tab favicon refreshed to orange palette (`app/icon.tsx` ImageResponse `#f97316` background; legacy `favicon.ico` deleted)
+- [x] BRAND-04: Shadcn `--primary` token redefined to Tailwind v4 orange (light `oklch(70.5% 0.213 47.604)` / dark `oklch(75% 0.183 55.934)`); ProductCard price now uses `text-primary` cascade
+- [ ] BRAND-05: Visual walk in light + dark at desktop + 375px (deferred to `08-HUMAN-UAT.md` per operator decision 2026-05-02 — pending)
+- [x] CTA copy rename: "Add Product" → "Track Price" across AddProductDialog/Form + tests (D-11)
+
 ### Active
 
 <!-- v1.1 polish requirements — populated by REQUIREMENTS.md -->
@@ -227,4 +235,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-02 — milestone v1.1 (Brand Polish & Email Config) initialized; v1.0 (DealDrop MVP) shipped 2026-05-02 to `https://dealdrop-khaki.vercel.app`*
+*Last updated: 2026-05-02 — Phase 8 (brand-polish) complete: orange `--primary` cascade, header logo, orange favicon, hero refresh, "Track Price" rename. BRAND-05 visual walk deferred to `08-HUMAN-UAT.md`. Milestone v1.1 progresses to Phase 9 (resend-env-config).*
