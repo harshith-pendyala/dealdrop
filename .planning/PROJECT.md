@@ -157,13 +157,16 @@ Unique constraint: `(user_id, url)` — prevents duplicate tracking.
 | Supabase for DB + Auth + Cron | One platform covers Postgres, RLS, Google OAuth, and pg_cron scheduling | DB + RLS + pg_cron/pg_net live (Phase 1); Google OAuth live on localhost (Phase 2); cron jobs pending Phase 6 |
 | Google OAuth only for v1 | One-click sign-in; no password/email verification UX to build | Shipped in Phase 2 — Vercel preview leg deferred to Phase 7 |
 | Firecrawl over per-site scrapers | Works on any e-commerce URL without site-specific code | — Pending |
-| Resend for transactional email | Generous free tier, clean SDK, aligns with Next.js ecosystem | — Pending |
-| Daily scrape at 9 AM | Matches "daily alert" expectation; keeps Firecrawl costs predictable | — Pending |
-| "Any price drop" alert rule | Simpler than target price or % threshold; ships faster | — Pending |
+| Resend for transactional email | Generous free tier, clean SDK, aligns with Next.js ecosystem | Validated in Phase 6 (sendPriceDropAlert) and Phase 7 (DEP-06 prod email) |
+| Daily scrape at 9 AM | Matches "daily alert" expectation; keeps Firecrawl costs predictable | Validated in Phase 6 (pg_cron 0 9 * * * UTC) and Phase 7 (prod cutover) |
+| "Any price drop" alert rule | Simpler than target price or % threshold; ships faster | Validated in Phase 6 (price-change gate D-02) and Phase 7 (DEP-06 dropped:1) |
 | Auth via modal, not a route | Single dynamic page; fewer routes to manage | Shipped in Phase 2 (AuthModal + AuthModalProvider) |
-| Keep price history forever | Low volume in portfolio use; retention policy unnecessary for v1 | — Pending |
-| Show scrape failure in UI (not email) | Avoids email noise; user sees state on the product card | — Pending |
-| Currency displayed as scraped (no FX) | Conversion adds complexity; original currency is accurate | — Pending |
+| Keep price history forever | Low volume in portfolio use; retention policy unnecessary for v1 | Validated in Phase 7 (cascade delete only, no retention) |
+| Show scrape failure in UI (not email) | Avoids email noise; user sees state on the product card | Validated in Phase 7 (PITFALLS:341 grid row PASS) |
+| Currency displayed as scraped (no FX) | Conversion adds complexity; original currency is accurate | Validated in Phase 7 (GBP product rendered without RangeError) |
+| `unstable_retry` over `reset` for error boundaries | Installed Next.js 16.2.4 docs renamed the prop; CONTEXT.md D-02 used the older name | Phase 7 Plan 07-01 — recorded as `overrides_applied: 1` in 07-VERIFICATION.md |
+| Single Google OAuth client serves dev + prod Supabase | Portfolio bar; production-hardening would split into two clients with separate quotas | Phase 7 Plan 07-06 — both Supabase projects share the same Client ID/Secret |
+| Vercel Deployment Protection scoped to Preview only | Production must be public for both real users and Supabase pg_cron `net.http_post` (no SSO cookie) | Phase 7 Plan 07-05 deviation; documented for future redeploys |
 
 ## Evolution
 
@@ -183,4 +186,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after Phase 6 (automated-monitoring-email-alerts) completion*
+*Last updated: 2026-05-02 after Phase 7 (polish-deployment) completion — milestone v1.0 fully shipped: prod URL `https://dealdrop-khaki.vercel.app` live, OAuth + cron + email loop verified end-to-end*
