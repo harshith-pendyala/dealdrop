@@ -26,8 +26,8 @@ export default function Icon() {
         style={{
           fontSize: 22,
           fontWeight: 700,
-          background: '#18181b', // zinc-900
-          color: '#fafafa',      // zinc-50
+          background: '#f97316', // orange-500
+          color: '#fafafa',      // zinc-50 (passes AA on orange-500)
           width: '100%',
           height: '100%',
           display: 'flex',
