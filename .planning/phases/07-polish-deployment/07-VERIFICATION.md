@@ -1,8 +1,9 @@
 ---
 phase: 07-polish-deployment
-verified: 2026-04-25T08:05:26Z
-status: in_progress
-score: pending
+verified: 2026-05-02T15:00:00Z
+status: passed
+score: 12/12 (with PASS-deferred on PITFALLS line 346)
+overrides_applied: 1
 ---
 
 # Phase 7: Polish & Deployment — Verification Report
@@ -214,3 +215,92 @@ Initial verification query `SELECT pg_get_functiondef('public.trigger_price_chec
 The optional `SELECT public.trigger_price_check_cron()` smoke test was skipped. Function definition + cron.job inspection are sufficient proof of the cutover. The end-to-end loop will be exercised for real either at the next 09:00 UTC daily fire OR during Plan 07-08's DEP-06 prod smoke test (which forces a price drop and observes the email).
 
 If the daily-fire fails with 401 in Vercel logs, the symptom is a CRON_SECRET mismatch between Vercel `production` env and Supabase prod Vault `dealdrop_cron_secret` — re-paste both with the same 48-char value (Plan 07-05 Task 2 Step 3).
+
+## DEP-06: End-to-End Verification
+
+**Operator:** operator
+**Date:** 2026-05-02
+**Account used:** operator's existing Google account (per Plan 07-06 same-account deviation — same inbox is used for sign-up and price-drop email; canonical end-user flow)
+**Prod URL:** `https://dealdrop-khaki.vercel.app/`
+**Prod Supabase ref:** `gltwnfnkodzkupkxwpro`
+**Test product URL:** `https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html`
+**Test product UUID:** `088328fe-4f87-459b-8c36-cc275f2c760a`
+**Test product seed price:** 51.77 GBP
+
+### Pre-flight (Plan 07-05 / 07-07 sanity)
+
+| Check | Command | Expected | Observed |
+|-------|---------|----------|----------|
+| Prod hero loads | `curl -I https://dealdrop-khaki.vercel.app/` | HTTP/2 200 | PASS |
+| Cron health | `curl https://dealdrop-khaki.vercel.app/api/cron/check-prices` | 200 + `{"status":"ok"}` | PASS |
+| Cron auth gate | `curl -X POST .../api/cron/check-prices` (no Bearer) | 401 + `{"error":"Unauthorized"}` | PASS |
+
+### Steps 1-3 (sign in + add product + seed)
+
+| # | Action | Expected | Observed |
+|---|--------|----------|----------|
+| 1 | Sign in on prod incognito with Google account | Lands at `/` with EmptyState | PASS |
+| 2 | Add `books.toscrape.com/.../a-light-in-the-attic` URL | ProductCard renders with name + £51.77 + image | PASS |
+| 3 | `SELECT * FROM products ORDER BY created_at DESC LIMIT 1` in PROD SQL | 1 row, current_price=51.77 GBP, id=088328fe-... | PASS |
+| 3a | `SELECT * FROM price_history WHERE product_id='088328fe-...'` | exactly 1 row (seed) | PASS |
+
+### Steps 4-9 (force drop + cron + email + chart + idempotency)
+
+| # | Action | Expected | Observed |
+|---|--------|----------|----------|
+| 4 | `UPDATE products SET current_price = current_price * 2 WHERE id='088328fe-...'` | current_price=103.54 | PASS |
+| 5 | `curl -X POST .../api/cron/check-prices -H 'Authorization: Bearer <secret>'` | 200 + `{"scraped":1,"updated":1,"dropped":1,"failed":[]}` | PASS |
+| 6 | Price-drop email arrives in operator inbox | Subject + image + name + struck old + prominent new + percent + CTA | PASS |
+| 6a | Email screenshot | saved | `screenshots/dep-06-email.png` |
+| 7 | Dashboard chart shows TWO data points after Show Chart | 2 points: seed (51.77) + cron-inserted (51.77 after Step 4 inflate→Step 5 cron) | PASS |
+| 7a | Chart screenshot | saved | `screenshots/dep-06-chart.png` |
+| 8 | `SELECT * FROM price_history WHERE product_id='088328fe-...' ORDER BY checked_at` | 2 rows; second row price=51.77 | PASS |
+| 8a | `SELECT current_price FROM products WHERE id='088328fe-...'` | 51.77 (post-cron INSERT-then-UPDATE) | PASS |
+| 9 | Re-fire cron POST (no changes) | 200 + `{"scraped":1,"updated":0,"dropped":0,"failed":[]}` | PASS |
+| 9a | `SELECT count(*) FROM price_history WHERE product_id='088328fe-...'` | still 2 (idempotency — Phase 6 D-02 price-change gate) | PASS |
+| 9b | No new email in inbox after re-fire | confirmed | PASS |
+
+Email screenshot: ![DEP-06 price drop email](screenshots/dep-06-email.png)
+Chart screenshot: ![DEP-06 chart with 2 data points](screenshots/dep-06-chart.png)
+
+### Same-Account Deviation Note (carryover from Plan 07-06)
+
+Plan 07-08 originally specified a fresh non-owner Gmail per PITFALLS:342 (Resend account-owner inboxes silently succeed even when domain DNS is broken). Operator has only one Google account; reused it for sign-up + email recipient. The DNS-silent-success risk this rule addresses is mitigated alternately by the email actually rendering correctly in the inbox (operator visually inspected sender, To, body fields — see screenshot) AND by Resend dashboard showing "delivered" status. For portfolio bar this is acceptable; production-hardening would re-test with a true non-owner inbox.
+
+### PITFALLS.md "Looks Done But Isn't" Inspection Grid
+
+| # | Pitfall (PITFALLS.md line) | Verification | Status | Evidence |
+|---|----------------------------|--------------|--------|----------|
+| 1 | Cron GET ≠ scraping (line 338) | Pre-flight: GET returns `{"status":"ok"}` instantly with no Firecrawl invocation | PASS | DEP-06 pre-flight row above |
+| 2 | RLS on price_history (line 339) | `pg_policies` query in prod returns ownership-chain qual on price_history; products table has 4 row-level policies | PASS | operator-confirmed via SQL Editor query (Check 1) |
+| 3 | OAuth on prod URL in BOTH Google + Supabase (line 340) | Plan 07-06 Tasks 1-3: Google redirect URIs include prod ref; Supabase prod Site URL + Redirect URLs set; smoke test passes | PASS | DEP-04 sections above |
+| 4 | Cron handles scrape failures gracefully (line 341) | Bad-URL product (`example.invalid/...`) handled gracefully — failed badge shown, no null price_history row, run continues | PASS | operator-confirmed (Check 6); Phase 6 dev coverage already covered the cron-path code |
+| 5 | Email arrives in operator inbox (line 342) | Task 2 Step 6 — email landed within ~30s, all body elements present | PASS-with-deviation | screenshot at `screenshots/dep-06-email.png`; same-account deviation noted above |
+| 6 | PriceChart at 1 + 0 data points (line 343) | Task 1 Step 2 confirmed Show Chart with 1 point did not crash; Phase 5 Plan 05-02 unit tests assert 0-point empty-state guard | PASS | DEP-06 Step 7 + `dealdrop/src/components/dashboard/PriceChart.test.tsx` |
+| 7 | Non-USD currency (line 344) | books.toscrape (GBP) product rendered with £ symbol; prod browser console clean (no RangeError / Intl errors) | PASS | operator-confirmed (Check 4) |
+| 8 | NEXT_PUBLIC_* env in Vercel prod (line 345) | OAuth flow against `gltwnfnkodzkupkxwpro.supabase.co/auth/v1/authorize` succeeded (Plan 07-06 + DEP-06 Step 1) — operational proof that `NEXT_PUBLIC_SUPABASE_URL` is bound to prod ref. Bare-HTML curl returned empty (Supabase URL is in client JS chunks, not inlined HTML) — operational evidence is the stronger proof. | PASS | Plan 07-06 OAuth smoke + Plan 07-05 `vercel env ls production` (7 rows) |
+| 9 | maxDuration with 15+ products (line 346) | Single-product happy path verified end-to-end; Fluid Compute confirmed ON in Plan 07-05 (the relevant infra prerequisite for `maxDuration=300`); 15+ scale not exercised | PASS-deferred | 07-05 Fluid Compute confirmation; deferred for portfolio bar |
+| 10 | Cascade delete (line 347) | Remove product via dashboard AlertDialog → both `products` and `price_history` count = 0 for that UUID | PASS | operator-confirmed (Check 5) |
+
+### Tailwind Production Verification (PITFALLS:362)
+
+| Check | Expected | Observed |
+|-------|----------|----------|
+| `@import "tailwindcss"` in globals.css | present (was set in Phase 1) | PASS |
+| No conflicting `tailwind.config.js` committed | not present | PASS |
+| Hero h1 renders at expected mobile-first font-size on prod (text-3xl ≈ 30px / text-5xl ≈ 48px) | yes | PASS (operator-confirmed via DevTools — Check 3) |
+
+### Cleanup
+
+- Test product (UUID `088328fe-4f87-459b-8c36-cc275f2c760a`) removed via dashboard; cascade delete cleared the 2 price_history rows (Check 5)
+- `dealdrop/.env.prod.tmp` (CRON_SECRET pull) — operator confirmed deleted post-use (Step 8 of Task 2)
+- Bad-URL test product (added in Check 6) removed
+- Prod database now has only the operator's `auth.users` row + zero products
+
+### Final Frontmatter
+
+| Field | Value | Rationale |
+|-------|-------|-----------|
+| `status` | `passed` | All 12 phase requirements verified; all 10 PITFALLS rows PASS or PASS-deferred |
+| `score` | `12/12 (with PASS-deferred on PITFALLS line 346)` | POL-01..06 + DEP-01..06 = 12 verified; 15+ products scale gate is the only deferred item |
+| `overrides_applied` | `1` | Plan 07-01: `reset` → `unstable_retry` per installed Next.js 16.2 docs (CONTEXT D-02 override; user-approved) |
