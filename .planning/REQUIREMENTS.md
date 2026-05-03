@@ -14,15 +14,15 @@
 - [x] **BRAND-02**: User sees a DealDrop logo image in the application header (asset provided by user, dropped in as PNG/SVG).
 - [x] **BRAND-03**: Browser tab shows the DealDrop logo as the favicon — replacing the generic v1.0 icon at `app/icon.tsx`.
 - [x] **BRAND-04**: A single accent color is applied consistently across primary buttons, links, and key UI highlights, defined as a Tailwind theme token / CSS custom property (so future palette changes are one-line).
-- [ ] **BRAND-05**: Accent color renders correctly in both light and dark mode with no contrast regression vs v1.0 (legibility preserved on hover/focus states).
+- [x] **BRAND-05**: Accent color renders correctly in both light and dark mode with no contrast regression vs v1.0 (legibility preserved on hover/focus states). [24/24 visual walk passed 2026-05-03; T16 hero dark-mode gradient leak fixed by quick/260503-ime]
 
 ### Email Config
 
-- [ ] **EMAIL-01**: Resend `from` address is sourced from an env var (e.g. `RESEND_FROM_EMAIL`) rather than a hardcoded literal — local dev has a sensible default.
-- [ ] **EMAIL-02**: A test-recipient override env var (e.g. `RESEND_TEST_RECIPIENT`) routes all price-drop alerts to that single address when set, regardless of which user added the product.
-- [ ] **EMAIL-03**: When the test-recipient override is unset, the production code path delivers alerts to the user-of-record's email — preserving v1.0 behavior for when a custom domain is verified in a future milestone.
-- [ ] **EMAIL-04**: New env vars are validated through the existing typed env schema (`env.server.ts`) — required vs optional documented; missing required values fail fast at boot.
-- [ ] **EMAIL-05**: README (or equivalent docs) explains how to flip from test-recipient mode to production mode — a one-env-var change after a domain is verified.
+- [x] **EMAIL-01**: Resend `from` address is sourced from an env var (e.g. `RESEND_FROM_EMAIL`) rather than a hardcoded literal — local dev has a sensible default. [validated Phase 9 — `from: env.RESEND_FROM_EMAIL` at `resend.ts:159`]
+- [x] **EMAIL-02**: A test-recipient override env var (e.g. `RESEND_TEST_RECIPIENT`) routes all price-drop alerts to that single address when set, regardless of which user added the product. [validated Phase 9 — `to: env.RESEND_TEST_RECIPIENT ?? input.to` at `resend.ts:160`]
+- [x] **EMAIL-03**: When the test-recipient override is unset, the production code path delivers alerts to the user-of-record's email — preserving v1.0 behavior for when a custom domain is verified in a future milestone. [validated Phase 9 — nullish-coalesce fallback]
+- [x] **EMAIL-04**: New env vars are validated through the existing typed env schema (`env.server.ts`) — required vs optional documented; missing required values fail fast at boot. [validated Phase 9 — `RESEND_TEST_RECIPIENT: z.string().email().optional()` at `env.server.ts:20`]
+- [x] **EMAIL-05**: README (or equivalent docs) explains how to flip from test-recipient mode to production mode — a one-env-var change after a domain is verified. [validated Phase 9 — `dealdrop/README.md` Email recipient modes section]
 
 ---
 
@@ -62,15 +62,15 @@ Explicit exclusions with reasoning:
 
 | REQ-ID | Phase | Plan | Verification |
 |--------|-------|------|--------------|
-| BRAND-01 | Phase 8 — Brand Polish | TBD | TBD |
-| BRAND-02 | Phase 8 — Brand Polish | TBD | TBD |
-| BRAND-03 | Phase 8 — Brand Polish | TBD | TBD |
-| BRAND-04 | Phase 8 — Brand Polish | TBD | TBD |
-| BRAND-05 | Phase 8 — Brand Polish | TBD | TBD |
-| EMAIL-01 | Phase 9 — Resend Env Config | TBD | TBD |
-| EMAIL-02 | Phase 9 — Resend Env Config | TBD | TBD |
-| EMAIL-03 | Phase 9 — Resend Env Config | TBD | TBD |
-| EMAIL-04 | Phase 9 — Resend Env Config | TBD | TBD |
-| EMAIL-05 | Phase 9 — Resend Env Config | TBD | TBD |
+| BRAND-01 | Phase 8 — Brand Polish | 08-04 | 08-VERIFICATION (passed) |
+| BRAND-02 | Phase 8 — Brand Polish | 08-02 | 08-VERIFICATION (passed) |
+| BRAND-03 | Phase 8 — Brand Polish | 08-03 | 08-VERIFICATION (passed) |
+| BRAND-04 | Phase 8 — Brand Polish | 08-01 | 08-VERIFICATION (passed) |
+| BRAND-05 | Phase 8 — Brand Polish | 08-06 + quick/260503-ime | 08-HUMAN-UAT (24/24 passed) |
+| EMAIL-01 | Phase 9 — Resend Env Config | 09-02 | 09-VERIFICATION (passed) |
+| EMAIL-02 | Phase 9 — Resend Env Config | 09-02 + 09-03 | 09-VERIFICATION (passed) |
+| EMAIL-03 | Phase 9 — Resend Env Config | 09-02 + 09-03 | 09-VERIFICATION (passed) |
+| EMAIL-04 | Phase 9 — Resend Env Config | 09-01 + 09-03 | 09-VERIFICATION (passed) |
+| EMAIL-05 | Phase 9 — Resend Env Config | 09-04 | 09-VERIFICATION (passed) |
 
-**Coverage:** 10/10 v1.1 requirements mapped ✓ (no orphans, no duplicates)
+**Coverage:** 10/10 v1.1 requirements complete ✓ (all validated)
