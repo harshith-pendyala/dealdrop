@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.1 Brand Polish & Email Config (Shipped: 2026-05-03)
+
+**Phases completed:** 2 phases, 10 plans, 16 tasks
+
+**Key accomplishments:**
+
+- Redefined --primary CSS custom property to verified Tailwind v4 orange oklch values (orange-500 light / orange-400 dark) so every existing bg-primary, text-primary, and var(--primary) consumer auto-restyles via the cascade; added text-primary to ProductCard price <p> as the only consumer that needed a class addition.
+- Replaced the text wordmark in Header.tsx with a click-home logo block (`<Link href="/" aria-label="DealDrop home"><Image src="/deal-drop-logo.png" alt="DealDrop" width={95} height={32} priority /></Link>`) and shipped a 5-test Header.test.tsx as the Wave 0 scaffold for BRAND-02.
+- Swapped the inline ImageResponse background in dealdrop/app/icon.tsx from #18181b (zinc-900) to #f97316 (Tailwind v4 orange-500) and deleted the working-tree dealdrop/app/favicon.ico leftover — Path B chosen because the wordmark logo doesn't reduce legibly to 32x32.
+- Two surgical edits to dealdrop/src/components/hero/Hero.tsx (delete the "Made with love" footer copy + append five Tailwind v4 gradient utilities to the section className) plus a Wave 0 Vitest test file (Hero.test.tsx) that locks in BRAND-01 absence and BRAND-04 gradient surface in red-green order.
+- Two-task surgical rename of every user-facing "Add Product" / "Add a product" / "Product added!" string in dealdrop/src to "Track Price" / "Track a price" / "Now tracking" (D-11), with test assertions updated in lockstep. Component files and backend identifiers explicitly preserved. Full vitest suite (173/173) green.
+- 08-VERIFICATION.md scaffolded and BRAND-01..04 closed via automated evidence; BRAND-05 disposition formally recorded as `deferred-to-human-uat` for the phase verifier to materialize 08-HUMAN-UAT.md.
+- Insert location:
+- Change:
+
+---
+
 ## v1.0 DealDrop MVP (Shipped: 2026-05-02)
 
 **Phases completed:** 7 phases, 38 plans, 55 tasks
