@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Brand Polish & Email Config
-status: executing
-stopped_at: Phase 9 context gathered
+status: shipped
+stopped_at: v1.1 complete — awaiting v1.2 scoping
 last_updated: "2026-05-03T08:06:19.414Z"
 last_activity: 2026-05-03
 progress:
@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-02)
+See: .planning/PROJECT.md (updated 2026-05-03 after v1.1)
 
 **Core value:** Users never miss a price drop on products they care about — regardless of which e-commerce site the product lives on.
-**Current focus:** Phase 09 — resend-env-config
+**Current focus:** Planning next milestone — run `/gsd-new-milestone` to scope v1.2 (likely Custom Domain & Real Email)
 
 ## Current Position
 
@@ -123,6 +123,10 @@ Recent decisions affecting current work:
 | Brand | Full palette / typography refresh beyond single accent color | Deferred to v1.3+ | 2026-05-02 (v1.1 scoping) |
 | Brand | Animated / interactive logo variants | Deferred to v1.3+ | 2026-05-02 (v1.1 scoping) |
 | Brand | OG images / social cards / multi-size brand assets | Deferred to v1.3+ | 2026-05-02 (v1.1 scoping) |
+| Legacy UAT | `.planning/phases/01-foundation-database/01-HUMAN-UAT.md` — 3 items: T1 env-validation regression (stale, satisfied by Phase 2+ env imports), T2 RLS impersonation live-verification (needs Supabase access), T3 Shadcn Button visual (already developer-confirmed 2026-04-18) | Acknowledged at v1.1 close; T1 + T3 stale, T2 awaiting prereq | 2026-05-03 (v1.1 close) |
+| Legacy UAT | `.planning/phases/02-authentication-landing/02-HUMAN-UAT.md` — Vercel preview OAuth round-trip | Superseded by Phase 7 prod smoke (DEP-06); acknowledged at v1.1 close | 2026-05-03 (v1.1 close) |
+| Build hygiene | Stale `dealdrop/.next/types/*-d 3.ts` Finder duplicate type files producing tsc errors | Acknowledged at v1.1 close — clean via `rm` and `next build` regeneration in v1.2 | 2026-05-03 (v1.1 close) |
+| Test hygiene | `dealdrop/src/lib/products/get-user-products.test.ts:121` — `Type 'null' is not assignable to type 'unknown[]'` | Pre-existing (not v1.1-introduced); fix in v1.2 | 2026-05-03 (v1.1 close) |
 
 ## Session Continuity
 

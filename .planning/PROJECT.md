@@ -79,9 +79,9 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 
 ### Active
 
-<!-- v1.1 polish requirements — populated by REQUIREMENTS.md -->
+<!-- No active milestone. Run `/gsd-new-milestone` to define v1.2 scope. -->
 
-See [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for milestone v1.1 scope.
+v1.1 shipped 2026-05-03. Next milestone (v1.2 Custom Domain & Real Email — likely) pending scoping.
 
 ### Out of Scope
 
@@ -104,17 +104,25 @@ See [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for milestone v1.1 scope.
 ### Project Type
 Fresh greenfield scaffold. A `create-next-app` skeleton already exists in [dealdrop/](dealdrop/) — Next.js 16.2.4, React 19, TypeScript strict, Tailwind v4, ESLint flat config. No custom business logic yet.
 
-### Current State (after v1.0)
+### Current State (after v1.1)
 
-**Shipped:** DealDrop v1.0 MVP — live in production at `https://dealdrop-khaki.vercel.app`. The full sign-up → add product → daily cron → price-drop email loop works end-to-end on prod, verified by DEP-06 walk on 2026-05-02.
+**Shipped:** DealDrop v1.1 Brand Polish & Email Config — live in production at `https://dealdrop-khaki.vercel.app`. v1.0's daily cron + price-drop email loop continues working end-to-end; v1.1 layers a coherent DealDrop brand (orange `--primary` cascade, header logo, branded favicon, "Track Price" CTA copy) and refactors the Resend send pipeline to be fully env-configurable so v1.2's domain-verification cutover requires no code change.
 
-**Stack as built:** Next.js 16.2.4 + React 19 + TypeScript strict + Tailwind v4 / Supabase (Postgres + Auth + Vault + pg_cron + pg_net) / Firecrawl v2 / Resend / Recharts 3.x / Shadcn UI new-york-zinc / Vercel hosting with Fluid Compute.
+**Stack as built:** Next.js 16.2.4 + React 19 + TypeScript strict + Tailwind v4 / Supabase (Postgres + Auth + Vault + pg_cron + pg_net) / Firecrawl v2 / Resend / Recharts 3.x / Shadcn UI new-york-zinc / Vercel hosting with Fluid Compute. **No stack changes in v1.1.**
 
-**Code:** ~5,657 LOC TS/TSX/SQL across `dealdrop/`. Six SQL migrations (0001–0006). Three Supabase client factories (server/browser/admin) with split env (`env.ts` client-safe, `env.server.ts` server-only via `import 'server-only'`).
+**Code (after v1.1):** ~5,657 LOC v1.0 baseline + ~4,980 lines added across 44 files in v1.1 (mostly tests, SUMMARY/PLAN docs, and the new README). Source-code surface change is small: 5 source files touched (`env.server.ts`, `resend.ts`, `resend.test.ts`, `globals.css`, `Hero.tsx`, plus header/icon/logo from Phase 8).
 
-**Testing:** Vitest with jsdom for client components and node env for server logic. ~108 unit tests across DAL, scraper, optimistic UI, error boundaries, and price-drop email path.
+**Testing:** Vitest grew from 158 → 177 tests (21 files, all passing). +19 net new tests in v1.1: Header.test.tsx (5), Hero.test.tsx (4), resend.test.ts override + env-validation (5), copy-rename assertions (5).
 
-**Per-phase artifacts:** All 7 phase VERIFICATION.md and SUMMARY.md files retained under [.planning/phases/](.planning/phases/) (or moved to `milestones/v1.0-phases/` if archived).
+**Per-phase artifacts:** Phases 1–7 SUMMARY/VERIFICATION retained under [.planning/phases/](.planning/phases/) or [.planning/milestones/v1.0-phases/](.planning/milestones/v1.0-phases/). Phases 8–9 SUMMARY/VERIFICATION + 1 quick task (`quick/260503-ime`) at [.planning/phases/](.planning/phases/) and [.planning/quick/](.planning/quick/) — eligible for archival via `/gsd-cleanup` once v1.2 begins.
+
+### Next Milestone Goals (v1.2 likely — pending `/gsd-new-milestone` scoping)
+
+- Custom domain purchase + DNS (SPF / DKIM / DMARC for Resend)
+- Resend domain verified, sender display name (e.g. "DealDrop Alerts <alerts@dealdrop.app>")
+- Vercel custom domain attached as primary deployment URL
+- Production email cutover: unset `RESEND_TEST_RECIPIENT` in Vercel env, redeploy — no code change required (v1.1's whole point)
+- Optional carryover: address pre-existing TS errors in `.next/types/*-d 3.ts` (Finder duplicate artifacts) and `get-user-products.test.ts:121` type mismatch surfaced during v1.1 type-check
 
 ### Existing Codebase State
 See [.planning/codebase/](.planning/codebase/) for full map.
@@ -242,4 +250,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-03 — Phase 9 (resend-env-config) complete: `RESEND_TEST_RECIPIENT` typed Zod env var with override expression `to: env.RESEND_TEST_RECIPIENT ?? input.to` in `dealdrop/src/lib/resend.ts`, module-load `console.warn` for observability, README "Email recipient modes" section. 177/177 tests pass. Milestone v1.1 (Brand Polish & Email Config) phases all complete.*
+*Last updated: 2026-05-03 after v1.1 milestone — 10/10 v1.1 requirements validated, 2 phases + 1 quick task shipped, 177/177 tests green, branded UI + env-configurable Resend pipeline live. Awaiting `/gsd-new-milestone` to scope v1.2.*
