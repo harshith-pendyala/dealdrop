@@ -62,7 +62,7 @@
   5. README (or equivalent docs) clearly explains the one-env-var flip from test-recipient mode to production mode for the future domain-verification milestone.
 **Plans**: 4 plans
   - [x] 09-01-PLAN.md — env.server.ts schema extension: add RESEND_TEST_RECIPIENT: z.string().email().optional() to server + runtimeEnv blocks (EMAIL-02, EMAIL-04)
-  - [ ] 09-02-PLAN.md — resend.ts override: replace to: input.to with to: env.RESEND_TEST_RECIPIENT ?? input.to + module-load console.warn for observability (EMAIL-01, EMAIL-02, EMAIL-03, D-01, D-02)
+  - [x] 09-02-PLAN.md — resend.ts override: replace to: input.to with to: env.RESEND_TEST_RECIPIENT ?? input.to + module-load console.warn for observability (EMAIL-01, EMAIL-02, EMAIL-03, D-01, D-02)
   - [ ] 09-03-PLAN.md — resend.test.ts: nested override describe (override-set + override-unset SDK assertions) + top-level env-validation rejection tests for malformed + mailbox-format values (EMAIL-02, EMAIL-03, EMAIL-04, D-04, D-06)
   - [x] 09-04-PLAN.md — Docs: append RESEND_TEST_RECIPIENT= to .env.example with usage comment + replace README scaffold with real DealDrop README including Email recipient modes section (EMAIL-01, EMAIL-05, D-07)
 
