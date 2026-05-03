@@ -38,6 +38,16 @@ export type SendResult =
 // ---------------------------------------------------------------------------
 const resend = new Resend(env.RESEND_API_KEY)
 
+// Visible-once observability for the test-recipient override (Phase 9, D-01).
+// Fires at module load when env.RESEND_TEST_RECIPIENT is set; appears in Vercel
+// function logs and the dev terminal. Structured-log payload — never template-literal
+// interpolate (T-6-04 / Phase 3 scrape-product.ts:88 precedent).
+if (env.RESEND_TEST_RECIPIENT) {
+  console.warn('resend: test_recipient_override_active', {
+    recipient: env.RESEND_TEST_RECIPIENT,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Pure helpers (unit-tested directly — no mocks needed)
 // ---------------------------------------------------------------------------
@@ -147,7 +157,7 @@ export async function sendPriceDropAlert(input: PriceDropInput): Promise<SendRes
   // for that rare path; per EMAIL-06, we log and continue either way.
   const { data, error } = await resend.emails.send({
     from: env.RESEND_FROM_EMAIL,
-    to: input.to,
+    to: env.RESEND_TEST_RECIPIENT ?? input.to,
     subject: `Price drop: ${input.product.name} -${percentDrop}%`,
     html,
   })
