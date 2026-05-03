@@ -70,6 +70,13 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 - [ ] BRAND-05: Visual walk in light + dark at desktop + 375px (deferred to `08-HUMAN-UAT.md` per operator decision 2026-05-02 — pending)
 - [x] CTA copy rename: "Add Product" → "Track Price" across AddProductDialog/Form + tests (D-11)
 
+#### Resend Env Config — Validated in Phase 9 (resend-env-config, v1.1)
+- [x] EMAIL-01: `from` address sourced from `env.RESEND_FROM_EMAIL` (no hardcoded literal in `dealdrop/src/lib/resend.ts`)
+- [x] EMAIL-02: `RESEND_TEST_RECIPIENT` override routes every alert to one address via `to: env.RESEND_TEST_RECIPIENT ?? input.to` (`resend.ts:160`)
+- [x] EMAIL-03: With override unset, alerts deliver to user-of-record's email (production code path preserved, nullish-coalesce fallback)
+- [x] EMAIL-04: `env.server.ts` validates `RESEND_TEST_RECIPIENT: z.string().email().optional()` — fail-fast at boot on malformed values
+- [x] EMAIL-05: `dealdrop/README.md` Email recipient modes section documents the one-env-var cutover (unset `RESEND_TEST_RECIPIENT` in Vercel env + redeploy = production mode, no code change required)
+
 ### Active
 
 <!-- v1.1 polish requirements — populated by REQUIREMENTS.md -->
@@ -235,4 +242,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-02 — Phase 8 (brand-polish) complete: orange `--primary` cascade, header logo, orange favicon, hero refresh, "Track Price" rename. BRAND-05 visual walk deferred to `08-HUMAN-UAT.md`. Milestone v1.1 progresses to Phase 9 (resend-env-config).*
+*Last updated: 2026-05-03 — Phase 9 (resend-env-config) complete: `RESEND_TEST_RECIPIENT` typed Zod env var with override expression `to: env.RESEND_TEST_RECIPIENT ?? input.to` in `dealdrop/src/lib/resend.ts`, module-load `console.warn` for observability, README "Email recipient modes" section. 177/177 tests pass. Milestone v1.1 (Brand Polish & Email Config) phases all complete.*
