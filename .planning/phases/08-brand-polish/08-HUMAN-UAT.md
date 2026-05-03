@@ -121,7 +121,7 @@ blocked: 0
 ## Gaps
 
 ### G1: Hero gradient leaks into dark mode (T16)
-status: failed
+status: fix_applied (awaiting visual re-walk — see quick/260503-ime)
 requirement: BRAND-05
 severity: visual + a11y (subhead `Paste any product URL...` unreadable on light gradient stop in OS dark mode)
 evidence: User screenshot 2026-05-03 13:21 — confirms code review HIGH-01 prediction
