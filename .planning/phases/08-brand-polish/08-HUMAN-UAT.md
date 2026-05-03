@@ -1,15 +1,16 @@
 ---
-status: diagnosed
+status: resolved
 phase: 08-brand-polish
 source: [08-VERIFICATION.md]
 started: 2026-05-02T20:59:30Z
-updated: 2026-05-03T13:21:00Z
+updated: 2026-05-03T13:30:00Z
 requirement: BRAND-05
+resolved: 2026-05-03
 ---
 
 ## Current Test
 
-[walk complete 2026-05-03 — 23/24 pass, 1 gap diagnosed (T16 hero gradient leaks into dark mode)]
+[all 24 tests passed — T16 fixed by quick/260503-ime, re-walk confirmed by user 2026-05-03]
 
 ## Tests
 
@@ -75,7 +76,7 @@ result: passed
 
 ### 16. Desktop dark — Hero gradient should be invisible (dark:from-transparent)
 expected: No orange tint on dark background — `dark:from-transparent` collapses gradient. **Note:** Code review HIGH-01 flagged that media-query dark mode may not honor class-based `dark:` variant — this row will likely surface that issue.
-result: failed — confirmed HIGH-01. Hero renders a white-to-black gradient in OS dark mode and the subhead "Paste any product URL..." is unreadable on the lighter portion. Root cause: `globals.css:4` `@custom-variant dark (&:is(.dark *))` is class-only, but `.dark` class is never applied — dark theme switches via `@media (prefers-color-scheme: dark)` at globals.css:81. So `dark:from-transparent` never fires; `from-orange-50` paints over the dark background.
+result: passed (2026-05-03, after fix) — first walk failed and confirmed HIGH-01 (`from-orange-50` painted over the dark background producing a white-to-black gradient that destroyed subhead contrast). Fix landed via quick/260503-ime: broadened `@custom-variant dark` in `globals.css:4` to `(&:where(.dark, .dark *), @media (prefers-color-scheme: dark))` so `dark:` utilities fire under OS dark mode. Re-walk confirms the gradient collapses and the subhead is readable.
 
 ### 17. 375px light — Logo crisp at 2x DPR
 expected: Logo renders crisply at mobile retina; no blur, correct intrinsic-ratio width.
@@ -112,8 +113,8 @@ result: passed
 ## Summary
 
 total: 24
-passed: 23
-issues: 1
+passed: 24
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -121,7 +122,7 @@ blocked: 0
 ## Gaps
 
 ### G1: Hero gradient leaks into dark mode (T16)
-status: fix_applied (awaiting visual re-walk — see quick/260503-ime)
+status: resolved (fix landed via quick/260503-ime; visual re-walk confirmed by user 2026-05-03)
 requirement: BRAND-05
 severity: visual + a11y (subhead `Paste any product URL...` unreadable on light gradient stop in OS dark mode)
 evidence: User screenshot 2026-05-03 13:21 — confirms code review HIGH-01 prediction

@@ -67,7 +67,7 @@ If everything else fails (auth edge cases, charts, fancy UI), the daily price ch
 - [x] BRAND-02: Header text wordmark replaced with `/deal-drop-logo.png` via `next/image`, click-home `Link` to `/`
 - [x] BRAND-03: Browser-tab favicon refreshed to orange palette (`app/icon.tsx` ImageResponse `#f97316` background; legacy `favicon.ico` deleted)
 - [x] BRAND-04: Shadcn `--primary` token redefined to Tailwind v4 orange (light `oklch(70.5% 0.213 47.604)` / dark `oklch(75% 0.183 55.934)`); ProductCard price now uses `text-primary` cascade
-- [ ] BRAND-05: Visual walk in light + dark at desktop + 375px (deferred to `08-HUMAN-UAT.md` per operator decision 2026-05-02 — pending)
+- [x] BRAND-05: Visual walk in light + dark at desktop + 375px — 24/24 passed in `08-HUMAN-UAT.md` (2026-05-03). T16 hero dark-mode gradient leak surfaced as G1, fixed via `quick/260503-ime` (broadened `@custom-variant dark` to honor `prefers-color-scheme`)
 - [x] CTA copy rename: "Add Product" → "Track Price" across AddProductDialog/Form + tests (D-11)
 
 #### Resend Env Config — Validated in Phase 9 (resend-env-config, v1.1)
