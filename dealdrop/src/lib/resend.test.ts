@@ -233,4 +233,81 @@ describe('sendPriceDropAlert (EMAIL-02, EMAIL-06)', () => {
     })
     await expect(mod.sendPriceDropAlert(baseInput)).resolves.toBeDefined()
   })
+
+  describe('with RESEND_TEST_RECIPIENT override (EMAIL-02, EMAIL-03)', () => {
+    // env is parsed once at module load — vi.stubEnv after import won't affect
+    // env.RESEND_TEST_RECIPIENT inside @/lib/resend. We mock @/lib/env.server,
+    // reset modules, and dynamically re-import resend so it captures the
+    // mocked env. Restored after each test by vi.unmock + resetModules.
+    afterEach(() => {
+      vi.doUnmock('@/lib/env.server')
+      vi.resetModules()
+    })
+
+    it('routes to env.RESEND_TEST_RECIPIENT when override is set, ignoring input.to', async () => {
+      vi.doMock('@/lib/env.server', () => ({
+        env: {
+          FIRECRAWL_API_KEY: 'test-key-fc-AAAAAAAAAAAAAAAA',
+          SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
+          RESEND_API_KEY: 'test-resend-key',
+          RESEND_FROM_EMAIL: 'alerts@example.com',
+          CRON_SECRET: 'a'.repeat(48),
+          RESEND_TEST_RECIPIENT: 'demo@example.com',
+        },
+      }))
+      vi.resetModules()
+      const overrideMod = await import('@/lib/resend')
+      sendMock.mockResolvedValueOnce({ data: { id: 'msg_456' }, error: null })
+      const res = await overrideMod.sendPriceDropAlert(baseInput) // baseInput.to = 'user@example.com'
+      expect(res).toEqual({ ok: true, messageId: 'msg_456' })
+      expect(sendMock).toHaveBeenCalledTimes(1)
+      const sendArgs = sendMock.mock.calls[0][0]
+      expect(sendArgs.to).toBe('demo@example.com')        // override wins (EMAIL-02)
+      expect(sendArgs.from).toBe('alerts@example.com')    // unchanged (EMAIL-01)
+      expect(sendArgs.subject).toBe('Price drop: Cool Headphones -18%')
+    })
+
+    it('falls back to input.to when override is unset (production code path — EMAIL-03)', async () => {
+      vi.doMock('@/lib/env.server', () => ({
+        env: {
+          FIRECRAWL_API_KEY: 'test-key-fc-AAAAAAAAAAAAAAAA',
+          SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
+          RESEND_API_KEY: 'test-resend-key',
+          RESEND_FROM_EMAIL: 'alerts@example.com',
+          CRON_SECRET: 'a'.repeat(48),
+          RESEND_TEST_RECIPIENT: undefined, // emptyStringAsUndefined → undefined
+        },
+      }))
+      vi.resetModules()
+      const overrideMod = await import('@/lib/resend')
+      sendMock.mockResolvedValueOnce({ data: { id: 'msg_789' }, error: null })
+      const res = await overrideMod.sendPriceDropAlert(baseInput) // baseInput.to = 'user@example.com'
+      expect(res).toEqual({ ok: true, messageId: 'msg_789' })
+      const sendArgs = sendMock.mock.calls[0][0]
+      expect(sendArgs.to).toBe('user@example.com')        // user-of-record (EMAIL-03)
+    })
+  })
+})
+
+describe('env.server.ts RESEND_TEST_RECIPIENT validation (EMAIL-04, D-05, D-06)', () => {
+  afterEach(() => {
+    // Restore override to empty + clear module cache so subsequent describes
+    // (and other test files) see a fresh, valid env on next import.
+    vi.stubEnv('RESEND_TEST_RECIPIENT', '')
+    vi.resetModules()
+  })
+
+  it('rejects malformed RESEND_TEST_RECIPIENT (not an email) — fail-fast at boot', async () => {
+    vi.stubEnv('RESEND_TEST_RECIPIENT', 'not-an-email')
+    vi.resetModules() // force re-parse with the new stubbed value
+    await expect(import('@/lib/env.server')).rejects.toThrow()
+  })
+
+  it('rejects mailbox-format RESEND_TEST_RECIPIENT (Zod v4 .email() — D-06)', async () => {
+    // Mirrors the RESEND_FROM_EMAIL strictness comment at resend.test.ts:12-19.
+    // The mailbox format "Name <addr@host>" does NOT pass Zod v4's .email() regex.
+    vi.stubEnv('RESEND_TEST_RECIPIENT', 'Demo <demo@example.com>')
+    vi.resetModules()
+    await expect(import('@/lib/env.server')).rejects.toThrow()
+  })
 })
