@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: Brand Polish & Email Config
 status: shipped
 stopped_at: v1.1 complete — awaiting v1.2 scoping
-last_updated: "2026-05-04T00:00:00.000Z"
+last_updated: "2026-05-04T12:45:00.000Z"
 last_activity: 2026-05-04
 progress:
   total_phases: 2
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-03 after v1.1)
 Phase: 09
 Plan: Not started
 Status: Executing Phase 09
-Last activity: 2026-05-03
+Last activity: 2026-05-04 - Completed quick task 260504-pap: DealDrop logo black background in dark mode
 
 Progress: [█████░░░░░] 50% (1/2 v1.1 phase plans complete; phase 9 not started; phase 8 awaits HUMAN-UAT closure)
 
@@ -114,6 +114,12 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - None for v1.1. Domain purchase / DNS / Vercel custom domain are explicitly **out of scope** — deferred to v1.2.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260504-pap | DealDrop logo: black background in dark mode, white (default) in light mode | 2026-05-04 | 470959f | [260504-pap-dealdrop-logo-black-background-in-dark-m](./quick/260504-pap-dealdrop-logo-black-background-in-dark-m/) |
 
 ## Deferred Items
 
