@@ -59,7 +59,7 @@ describe('addProduct', () => {
 
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Book', current_price: 19.99, currency_code: 'GBP', image_url: 'https://cdn/x.jpg' },
+      data: { name: 'Book', current_price: 19.99, currency_code: 'GBP', image_url: 'https://cdn/x.jpg' , mrp: null },
     })
     const supabase = makeSupabaseMock()
     vi.mocked(createClient).mockResolvedValue(supabase as any)
@@ -123,7 +123,7 @@ describe('addProduct', () => {
 
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Book', current_price: 19.99, currency_code: 'USD', image_url: null },
+      data: { name: 'Book', current_price: 19.99, currency_code: 'USD', image_url: null, mrp: null },
     })
     const supabase = makeSupabaseMock({
       insertProduct: { data: null, error: { code: '23505', message: 'unique violation' } },
@@ -146,7 +146,7 @@ describe('addProduct', () => {
 
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Book', current_price: 9.99, currency_code: 'USD', image_url: null },
+      data: { name: 'Book', current_price: 9.99, currency_code: 'USD', image_url: null, mrp: null },
     })
     const supabase = makeSupabaseMock({
       insertProduct: { data: null, error: { code: '42501', message: 'permission denied' } },
@@ -167,7 +167,7 @@ describe('addProduct', () => {
 
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Book', current_price: 9.99, currency_code: 'USD', image_url: null },
+      data: { name: 'Book', current_price: 9.99, currency_code: 'USD', image_url: null, mrp: null },
     })
     // products insert succeeds (id: 'p1'), but price_history insert fails
     const supabase = makeSupabaseMock({
@@ -201,7 +201,7 @@ describe('addProduct', () => {
 
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Gadget', current_price: 49.99, currency_code: 'EUR', image_url: null },
+      data: { name: 'Gadget', current_price: 49.99, currency_code: 'EUR', image_url: null, mrp: null },
     })
     const supabase = makeSupabaseMock()
     vi.mocked(createClient).mockResolvedValue(supabase as any)
@@ -241,7 +241,7 @@ describe('addProduct', () => {
     // Success branch: revalidatePath called once
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Book', current_price: 19.99, currency_code: 'GBP', image_url: null },
+      data: { name: 'Book', current_price: 19.99, currency_code: 'GBP', image_url: null, mrp: null },
     })
     const supabaseOk = makeSupabaseMock()
     vi.mocked(createClient).mockResolvedValue(supabaseOk as any)

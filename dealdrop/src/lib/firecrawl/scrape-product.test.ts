@@ -68,10 +68,12 @@ beforeAll(async () => {
 
 let errSpy: ReturnType<typeof vi.spyOn>
 let logSpy: ReturnType<typeof vi.spyOn>
+let warnSpy: ReturnType<typeof vi.spyOn>
 let fetchMock: ReturnType<typeof vi.fn>
 beforeEach(() => {
   errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
   logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+  warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
   fetchMock = vi.fn()
   vi.stubGlobal('fetch', fetchMock)
   vi.useFakeTimers({ shouldAdvanceTime: true })
@@ -79,6 +81,7 @@ beforeEach(() => {
 afterEach(() => {
   errSpy.mockRestore()
   logSpy.mockRestore()
+  warnSpy.mockRestore()
   vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
@@ -262,11 +265,26 @@ describe('scrapeProduct — request shape (Seam 2)', () => {
     expect(body.formats).toHaveLength(2)
     const jsonFormat = body.formats[0] as {
       type: string
-      schema: unknown
+      schema: { properties: Record<string, unknown>; required: string[] }
       prompt: string
     }
     expect(jsonFormat.type).toBe('json')
     expect(jsonFormat.prompt).toMatch(/product_name/i)
+    // Cycle-5: prompt and schema must mention all three price slots.
+    expect(jsonFormat.prompt).toMatch(/mrp/i)
+    expect(jsonFormat.prompt).toMatch(/lowest_conditional_price/i)
+    expect(jsonFormat.prompt).toMatch(/current_price/i)
+    expect(jsonFormat.schema.properties).toHaveProperty('mrp')
+    expect(jsonFormat.schema.properties).toHaveProperty('current_price')
+    expect(jsonFormat.schema.properties).toHaveProperty(
+      'lowest_conditional_price',
+    )
+    // current_price stays required; mrp / lowest_conditional_price optional.
+    expect(jsonFormat.schema.required).toContain('current_price')
+    expect(jsonFormat.schema.required).not.toContain('mrp')
+    expect(jsonFormat.schema.required).not.toContain(
+      'lowest_conditional_price',
+    )
     expect(body.formats[1]).toBe('html')
     expect(body.onlyMainContent).toBe(true)
     expect(body.timeout).toBe(60_000)
@@ -300,7 +318,7 @@ describe('scrapeProduct — structural price extractor wiring (Cycle 3)', () => 
     </script>
   </body></html>`
 
-  it('B16: Amazon URL with deal HTML → uses structural price (363) not LLM price (426.87)', async () => {
+  it('B16: Amazon URL with deal HTML → uses structural price (363) not LLM price (426.87) and extracts MRP 429', async () => {
     fetchMock.mockResolvedValueOnce(
       envelopeResponse(
         {
@@ -319,6 +337,8 @@ describe('scrapeProduct — structural price extractor wiring (Cycle 3)', () => 
     expect(out.ok).toBe(true)
     if (out.ok) {
       expect(out.data.current_price).toBe(363)
+      // Cycle-5: structural MRP from the strike-through block.
+      expect(out.data.mrp).toBe(429)
     }
   })
 
@@ -363,5 +383,66 @@ describe('scrapeProduct — structural price extractor wiring (Cycle 3)', () => 
     )
     expect(out.ok).toBe(true)
     if (out.ok) expect(out.data.current_price).toBe(555.55)
+  })
+})
+
+describe('scrapeProduct — multi-slot Cycle 5 wiring', () => {
+  it('B20: Flipkart-style three-slot LLM payload → captures current_price 20499 and mrp 36999 (no structural HTML)', async () => {
+    // Real Flipkart returns no structural data; the LLM with the multi-slot
+    // schema now categorizes the three prices, and we keep current_price.
+    fetchMock.mockResolvedValueOnce(
+      envelopeResponse({
+        product_name: 'Samsung Galaxy A35 5G (Awesome Lilac, 256 GB) (8 GB RAM)',
+        mrp: 36999,
+        current_price: 20499,
+        lowest_conditional_price: 19474,
+        currency_code: 'INR',
+        product_image_url:
+          'https://rukminim2.flixcart.com/image/x.jpeg',
+      }),
+    )
+    const out = await mod.scrapeProduct(
+      'https://www.flipkart.com/samsung-galaxy-a35-5g-awesome-lilac-256-gb/p/itm8f49f29e842cc',
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) {
+      expect(out.data.current_price).toBe(20499)
+      expect(out.data.mrp).toBe(36999)
+    }
+  })
+
+  it('B21: structural MRP override beats LLM mrp on Amazon (override wins)', async () => {
+    // LLM thinks MRP is 999, but the strike-through block on the Amazon page
+    // is 429 — structural value should win, matching the priority rule for
+    // current_price.
+    const amazonHtml = `<html><body>
+      <span class="a-price priceToPay">
+        <span class="a-offscreen">₹363.00</span>
+      </span>
+      <span class="a-price a-text-price" data-a-strike="true">
+        <span class="a-offscreen">₹429.00</span>
+      </span>
+    </body></html>`
+    fetchMock.mockResolvedValueOnce(
+      envelopeResponse(
+        {
+          product_name: 'Cetaphil',
+          mrp: 999, // wrong; structural override should win
+          current_price: 426.87, // wrong; structural override should win
+          lowest_conditional_price: null,
+          currency_code: 'INR',
+          product_image_url: null,
+        },
+        { html: amazonHtml },
+      ),
+    )
+    const out = await mod.scrapeProduct(
+      'https://www.amazon.in/Cetaphil/dp/B01CCGW4OE',
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) {
+      expect(out.data.current_price).toBe(363)
+      expect(out.data.mrp).toBe(429)
+    }
   })
 })

@@ -17,7 +17,10 @@ import {
   PRODUCT_JSON_SCHEMA,
   parseProductResponse,
 } from './schema'
-import { extractStructuralPrice } from './price-extractor'
+import {
+  extractStructuralPrice,
+  extractStructuralMrp,
+} from './price-extractor'
 import type { ScrapeResult } from './types'
 
 export type { ScrapeResult, ProductData, ScrapeFailureReason } from './types'
@@ -40,47 +43,65 @@ const RETRY_BACKOFF_MS = 2_000
 // Source: https://docs.firecrawl.dev/api-reference/endpoint/scrape (maxAge param)
 const SCRAPE_MAX_AGE_MS = 0
 
-// Cycle-4: prompt hardening for sites that ship NO structured data at all
-// (e.g. Flipkart — no JSON-LD, no OG product meta, no microdata; the LLM
-// fallback is the only path). The Galaxy A35 5G regression captured Flipkart's
-// "best value with [bank] offer" promo (₹19,474) instead of the unconditional
-// checkout price (₹20,499). The exclusion list now explicitly enumerates the
-// classes of conditional offer the LLM kept gravitating toward, and a
-// positive instruction anchors the choice to "any user, no bank/coupon/exchange
-// required".
+// Cycle-5: multi-slot price prompt. Cycle-4's pure prompt-engineering
+// approach failed UAT for Flipkart — the LLM kept choosing the most
+// visually prominent price even when told to exclude conditional offers,
+// because it was being asked to pick ONE price out of three plausible
+// candidates. We now ask the LLM to CATEGORIZE prices into three slots
+// (`mrp`, `current_price`, `lowest_conditional_price`) instead of choosing
+// one. Local sanity-check logic in `parseProductResponse` repairs slot
+// swaps and selects `current_price` as the DealDrop value.
+//
+// The exclusion list is kept (it still helps the LLM put the right number
+// in the right slot) but is now framed as classification guidance rather
+// than rejection criteria.
 const PROMPT = [
-  'Extract product_name, current_price (numeric), currency_code (ISO 4217 alpha-3),',
-  'and product_image_url from this e-commerce product page.',
+  'Extract product_name, three price slots (mrp, current_price,',
+  'lowest_conditional_price), currency_code (ISO 4217 alpha-3), and',
+  'product_image_url from this e-commerce product page.',
   '',
-  'For current_price, return the ACTIVE CHECKOUT PRICE — the single amount the buyer',
-  'would actually pay right now if they clicked Buy / Add to Cart. Prefer the price',
-  'displayed adjacent to the primary Buy / Add-to-Cart / Checkout button.',
+  'You must CATEGORIZE every visible price into ONE of three slots — not pick',
+  'just one price. Read the per-slot guidance carefully:',
   '',
-  'POSITIVE INSTRUCTION: If multiple prices appear, pick the price that ANY user would',
-  'pay at checkout WITHOUT requiring a specific payment method, bank account, credit card,',
-  'wallet, coupon code, or exchange. Choose the unconditional sale / deal price — the',
-  'amount shown by default before any optional offer is applied.',
+  '* mrp — the MAXIMUM RETAIL PRICE / list price / "was" price / regular price',
+  '  / strike-through price. The PRE-discount reference price. Look for prices',
+  '  rendered with line-through styling, prefixed with "M.R.P.", "List", "Was",',
+  '  or "Regular", or shown crossed out next to the active price. Return null',
+  '  if no MRP / list / "was" price is shown (regular-priced items typically',
+  '  have no MRP).',
   '',
-  'Do NOT return any of the following, even if they appear larger, more prominent, or are',
-  'visually highlighted as "best value":',
-  '- M.R.P., list price, "was" price, original price, strike-through price',
-  '- Tax-inclusive sub-line near the M.R.P. (e.g. "M.R.P. inclusive of all taxes")',
-  '- Per-unit prices (e.g. price per 100 ml, price per kg, price per count)',
-  '- EMI / monthly installment amounts (e.g. "EMI starting at", "no-cost EMI of")',
-  '- Subscribe & Save / subscription-only prices',
-  '- Bundle, combo, "frequently bought together", or add-on prices',
-  '- Shipping, delivery, or import fees',
-  '- Prices for variants the user has not selected (different size / color / pack)',
-  '- Bank offers, credit card offers, debit card offers (e.g. "with [Bank Name] bank offer",',
-  '  "best value with [Bank] discount", "Buy at ₹X" preceded by an offer banner)',
-  '- Prepaid / wallet / UPI discounts (e.g. "₹X off with prepaid", "wallet discount")',
-  '- Coupon-conditional prices (e.g. "₹X off with coupon CODE")',
-  '- Exchange offers / trade-in prices (e.g. "with exchange of old phone")',
+  '* current_price — the DEFAULT checkout price the buyer pays right now if',
+  '  they click Buy / Add to Cart WITHOUT applying any payment-method-specific',
+  '  offer (no bank offer, no credit-card offer, no debit-card offer, no',
+  '  wallet/UPI/prepaid discount, no coupon code, no exchange / trade-in, no',
+  '  no-cost EMI). Prefer the price displayed adjacent to the primary Buy /',
+  '  Add-to-Cart / Checkout button. If a discount is applied unconditionally',
+  '  (visible to every shopper, no payment method required), return the',
+  '  POST-discount price, NOT the pre-discount MRP. This slot is REQUIRED;',
+  '  every product page has a default checkout price.',
   '',
-  'If a discount is applied unconditionally (visible to every shopper, no payment method',
-  'required), return the post-discount price (the deal price), not the pre-discount M.R.P.',
-  'If multiple candidate prices appear, choose the one nearest the Buy button that matches',
-  'the currently selected variant AND does not require a bank / card / coupon / exchange.',
+  '* lowest_conditional_price — the LOWEST price visible on the page that is',
+  '  CONDITIONAL on a specific payment method, payment instrument, or offer',
+  '  code. Includes: bank offers, credit-card offers, debit-card offers',
+  '  (e.g. "with [Bank] bank offer", "best value with [Bank] discount"),',
+  '  prepaid / wallet / UPI discounts, coupon-conditional prices ("₹X off',
+  '  with coupon CODE"), exchange / trade-in prices ("with exchange of old',
+  '  phone"), no-cost-EMI conditional prices. Cues: "Buy at ₹X", "best value",',
+  '  "Apply offers for maximum savings". Return null if no conditional offer',
+  '  is shown.',
+  '',
+  'Important rules:',
+  '- The MRP must be GREATER than or equal to current_price (a discount can',
+  '  never make the price exceed the list price). If you only see one price,',
+  '  it goes in current_price and mrp is null.',
+  '- The lowest_conditional_price must be LESS than or equal to current_price',
+  '  when present (a conditional offer is by definition cheaper than the',
+  '  default price).',
+  '- Do NOT pick per-unit prices (e.g. price per 100 ml, price per kg), EMI',
+  '  monthly amounts ("EMI starting at"), Subscribe & Save / subscription',
+  '  prices, bundle / combo prices, shipping or import fees, or prices for',
+  '  unselected variants. Skip them entirely.',
+  '- Parse formatting like "$1,299.99" to 1299.99 and "₹36,999" to 36999.',
 ].join(' ')
 
 type FetchOutcome =
@@ -229,23 +250,32 @@ export async function scrapeProduct(rawUrl: string): Promise<ScrapeResult> {
       return { ok: false, reason: 'unknown' }
     }
 
-    // Cycle-3: run the structural price extractor on the raw page HTML BEFORE
-    // delegating to parseProductResponse. When the extractor finds a price
-    // (e.g. Amazon's `.priceToPay .a-offscreen` deal-price block, or JSON-LD /
-    // OG / microdata on other retailers) we use it to override the LLM-supplied
-    // `current_price`. The LLM tends to trust schema.org JSON-LD canonical
-    // values which can lag the visible deal price under an active discount.
-    // When the extractor returns null the LLM value is used unchanged.
+    // Cycle-3 / Cycle-5: run the structural extractors on the raw page HTML
+    // BEFORE delegating to parseProductResponse. We extract two values:
+    //
+    //   • `structuralPrice` — overrides `current_price` (the cycle-3 path —
+    //     Amazon `.priceToPay`, JSON-LD / OG / microdata for other hosts).
+    //   • `structuralMrp` — overrides `mrp` (cycle-5 — Amazon `.basisPrice`
+    //     / `.a-text-strike` strike-through, JSON-LD `priceSpecification.
+    //     maxPrice` / `Offer.highPrice`). Optional — when null, the LLM's
+    //     `mrp` slot is used instead.
+    //
+    // When both extractors return null, the LLM-supplied slots are used
+    // unchanged.
     const html = envParsed.data.data.html
     const structuralPrice = extractStructuralPrice({
       url: normalizedUrl,
       html,
     })
+    const structuralMrp = extractStructuralMrp({
+      url: normalizedUrl,
+      html,
+    })
 
-    // Cycle-2 + Cycle-3 instrumentation: log the raw `data.json` payload from
-    // Firecrawl alongside the cache state and the structural price the
-    // extractor selected. Lets us tell at a glance which source produced the
-    // captured price (LLM vs. structural) and whether the cache was bypassed.
+    // Cycle-2 + Cycle-3 + Cycle-5 instrumentation: log the raw `data.json`
+    // payload from Firecrawl alongside the cache state and BOTH structural
+    // values the extractors selected. Lets us tell at a glance which source
+    // produced each captured value.
     const meta = envParsed.data.data.metadata as
       | { cacheState?: unknown; cachedAt?: unknown }
       | undefined
@@ -255,15 +285,17 @@ export async function scrapeProduct(rawUrl: string): Promise<ScrapeResult> {
       cachedAt: meta?.cachedAt,
       htmlLength: typeof html === 'string' ? html.length : 0,
       structuralPrice,
+      structuralMrp,
       json: envParsed.data.data.json,
     })
 
     // 4. Delegate branch-ordered field validation to parseProductResponse (Plan 02).
-    //    The structuralPrice (if non-null) replaces `data.json.current_price`
-    //    inside parseProductResponse; otherwise the LLM value is used.
+    //    The structuralPrice / structuralMrp (if non-null) replace the
+    //    corresponding LLM slots inside parseProductResponse.
     return parseProductResponse(
       envParsed.data.data.json,
       structuralPrice,
+      structuralMrp,
     )
   }
 

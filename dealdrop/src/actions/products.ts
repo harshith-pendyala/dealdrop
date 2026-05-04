@@ -31,6 +31,7 @@ export async function addProduct(
 
   const normalizedUrl = normalizeUrl(rawUrl)
   // Pitfall 1: ProductData.currency_code maps to products.currency — explicit rename.
+  // Cycle-5: also persist mrp (nullable) when the LLM/structural extractors found one.
   const { data: product, error: insertProductErr } = await supabase
     .from('products')
     .insert({
@@ -40,6 +41,7 @@ export async function addProduct(
       current_price: result.data.current_price,
       currency: result.data.currency_code,
       image_url: result.data.image_url,
+      mrp: result.data.mrp,
     })
     .select('id')
     .single()

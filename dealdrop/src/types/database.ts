@@ -54,6 +54,7 @@ export type Database = {
           id: string
           image_url: string | null
           last_scrape_failed_at: string | null
+          mrp: number | null
           name: string
           updated_at: string
           url: string
@@ -66,6 +67,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           last_scrape_failed_at?: string | null
+          mrp?: number | null
           name: string
           updated_at?: string
           url: string
@@ -78,6 +80,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           last_scrape_failed_at?: string | null
+          mrp?: number | null
           name?: string
           updated_at?: string
           url?: string

@@ -382,6 +382,110 @@ describe('extractStructuralPrice — guard rails', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// Cycle-5: structural MRP extractor
+// ---------------------------------------------------------------------------
+
+describe('extractStructuralMrp — Amazon (Cycle 5)', () => {
+  it('extracts MRP from data-a-strike="true" .a-offscreen', () => {
+    const p = mod.extractStructuralMrp({
+      url: 'https://www.amazon.in/dp/B01CCGW4OE',
+      html: AMAZON_PRICE_TO_PAY,
+    })
+    // The strike-through block in AMAZON_PRICE_TO_PAY is ₹429.00.
+    expect(p).toBe(429)
+  })
+
+  it('extracts MRP from .basisPrice .a-offscreen', () => {
+    const html = `<html><body>
+      <span class="basisPrice">
+        <span class="a-offscreen">$1,299.00</span>
+      </span>
+    </body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://www.amazon.com/dp/B0X',
+      html,
+    })
+    expect(p).toBe(1299)
+  })
+
+  it('extracts MRP from .a-text-strike (alternative class)', () => {
+    const html = `<html><body>
+      <span class="a-price a-text-strike">
+        <span class="a-offscreen">€89.99</span>
+      </span>
+    </body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://www.amazon.de/dp/B0X',
+      html,
+    })
+    expect(p).toBe(89.99)
+  })
+
+  it('returns null on Amazon when no strike-through block is present', () => {
+    const html = `<html><body>
+      <span class="a-price priceToPay">
+        <span class="a-offscreen">₹363.00</span>
+      </span>
+    </body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://www.amazon.in/dp/B0X',
+      html,
+    })
+    expect(p).toBeNull()
+  })
+})
+
+describe('extractStructuralMrp — non-Amazon JSON-LD (Cycle 5)', () => {
+  it('extracts AggregateOffer.highPrice', () => {
+    const html = `<html><body>
+      <script type="application/ld+json">
+        {"@type":"Product","offers":{"@type":"AggregateOffer","lowPrice":"45.00","highPrice":"60.00","priceCurrency":"USD"}}
+      </script>
+    </body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://shop.example.com/x',
+      html,
+    })
+    expect(p).toBe(60)
+  })
+
+  it('extracts priceSpecification.maxPrice', () => {
+    const html = `<html><body>
+      <script type="application/ld+json">
+        {"@type":"Product","offers":{"@type":"Offer","price":"800","priceSpecification":{"@type":"PriceSpecification","maxPrice":1000,"price":800}}}
+      </script>
+    </body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://shop.example.com/x',
+      html,
+    })
+    expect(p).toBe(1000)
+  })
+
+  it('returns null when JSON-LD has no MRP-equivalent field', () => {
+    const html = `<html><body>
+      <script type="application/ld+json">
+        {"@type":"Product","offers":{"@type":"Offer","price":"19.99"}}
+      </script>
+    </body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://shop.example.com/x',
+      html,
+    })
+    expect(p).toBeNull()
+  })
+
+  it('returns null when the page has no JSON-LD at all (non-Amazon)', () => {
+    const html = `<html><body><div>plain content</div></body></html>`
+    const p = mod.extractStructuralMrp({
+      url: 'https://shop.example.com/x',
+      html,
+    })
+    expect(p).toBeNull()
+  })
+})
+
 describe('parsePriceText (internal)', () => {
   it('parses INR rupee', () => {
     expect(mod.__testing.parsePriceText('₹363.00')).toBe(363)

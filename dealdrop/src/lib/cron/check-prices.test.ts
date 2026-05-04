@@ -78,7 +78,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     const admin = makeSupabaseAdminMock({ selectProducts: { data: products, error: null } })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Product One', current_price: 100, currency_code: 'USD', image_url: null },
+      data: { name: 'Product One', current_price: 100, currency_code: 'USD', image_url: null, mrp: null },
     })
     await mod.runPriceCheck(admin as never)
     const fromCalls = (admin.from as unknown as { mock: { calls: [string][] } }).mock.calls
@@ -94,7 +94,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     const admin = makeSupabaseAdminMock({ selectProducts: { data: products, error: null } })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null },
+      data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null, mrp: null },
     })
     await mod.runPriceCheck(admin as never)
     expect(scrapeProduct).toHaveBeenCalledTimes(2)
@@ -117,7 +117,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
       inFlight--
       return {
         ok: true,
-        data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null },
+        data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null, mrp: null },
       }
     })
     await mod.runPriceCheck(admin as never)
@@ -135,7 +135,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
       .mockResolvedValueOnce({ ok: false, reason: 'scrape_timeout' })
       .mockResolvedValueOnce({
         ok: true,
-        data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null },
+        data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null, mrp: null },
       })
     const summary = await mod.runPriceCheck(admin as never)
     expect(summary.failed).toEqual([{ product_id: 'p-fail', reason: 'scrape_timeout' }])
@@ -183,7 +183,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     const admin = makeSupabaseAdminMock({ selectProducts: { data: products, error: null } })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'Product One', current_price: 100, currency_code: 'USD', image_url: null },
+      data: { name: 'Product One', current_price: 100, currency_code: 'USD', image_url: null, mrp: null },
     })
     await mod.runPriceCheck(admin as never)
 
@@ -202,7 +202,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     const admin = makeSupabaseAdminMock({ selectProducts: { data: products, error: null } })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null },
+      data: { name: 'x', current_price: 100, currency_code: 'USD', image_url: null, mrp: null },
     })
     await mod.runPriceCheck(admin as never)
 
@@ -238,7 +238,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'x', current_price: 82, currency_code: 'USD', image_url: null },
+      data: { name: 'x', current_price: 82, currency_code: 'USD', image_url: null, mrp: null },
     })
     vi.mocked(sendPriceDropAlert).mockResolvedValue({ ok: true, messageId: 'm1' })
 
@@ -297,6 +297,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
         current_price: 82,
         currency_code: 'USD',
         image_url: 'https://cdn.example.com/scraped.jpg',
+        mrp: null,
       },
     })
     vi.mocked(sendPriceDropAlert).mockResolvedValue({ ok: true, messageId: 'm1' })
@@ -325,7 +326,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'x', current_price: 82, currency_code: 'USD', image_url: null },
+      data: { name: 'x', current_price: 82, currency_code: 'USD', image_url: null, mrp: null },
     })
     await mod.runPriceCheck(admin as never)
     expect(sendPriceDropAlert).not.toHaveBeenCalled()
@@ -343,7 +344,7 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     })
     vi.mocked(scrapeProduct).mockResolvedValue({
       ok: true,
-      data: { name: 'x', current_price: 82, currency_code: 'EUR', image_url: null },
+      data: { name: 'x', current_price: 82, currency_code: 'EUR', image_url: null, mrp: null },
     })
     await mod.runPriceCheck(admin as never)
 
@@ -372,11 +373,11 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     vi.mocked(scrapeProduct)
       .mockResolvedValueOnce({
         ok: true,
-        data: { name: 'x', current_price: 80, currency_code: 'USD', image_url: null },
+        data: { name: 'x', current_price: 80, currency_code: 'USD', image_url: null, mrp: null },
       })
       .mockResolvedValueOnce({
         ok: true,
-        data: { name: 'y', current_price: 150, currency_code: 'USD', image_url: null },
+        data: { name: 'y', current_price: 150, currency_code: 'USD', image_url: null, mrp: null },
       })
     // First drop fails to send; second should still be attempted.
     vi.mocked(sendPriceDropAlert)
@@ -405,11 +406,11 @@ describe('runPriceCheck orchestrator (CRON-03/04/06/07/08/09, EMAIL-01/05/06)', 
     vi.mocked(scrapeProduct)
       .mockResolvedValueOnce({
         ok: true,
-        data: { name: 'x', current_price: 82, currency_code: 'USD', image_url: null },
+        data: { name: 'x', current_price: 82, currency_code: 'USD', image_url: null, mrp: null },
       })
       .mockResolvedValueOnce({
         ok: true,
-        data: { name: 'y', current_price: 50, currency_code: 'USD', image_url: null },
+        data: { name: 'y', current_price: 50, currency_code: 'USD', image_url: null, mrp: null },
       })
       .mockResolvedValueOnce({ ok: false, reason: 'network_error' })
     vi.mocked(sendPriceDropAlert).mockResolvedValue({ ok: true, messageId: 'm' })

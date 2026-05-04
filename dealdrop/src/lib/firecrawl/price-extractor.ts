@@ -18,7 +18,15 @@ import 'server-only'
 // to exclude conditional / bank-card / wallet / EMI / exchange offers
 // (cycle-4 PROMPT update in scrape-product.ts).
 //
-// Priority order:
+// Cycle-5 extension (multi-slot extraction):
+// We now ALSO extract MRP (the strike-through / "was" price) structurally
+// when present, alongside the current price. Amazon: `.basisPrice` /
+// `.a-text-strike` / `[data-a-strike="true"]`. Non-Amazon: JSON-LD
+// `priceSpecification.maxPrice` / `Offer.highPrice` when shipped. Optional —
+// returns null when not found, never load-bearing. The LLM `mrp` slot is
+// the fallback when the structural MRP is null.
+//
+// Priority order for current_price:
 //   Amazon host:
 //     1. Site-specific selectors (.priceToPay .a-offscreen, etc.). On a miss,
 //        return null — DO NOT fall through to JSON-LD/OG, which on Amazon is
@@ -109,6 +117,28 @@ const AMAZON_PATTERNS: readonly RegExp[] = [
   /id="priceblock_saleprice"[^>]*>([^<]+)</i,
 ]
 
+// Cycle-5: Amazon MRP / strike-through block. These coexist with the
+// .priceToPay block (#corePriceDisplay_desktop_feature_div has both) and
+// look like:
+//   <span class="a-price a-text-price" data-a-strike="true">
+//     <span class="a-offscreen">₹429.00</span>
+//     ...
+//   </span>
+//   OR
+//   <span class="basisPrice">
+//     <span class="a-offscreen">₹429.00</span>
+//   </span>
+const AMAZON_MRP_PATTERNS: readonly RegExp[] = [
+  // .basisPrice .a-offscreen — newer PDPs put the basis (was) price here.
+  /<span[^>]*class="[^"]*basisPrice[^"]*"[^>]*>[\s\S]{0,1500}?<span[^>]*class="[^"]*a-offscreen[^"]*"[^>]*>([^<]+)<\/span>/i,
+  // .a-text-price (strike-through styling) — paired with data-a-strike="true"
+  // on most Amazon PDPs. The data-a-strike form is more reliable than class
+  // alone because some templates omit data-a-color.
+  /<span[^>]*data-a-strike="true"[^>]*>[\s\S]{0,1500}?<span[^>]*class="[^"]*a-offscreen[^"]*"[^>]*>([^<]+)<\/span>/i,
+  // .a-text-price.a-text-strike (alternative class name).
+  /<span[^>]*class="[^"]*a-text-strike[^"]*"[^>]*>[\s\S]{0,1500}?<span[^>]*class="[^"]*a-offscreen[^"]*"[^>]*>([^<]+)<\/span>/i,
+]
+
 function isAmazonHost(host: string): boolean {
   // Match amazon.com, amazon.in, amazon.co.uk, etc.
   return /(^|\.)amazon\.[a-z.]{2,}$/i.test(host)
@@ -116,6 +146,10 @@ function isAmazonHost(host: string): boolean {
 
 function extractAmazonPrice(html: string): number | null {
   return firstMatchingPrice(html, AMAZON_PATTERNS)
+}
+
+function extractAmazonMrp(html: string): number | null {
+  return firstMatchingPrice(html, AMAZON_MRP_PATTERNS)
 }
 
 // --- JSON-LD fallback ---
@@ -139,6 +173,29 @@ function extractJsonLdPrice(html: string): number | null {
     }
     const price = findProductPriceInJsonLd(parsed)
     if (price != null) return price
+  }
+  return null
+}
+
+// Cycle-5: same JSON-LD walker, but pulling the MRP-equivalent fields:
+//   - Offer.priceSpecification.maxPrice
+//   - Offer.priceSpecification.price + Offer.priceSpecification.referencePrice
+//   - AggregateOffer.highPrice
+//   - top-level Offer.highPrice (some non-AggregateOffer schemas use this)
+function extractJsonLdMrp(html: string): number | null {
+  let match: RegExpExecArray | null
+  JSONLD_BLOCK_RE.lastIndex = 0
+  while ((match = JSONLD_BLOCK_RE.exec(html)) !== null) {
+    const raw = match[1]?.trim()
+    if (!raw) continue
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      continue
+    }
+    const mrp = findProductMrpInJsonLd(parsed)
+    if (mrp != null) return mrp
   }
   return null
 }
@@ -183,6 +240,41 @@ function findProductPriceInJsonLd(node: unknown): number | null {
   return null
 }
 
+function findProductMrpInJsonLd(node: unknown): number | null {
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const p = findProductMrpInJsonLd(item)
+      if (p != null) return p
+    }
+    return null
+  }
+  if (!node || typeof node !== 'object') return null
+  const obj = node as Record<string, unknown>
+
+  if (Array.isArray(obj['@graph'])) {
+    const p = findProductMrpInJsonLd(obj['@graph'])
+    if (p != null) return p
+  }
+
+  const type = obj['@type']
+  const isProduct =
+    type === 'Product' ||
+    (Array.isArray(type) && type.includes('Product'))
+
+  if (isProduct && obj.offers !== undefined) {
+    const p = mrpFromOffers(obj.offers)
+    if (p != null) return p
+  }
+
+  for (const v of Object.values(obj)) {
+    if (v && typeof v === 'object') {
+      const p = findProductMrpInJsonLd(v)
+      if (p != null) return p
+    }
+  }
+  return null
+}
+
 function priceFromOffers(offers: unknown): number | null {
   if (Array.isArray(offers)) {
     for (const o of offers) {
@@ -208,6 +300,56 @@ function priceFromOffers(offers: unknown): number | null {
         ? parsePriceText(o.lowPrice)
         : null
   if (low != null && low > 0) return low
+  return null
+}
+
+function mrpFromOffers(offers: unknown): number | null {
+  if (Array.isArray(offers)) {
+    for (const o of offers) {
+      const p = mrpFromOffers(o)
+      if (p != null) return p
+    }
+    return null
+  }
+  if (!offers || typeof offers !== 'object') return null
+  const o = offers as Record<string, unknown>
+
+  // AggregateOffer.highPrice
+  const high =
+    typeof o.highPrice === 'number'
+      ? o.highPrice
+      : typeof o.highPrice === 'string'
+        ? parsePriceText(o.highPrice)
+        : null
+  if (high != null && high > 0) return high
+
+  // priceSpecification.maxPrice / priceSpecification.referencePrice
+  const spec = o.priceSpecification
+  if (spec && typeof spec === 'object') {
+    if (Array.isArray(spec)) {
+      for (const s of spec) {
+        const p = mrpFromOffers({ priceSpecification: s })
+        if (p != null) return p
+      }
+    } else {
+      const s = spec as Record<string, unknown>
+      const max =
+        typeof s.maxPrice === 'number'
+          ? s.maxPrice
+          : typeof s.maxPrice === 'string'
+            ? parsePriceText(s.maxPrice)
+            : null
+      if (max != null && max > 0) return max
+      const ref =
+        typeof s.referencePrice === 'number'
+          ? s.referencePrice
+          : typeof s.referencePrice === 'string'
+            ? parsePriceText(s.referencePrice)
+            : null
+      if (ref != null && ref > 0) return ref
+    }
+  }
+
   return null
 }
 
@@ -297,12 +439,49 @@ export function extractStructuralPrice(args: {
   return null
 }
 
+/**
+ * Cycle-5: best-effort structural MRP extractor — same interface as the price
+ * extractor but pulling the strike-through / list / "was" price.
+ *
+ * Returns a positive number when one is found, otherwise null. Always
+ * advisory — the caller is free to fall back to the LLM's `mrp` slot or
+ * keep null.
+ *
+ *   Amazon hosts → site-specific strike-through selectors only.
+ *   Other hosts  → JSON-LD `priceSpecification.maxPrice` / `Offer.highPrice`
+ *                  / `AggregateOffer.highPrice`. (No OG / microdata MRP —
+ *                  ogp.me defines no list-price field; product:original_price
+ *                  isn't a settled standard.)
+ */
+export function extractStructuralMrp(args: {
+  url: string
+  html: string | undefined | null
+}): number | null {
+  const html = args.html
+  if (typeof html !== 'string' || html.length === 0) return null
+
+  let host = ''
+  try {
+    host = new URL(args.url).hostname
+  } catch {
+    return null
+  }
+
+  if (isAmazonHost(host)) {
+    return extractAmazonMrp(html)
+  }
+
+  return extractJsonLdMrp(html)
+}
+
 // Exported for tests.
 export const __testing = {
   parsePriceText,
   isAmazonHost,
   extractAmazonPrice,
+  extractAmazonMrp,
   extractJsonLdPrice,
+  extractJsonLdMrp,
   extractOpenGraphPrice,
   extractMicrodataPrice,
 }

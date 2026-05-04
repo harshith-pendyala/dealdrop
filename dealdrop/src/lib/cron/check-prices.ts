@@ -50,6 +50,7 @@ type ProductRow = {
   currency: string
   image_url: string | null
   last_scrape_failed_at: string | null
+  mrp: number | null
   created_at: string
   updated_at: string
 }
@@ -117,15 +118,21 @@ async function processOneProduct(
   if (scraped.current_price === product.current_price) {
     // Healthy-but-unchanged. If this product was previously flagged failing,
     // clear the flag so DASH-08 badge honestly reflects "not currently failing".
-    if (product.last_scrape_failed_at !== null) {
+    // Cycle-5: also opportunistically refresh mrp if the scraper found one
+    // (or a different one than what's stored). MRP rarely changes, but if a
+    // retailer adjusts it the dashboard should pick it up next cron.
+    if (
+      product.last_scrape_failed_at !== null ||
+      scraped.mrp !== product.mrp
+    ) {
       const { error: clearErr } = await admin
         .from('products')
         .update({
           last_scrape_failed_at: null,
           updated_at: new Date().toISOString(),
+          mrp: scraped.mrp,
         })
         .eq('id', product.id)
-        .not('last_scrape_failed_at', 'is', null)
       if (clearErr) {
         console.error('cron: clear_failed_flag_failed', {
           productId: product.id,
@@ -140,6 +147,8 @@ async function processOneProduct(
   const nowIso = new Date().toISOString()
 
   // Step 1: INSERT price_history row.
+  // Cycle-5: price_history schema unchanged — only current_price gets recorded
+  // per cron tick. MRP lives on the product row (rarely changes).
   const { error: histErr } = await admin.from('price_history').insert({
     product_id: product.id,
     price: scraped.current_price,
@@ -155,13 +164,14 @@ async function processOneProduct(
     return { kind: 'unchanged', productId: product.id }
   }
 
-  // Step 2: UPDATE products (current_price, updated_at, last_scrape_failed_at=null).
+  // Step 2: UPDATE products (current_price, updated_at, last_scrape_failed_at=null, mrp).
   const { error: updErr } = await admin
     .from('products')
     .update({
       current_price: scraped.current_price,
       updated_at: nowIso,
       last_scrape_failed_at: null,
+      mrp: scraped.mrp,
     })
     .eq('id', product.id)
   if (updErr) {

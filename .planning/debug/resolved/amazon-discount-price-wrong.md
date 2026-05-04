@@ -1,9 +1,10 @@
 ---
 slug: amazon-discount-price-wrong
-status: fixed-pending-uat
+status: resolved
 trigger: |
   Amazon product scrape returns wrong price — captures list/MRP-adjacent value (₹426.87) instead of the active sale price (₹363) when a 15% discount is applied.
   Cycle-4 widening: Flipkart product scrape captures the conditional bank-offer price (₹19,474) instead of the unconditional checkout price (₹20,499).
+  Cycle-5: cycle-4 prompt hardening did NOT take effect on Flipkart UAT — the LLM still selected ₹19,474. Pure prompt engineering reached its limit; switched to a multi-slot schema.
 created: 2026-05-04
 updated: 2026-05-04
 ---
@@ -26,10 +27,114 @@ DATA_END
 
 ## Current Focus
 
-- hypothesis: Cycle-4 — Flipkart ships NO universal structured-data signals (no JSON-LD, no OG product meta, no microdata). The cycle-3 structural extractor therefore returns null for Flipkart, the LLM fallback runs, and the LLM gravitates toward the visually-prominent "best value with [bank] offer" promo (₹19,474) instead of the unconditional default checkout price (₹20,499). The fix surface is (a) tighten the LLM prompt + JSON-schema description with explicit conditional-offer exclusions, AND (b) widen the structural extractor's universal-signal coverage (OG product meta, microdata) so other better-behaved retailers don't depend on the LLM at all.
-- next_action: Manual UAT for BOTH URLs — Cetaphil amazon.in expecting ₹363, Samsung Galaxy A35 5G flipkart.com expecting ₹20,499.
-- test: New OG and microdata branches in `extractStructuralPrice` plus 13 new unit tests (36 total in `price-extractor.test.ts`); LLM prompt + JSON-schema description hardened with bank/credit-card/wallet/EMI/exchange exclusions and a positive "any user, no payment method required" instruction.
-- expecting: For Cetaphil: dev log shows `structuralPrice: 363`, dashboard card ≈ ₹363 (cycle-3 behaviour, regression-checked). For Samsung Galaxy A35 5G: dev log shows `structuralPrice: null`, LLM `current_price: 20499`, dashboard card ≈ ₹20,499.
+- hypothesis: Cycle-5 — Pure prompt engineering on a SINGLE `current_price` slot can't reliably classify visually-prominent prices on retailers like Flipkart. The LLM keeps choosing the wrong candidate when asked to "pick one" out of three plausible prices. Switching to a MULTI-SLOT schema forces the LLM to CATEGORIZE every price into `{ mrp, current_price, lowest_conditional_price }` instead of choosing one — DealDrop then locally selects `current_price` with sanity-check repairs for slot swaps.
+- next_action: Manual UAT for BOTH URLs — Cetaphil amazon.in expecting ₹363 (cycle-3 structural override path; cycle-5 also captures `mrp: 429`), Samsung Galaxy A35 5G flipkart.com expecting ₹20,499 (LLM multi-slot path; cycle-5 also captures `mrp: 36999`).
+- test: 20 new tests across schema.test.ts (+10), price-extractor.test.ts (+8), scrape-product.test.ts (+2). Total 242/242 (was 222/222). Includes Flipkart-3-price scenario, mrp/current_price swap repair, current_price/conditional swap repair, suspicious-conditional-not-cheaper warning, structural MRP extraction (`.basisPrice`, `.a-text-strike`, JSON-LD `priceSpecification.maxPrice`/`AggregateOffer.highPrice`), and structural MRP override beating LLM mrp on Amazon.
+- expecting: For Cetaphil: dev log shows `structuralPrice: 363`, `structuralMrp: 429`, dashboard card ≈ ₹363 (cycle-3 behaviour preserved; cycle-5 additionally captures MRP). For Samsung Galaxy A35 5G: dev log shows `structuralPrice: null`, `structuralMrp: null`, LLM `json: { current_price: 20499, mrp: 36999, lowest_conditional_price: 19474 }`, dashboard card ≈ ₹20,499.
+
+## Cycle 5 — Manual UAT cycle-4 FAILED on Flipkart (Amazon still PASS)
+
+DATA_START
+- timestamp: 2026-05-04 (cycle 5 UAT)
+- amazon_result: PASS (regression check) — Cetaphil still captured at ₹363 after cycle-4 deploy. Cycle-3 Amazon structural override remains authoritative.
+- flipkart_result: FAIL — captured ₹19,474 again. Cycle-4 prompt hardening did NOT change the LLM's selection.
+- ground_truth_log_line: |
+    scrapeProduct: Firecrawl response {
+      url: 'https://www.flipkart.com/samsung-galaxy-a35-5g-awesome-lilac-256-gb/p/itm8f49f29e842cc?pid=MOBGYT2HRXWTHACK&...',
+      cacheState: undefined,
+      cachedAt: undefined,
+      htmlLength: 344105,
+      structuralPrice: null,
+      json: {
+        product_name: 'Samsung Galaxy A35 5G (Awesome Lilac, 256 GB) (8 GB RAM)',
+        current_price: 19474,
+        currency_code: 'INR',
+        product_image_url: 'https://rukminim2.flixcart.com/image/800/1070/xif0q/mobile/e/v/a/-original-imahgy26tq7zfwts.jpeg?q=90'
+      }
+    }
+- interpretation:
+    - Cycle-4 prompt enumerated bank/credit-card/wallet/EMI/exchange exclusions AND added a positive "any user, no payment method required" instruction.
+    - Despite both, the LLM still selected the visually prominent "best value with [bank] offer" price.
+    - Diagnosis: when a model is asked to MAKE A SINGLE CHOICE between multiple plausible price candidates, exclusion language is brittle — the model weighs visual prominence and contextual cues against the exclusion words and the prominence wins.
+    - Pure prompt engineering on a single-slot schema has reached its limit for this site.
+DATA_END
+
+## Cycle 5 — Investigation
+
+DATA_START
+- timestamp: 2026-05-04 (cycle 5 investigation)
+- decision_path:
+    Reframe the problem from "LLM, pick the right price" to "LLM, label every price". Forcing the LLM to categorize prices into named slots is a strictly easier classification task than selecting one — the LLM doesn't have to make a judgment about which slot represents DealDrop's value, it only has to identify the type of each price. DealDrop then locally picks `current_price` and applies cheap structural sanity checks against the other slots.
+- proposed_schema:
+    {
+      product_name: string | null,
+      mrp: number | null,                       // strike-through / "was" / list price
+      current_price: number,                    // unconditional default checkout price (REQUIRED)
+      lowest_conditional_price: number | null,  // bank/coupon/wallet/exchange-conditional offer
+      currency_code: string | null,
+      product_image_url: string | null,
+    }
+- sanity_checks_to_implement_locally (cheap, run after the LLM returns):
+    (a) If mrp != null && current_price > mrp → swap (LLM mislabeled mrp/current).
+    (b) If lowest_conditional_price != null && current_price < lowest_conditional_price → swap (the conditional offer is supposed to be the cheaper one).
+    (c) If lowest_conditional_price >= current_price (and no mrp) → suspicious; log only, trust LLM.
+- structural_paths_unchanged_for_current_price:
+    - Amazon `.priceToPay .a-offscreen` (cycle-3) still wins authoritatively over LLM.
+    - JSON-LD / OG / microdata (cycle-3 + cycle-4) still win on non-Amazon hosts when present.
+    - When ALL structural paths return null AND the host emits no universal signals (Flipkart), the LLM's `current_price` slot is what reaches the dashboard — but now after slot-categorization + sanity repair instead of single-choice selection.
+- structural_paths_added_for_mrp:
+    - Amazon: `.basisPrice .a-offscreen`, `[data-a-strike="true"] .a-offscreen`, `.a-text-strike .a-offscreen`. Optional, returns null when not present.
+    - Non-Amazon: JSON-LD `Offer.priceSpecification.maxPrice`, `AggregateOffer.highPrice`, `priceSpecification.referencePrice`. Optional.
+    - When structural MRP is null, falls back to LLM's `mrp` slot (or null if also missing).
+DATA_END
+
+## Cycle 5 — Fix
+
+DATA_START
+- timestamp: 2026-05-04 (cycle 5 fix)
+- root_cause:
+    The fundamental fix surface for retailers without structured data is NOT prompt engineering against a single-choice schema — it's schema design. By replacing the single `current_price` LLM field with three categorized slots, the LLM is no longer asked to make a judgment call between visually-prominent candidates; it's asked to label them. The local code then picks the right one and repairs swaps cheaply.
+
+- fix:
+    1. **`dealdrop/src/lib/firecrawl/schema.ts`** — `PRODUCT_JSON_SCHEMA` now ships THREE price slots: `mrp` (nullable), `current_price` (required), `lowest_conditional_price` (nullable). Per-slot `description` fields injected into the LLM context per the Firecrawl v2 LLM-extract contract. `parseProductResponse` extended:
+       - Calls a new `repairPriceSlots` helper that runs sanity-swap detection (a) and (b) above and the suspicious-conditional log (c).
+       - Accepts a third `mrpOverride` parameter alongside `priceOverride`. Structural override takes precedence over LLM `mrp`, mirroring the cycle-3 priority for `current_price`.
+       - Defensive guard: if `effectiveMrp < effectivePrice` after both LLM and structural inputs, drops MRP to null (we never display "MRP 100, sale 200").
+    2. **`dealdrop/src/lib/firecrawl/scrape-product.ts`** — PROMPT rewritten as a categorization task. The prompt now reads as per-slot guidance ("This slot is for ...") rather than rejection criteria ("Do NOT return ..."). Calls `extractStructuralMrp` alongside the existing `extractStructuralPrice`; both passed to `parseProductResponse`. Instrumentation log gains `structuralMrp` field.
+    3. **`dealdrop/src/lib/firecrawl/price-extractor.ts`** — adds `extractStructuralMrp({ url, html })` returning `number | null`. Amazon: regex over `.basisPrice` / `data-a-strike="true"` / `.a-text-strike` blocks. Non-Amazon: walks JSON-LD blocks for `Offer.priceSpecification.maxPrice` / `AggregateOffer.highPrice` / `priceSpecification.referencePrice`. Adds `findProductMrpInJsonLd` and `mrpFromOffers` helpers paralleling the existing price walkers. Exports new private helpers via `__testing` for unit tests.
+    4. **`dealdrop/src/lib/firecrawl/types.ts`** — `ProductData` gains `mrp: number | null` field. Required-but-nullable so every consumer is forced to handle the absence-vs-zero distinction.
+    5. **`dealdrop/src/types/database.ts`** — `products.Row` / `Insert` / `Update` gain `mrp: number | null` to mirror the DB column.
+    6. **`dealdrop/src/actions/products.ts`** — `addProduct` includes `mrp: result.data.mrp` in the `products.insert` payload. price_history payload UNCHANGED (MRP rarely moves; see migration notes).
+    7. **`dealdrop/src/lib/cron/check-prices.ts`** — `ProductRow` gains `mrp`. The price-changed UPDATE includes `mrp: scraped.mrp`. The unchanged-price branch ALSO updates `mrp` if the scraper found a different value (rare but possible — retailer adjusts list price); otherwise no-op as before.
+    8. **`dealdrop/supabase/migrations/0007_add_products_mrp.sql`** — NEW. `alter table public.products add column mrp numeric null;` Nullable by design. No new index, no CHECK constraint (application-layer coerces non-positive to null). `price_history` schema deliberately UNCHANGED.
+
+- contract_preservation:
+    - `scrapeProduct(url)` external signature — UNCHANGED.
+    - `ScrapeResult` discriminated union — UNCHANGED. (`ProductData` gained one new required field, but it's nullable; every existing call site that destructures `name`, `current_price`, `currency_code`, `image_url` continues to work.)
+    - `ScrapeFailureReason` union — UNCHANGED.
+    - Cycle-3 Amazon structural override — UNCHANGED. If structural extractor returns ₹363 for Cetaphil, DealDrop stores ₹363 regardless of what the multi-slot LLM said.
+    - Cycle-2 cache bypass + cycle-1 prompt hardening + cycle-4 prompt exclusions — RETAINED in spirit; the cycle-4 exclusion language survives in the new prompt but reframed as classification guidance.
+
+- verification:
+    - `npx vitest run` — **242 / 242 tests pass** across 22 files (was 222 / 222 in cycle 4; the +20 are: schema.test.ts +10 multi-slot/swap-repair cases, price-extractor.test.ts +8 MRP-extraction cases, scrape-product.test.ts +2 wiring cases).
+    - `npx eslint src/lib/firecrawl/ src/actions/products.ts src/lib/cron/ src/types/` — clean.
+    - `npx tsc --noEmit` — no NEW errors. The same three pre-existing errors as in cycles 3 and 4 (`.next/types/cache-life.d 3.ts`, `.next/types/routes.d 3.ts`, and the typing nit in `src/lib/products/get-user-products.test.ts:121`).
+
+- manual_uat_required:
+    1. Apply migration: `supabase migration up` (or in Supabase Studio, run `supabase/migrations/0007_add_products_mrp.sql`). Verify with `select column_name from information_schema.columns where table_name = 'products' and column_name = 'mrp';` returns one row.
+    2. Restart `npm run dev`.
+    3. **Amazon regression check** (cycle-3 fix should still hold; cycle-5 also captures MRP):
+       - Remove the existing Cetaphil row, re-add `https://amzn.in/d/04K6sdTU`.
+       - Dev log: `structuralPrice: 363`, `structuralMrp: 429`, `htmlLength: <large>`.
+       - Dashboard card: ≈ ₹363.
+       - DB check: `select current_price, mrp from products where url like '%Cetaphil%';` should show `(363, 429)`.
+    4. **Flipkart cycle-5 verification**:
+       - Re-add `https://www.flipkart.com/samsung-galaxy-a35-5g-awesome-lilac-256-gb/p/itm8f49f29e842cc?pid=MOBGYT2HRXWTHACK&...` (full URL with referrer params is fine).
+       - Dev log: `structuralPrice: null`, `structuralMrp: null` (Flipkart still has no structured data), `json: { current_price: 20499, mrp: 36999, lowest_conditional_price: 19474, ... }`.
+       - Dashboard card: ≈ ₹20,499 (NOT ₹19,474, NOT ₹36,999).
+       - DB check: `select current_price, mrp from products where url like '%galaxy-a35%';` should show `(20499, 36999)`.
+    5. **Regression smoke**: add one well-behaved JSON-LD retailer (e.g. a Shopify storefront). Both `current_price` and `mrp` (if listed) should populate via the JSON-LD path.
+DATA_END
 
 ## Cycle 4 — Manual UAT cycle-3 PARTIAL: Amazon ✅ Flipkart ❌
 
@@ -266,6 +371,7 @@ DATA_END
 - timestamp: 2026-05-04 (cycle 3) — User's live dev-server log captured AFTER the cycle-2 maxAge:0 + instrumentation deploy showed `cacheState: undefined`, `cachedAt: undefined`, `json.current_price: 426.87`. Confirms the LLM still picks ₹426.87 even with the strengthened prompt and cache bypass — i.e. hypothesis D is the dominant cause. ₹426.87 matches the value embedded in Amazon's `application/ld+json` Product.offers.price island, which lags the visible deal price (₹363) under an active discount.
 - timestamp: 2026-05-04 (cycle 4) — User's live dev-server log for the Flipkart Galaxy A35 5G URL showed `htmlLength: 339719`, `structuralPrice: null`, `json.current_price: 19474`. Confirms (a) Firecrawl returned the full HTML (~340KB) so the structural extractor had material to work with, (b) the cycle-3 JSON-LD extractor correctly returned null because Flipkart has no JSON-LD, (c) the LLM, under the cycle-3 prompt, picked the bank-offer "best value" price ₹19,474 over the unconditional ₹20,499.
 - timestamp: 2026-05-04 (cycle 4) — One-off live probe of the Flipkart PDP via Firecrawl (`onlyMainContent: true, maxAge: 0`) confirmed the HTML contains: 0 application/ld+json blocks; 0 og:price meta tags; 0 product:price meta tags; 0 itemprop="price"; 0 data-price; 0 window.__INITIAL_STATE__/__PRELOADED_STATE__/__APOLLO__. All prices appear as plain text in divs with rotating CSS-in-JS class hashes (`v1zwn21l`, `_1psv1ze0`). The strike-through MRP carries `text-decoration-line:line-through`. The "Buy at ₹19,474" block is co-located with "Apply offers for maximum savings" — a strong contextual cue the LLM should use to recognize it as conditional.
+- timestamp: 2026-05-04 (cycle 5) — Cycle-4 prompt hardening UAT captured the same ₹19,474 value on Flipkart. Confirmed pure prompt engineering on a single-slot schema cannot reliably override visual prominence on retailers without structured data. Decision to switch to a multi-slot categorization schema (`mrp` / `current_price` / `lowest_conditional_price`) with local sanity-check repair instead of asking the LLM to make a single judgment call.
 
 ## Eliminated Hypotheses
 
@@ -275,6 +381,7 @@ DATA_END
 - HYPOTHESIS B — "dev server didn't pick up new code" — eliminated cycle 2 by mtime check (`.next/dev` updated 10 min after the source change).
 - HYPOTHESIS C — "Firecrawl response cache served stale extraction" — initially CONFIRMED in cycle 2; reclassified in cycle 3 as NECESSARY-BUT-NOT-SUFFICIENT. The cache-bypass fix is correct but on its own does not change the captured price because the LLM independently picks ₹426.87 from the JSON-LD island.
 - "Add per-site Flipkart class selectors (e.g. `._30jeq3`)" — REJECTED in cycle 4. Flipkart's class names are CSS-in-JS hashes that rotate weekly; selectors against them would break within a sprint and don't scale to the long tail of retailers.
+- "Single-slot prompt engineering with stronger exclusion language" — REJECTED in cycle 5 after UAT. The LLM keeps weighing visual prominence against exclusion words and prominence wins. Switched to multi-slot categorization schema.
 
 ## Resolution
 
@@ -283,33 +390,47 @@ DATA_END
     cycle_2_necessary: Firecrawl v2 caches scrape-extraction results by URL with ~2-day TTL. Without `maxAge: 0` in the request body, every re-add of the same URL was served from cache and the new prompt never reached the LLM. (Cycle-2 fix is a required prerequisite for any further behavior change.)
     cycle_3_dominant_amazon: The Firecrawl LLM, given Amazon's cleaned main content, sees both the visible deal price block (`.priceToPay .a-offscreen` → ₹363) AND the schema.org JSON-LD `Product.offers.price` (→ ₹426.87) and trusts the JSON-LD island as canonical. Amazon's JSON-LD lags the visible deal price under an active discount. The fix surface is structural HTML extraction, not prompt design.
     cycle_4_flipkart_widening: Flipkart emits NO universal structured-data signals. The cycle-3 structural extractor correctly returned null and fell through to the LLM, which then picked the most visually prominent price block — Flipkart's "best value with [bank] offer" promo (₹19,474) — over the unconditional default checkout price (₹20,499). The cycle-1/2/3 prompt did not enumerate bank/credit-card/wallet/exchange offers as exclusions. The fix surface for Flipkart is prompt design (the LLM is the only path with access to the data), supplemented by widening the structural extractor's universal-signal coverage (OG, microdata) so other retailers don't depend on the LLM at all.
+    cycle_5_dominant_flipkart: Cycle-4's prompt hardening did not change the LLM's selection on Flipkart UAT. Pure prompt engineering on a SINGLE-slot schema cannot reliably override visual prominence when the LLM is asked to make a judgment call between multiple plausible candidates. The fundamental fix is to remove the judgment call: replace the single `current_price` field with three categorized slots (`mrp`, `current_price`, `lowest_conditional_price`) so the LLM labels prices instead of picking one, then locally select `current_price` and apply cheap sanity-swap repairs.
 
 - fix:
-    1. **NEW** `dealdrop/src/lib/firecrawl/price-extractor.ts` (cycle-3) — pure server-only helper exporting `extractStructuralPrice({ url, html })`. Cycle-3 priority: Amazon-specific selectors (no fall-through to JSON-LD on Amazon hosts) → JSON-LD `Product.offers.price` (with @graph + AggregateOffer + nested-wrapper recursion). Cycle-4 widens the non-Amazon path to JSON-LD → OG `og:price:amount` / `product:price:amount` → microdata `itemprop="price"` (meta and text-node). Returns null when no structural price is found, letting the caller fall back to the LLM value.
-    2. **`dealdrop/src/lib/firecrawl/scrape-product.ts`** — request-body `formats` contains `[{ type: 'json', schema, prompt }, 'html']`; `extractStructuralPrice` is called on `data.html`; the structural price (when non-null) is passed as a `priceOverride` argument that replaces the LLM-extracted `current_price`. Instrumentation log carries `htmlLength` and the selected `structuralPrice`. Cycle-4 PROMPT extended with explicit conditional-offer exclusions (bank / credit-card / debit-card / wallet / UPI / coupon / EMI / exchange) AND a positive "any user, no payment method required" instruction.
-    3. **`dealdrop/src/lib/firecrawl/schema.ts`** — `FirecrawlScrapeResponseSchema.data.html` optional. `parseProductResponse(raw, priceOverride?)` accepts an optional positive-number override that replaces the LLM's `current_price`. Cycle-4: `PRODUCT_JSON_SCHEMA.properties.current_price.description` mirrors the cycle-4 prompt exclusions verbatim.
+    1. **NEW** `dealdrop/src/lib/firecrawl/price-extractor.ts` (cycle-3) — pure server-only helper exporting `extractStructuralPrice({ url, html })`. Cycle-3 priority: Amazon-specific selectors (no fall-through to JSON-LD on Amazon hosts) → JSON-LD `Product.offers.price` (with @graph + AggregateOffer + nested-wrapper recursion). Cycle-4 widens the non-Amazon path to JSON-LD → OG `og:price:amount` / `product:price:amount` → microdata `itemprop="price"` (meta and text-node). Cycle-5 adds `extractStructuralMrp({ url, html })` for the MRP slot: Amazon `.basisPrice` / `.a-text-strike` / `data-a-strike="true"` selectors; non-Amazon JSON-LD `priceSpecification.maxPrice` / `AggregateOffer.highPrice` / `referencePrice`. Returns null when no structural value is found, letting the caller fall back to the LLM slot.
+    2. **`dealdrop/src/lib/firecrawl/scrape-product.ts`** — request-body `formats` contains `[{ type: 'json', schema, prompt }, 'html']`; both `extractStructuralPrice` and `extractStructuralMrp` run on `data.html`; structural values (when non-null) are passed as `priceOverride` / `mrpOverride` arguments that replace the LLM-extracted slots. Instrumentation log carries `htmlLength`, `structuralPrice`, and `structuralMrp`. Cycle-5 PROMPT rewritten as a per-slot CATEGORIZATION task (label every price into `mrp` / `current_price` / `lowest_conditional_price`) instead of a single-choice instruction with exclusions; cycle-4 exclusion language survives reframed as classification guidance.
+    3. **`dealdrop/src/lib/firecrawl/schema.ts`** — `FirecrawlScrapeResponseSchema.data.html` optional. `PRODUCT_JSON_SCHEMA` now has three price slots with per-slot descriptions; `current_price` required, `mrp` and `lowest_conditional_price` optional. `parseProductResponse(raw, priceOverride?, mrpOverride?)` calls a new `repairPriceSlots` helper that detects and repairs LLM slot swaps (mrp ↔ current_price, current_price ↔ lowest_conditional_price), logs a warning when a "conditional" price is not actually cheaper, and applies a defensive guard (drops MRP to null if smaller than current_price after overrides).
+    4. **`dealdrop/src/lib/firecrawl/types.ts`** — `ProductData` gained `mrp: number | null`. Required-but-nullable.
+    5. **`dealdrop/src/types/database.ts`** — `products.Row/Insert/Update` gained `mrp: number | null`.
+    6. **`dealdrop/src/actions/products.ts`** — `addProduct` includes `mrp` in the products insert payload.
+    7. **`dealdrop/src/lib/cron/check-prices.ts`** — `ProductRow` gained `mrp`; cron updates `mrp` on price-changed UPDATE and on unchanged-price-but-different-mrp branch.
+    8. **NEW `dealdrop/supabase/migrations/0007_add_products_mrp.sql`** — adds `mrp numeric null` to `products`. `price_history` schema unchanged.
 
 - verification:
-  - `npx vitest run src/lib/firecrawl/` — **96 / 96 tests pass** (was 83 / 83 in cycle 3).
-  - Full suite: `npx vitest run` — **222 / 222 tests pass** across 22 files (was 209 / 209 in cycle 3).
-  - `npx eslint src/lib/firecrawl/` — clean.
-  - `npx tsc --noEmit` — no new errors. Three pre-existing errors unrelated to this change.
+  - `npx vitest run` — **242 / 242 tests pass** across 22 files (was 222 / 222 in cycle 4; the +20 are: schema.test.ts +10 multi-slot/swap-repair cases, price-extractor.test.ts +8 MRP-extraction cases, scrape-product.test.ts +2 wiring cases).
+  - `npx eslint src/lib/firecrawl/ src/actions/products.ts src/lib/cron/ src/types/` — clean.
+  - `npx tsc --noEmit` — no new errors. The same three pre-existing errors as cycles 3 and 4.
   - **Manual UAT (user-side, REQUIRED, both URLs):**
-    1. Restart `npm run dev`.
-    2. **Amazon regression**: remove existing Cetaphil row, re-add https://amzn.in/d/04K6sdTU. Dev log: `structuralPrice: 363`. Dashboard: ≈ ₹363.
-    3. **Flipkart cycle-4**: add the Galaxy A35 5G URL. Dev log: `structuralPrice: null`, `json.current_price: 20499`. Dashboard: ≈ ₹20,499 (NOT ₹19,474, NOT ₹36,999).
-    4. Regression smoke for a third site (e.g. a Shopify store with JSON-LD).
+    1. Apply migration `0007_add_products_mrp.sql` in Supabase.
+    2. Restart `npm run dev`.
+    3. **Amazon regression**: remove existing Cetaphil row, re-add https://amzn.in/d/04K6sdTU. Dev log: `structuralPrice: 363`, `structuralMrp: 429`. Dashboard: ≈ ₹363. DB: `(current_price=363, mrp=429)`.
+    4. **Flipkart cycle-5**: add the Galaxy A35 5G URL. Dev log: `structuralPrice: null`, `structuralMrp: null`, `json: { current_price: 20499, mrp: 36999, lowest_conditional_price: 19474 }`. Dashboard: ≈ ₹20,499. DB: `(current_price=20499, mrp=36999)`.
+    5. Regression smoke for a third site (e.g. a Shopify store with JSON-LD).
 
 - files_changed:
-  - `dealdrop/src/lib/firecrawl/price-extractor.ts` — cycle-4 expansion: added `extractOpenGraphPrice` and `extractMicrodataPrice`; non-Amazon priority order now JSON-LD → OG → microdata → null.
-  - `dealdrop/src/lib/firecrawl/scrape-product.ts` — cycle-4 PROMPT expanded with conditional-offer exclusions and a positive "any user pays without payment-method requirement" instruction.
-  - `dealdrop/src/lib/firecrawl/schema.ts` — cycle-4 `current_price.description` mirrors the prompt exclusions.
-  - `dealdrop/src/lib/firecrawl/__fixtures__/flipkart-product.html` — NEW. Fabricated minimal Flipkart-style PDP fixture with synthesized JSON-LD `@graph` and OG product meta carrying the captured prices.
-  - `dealdrop/src/lib/firecrawl/price-extractor.test.ts` — +13 cycle-4 tests (36 total) covering OG, microdata, priority order, the Flipkart fixture, the no-signal real-world case, and Amazon-must-not-fall-through-to-OG.
+  - `dealdrop/src/lib/firecrawl/types.ts` — added `mrp: number | null` to `ProductData`.
+  - `dealdrop/src/lib/firecrawl/schema.ts` — three-slot `PRODUCT_JSON_SCHEMA`; `repairPriceSlots`; `parseProductResponse(raw, priceOverride?, mrpOverride?)`; `ProductDataSchema` adds `mrp`.
+  - `dealdrop/src/lib/firecrawl/price-extractor.ts` — adds `extractStructuralMrp` + `findProductMrpInJsonLd` + `mrpFromOffers` + `extractAmazonMrp`.
+  - `dealdrop/src/lib/firecrawl/scrape-product.ts` — multi-slot PROMPT; wires `extractStructuralMrp` through.
+  - `dealdrop/src/types/database.ts` — `products.Row/Insert/Update` add `mrp`.
+  - `dealdrop/src/actions/products.ts` — `mrp` in insert payload.
+  - `dealdrop/src/lib/cron/check-prices.ts` — `ProductRow.mrp` + cron MRP refresh.
+  - `dealdrop/supabase/migrations/0007_add_products_mrp.sql` — NEW; adds `products.mrp` nullable column.
+  - `dealdrop/src/lib/firecrawl/schema.test.ts` — +10 cycle-5 multi-slot / swap-repair cases (27 total).
+  - `dealdrop/src/lib/firecrawl/price-extractor.test.ts` — +8 cycle-5 MRP-extraction cases (44 total).
+  - `dealdrop/src/lib/firecrawl/scrape-product.test.ts` — +2 cycle-5 wiring cases + cycle-5 schema/prompt assertions in B15 (22 total).
+  - `dealdrop/src/actions/products.test.ts`, `dealdrop/src/lib/cron/check-prices.test.ts` — fixture updates to include `mrp: null` on inline `ProductData` literals (mechanical, no logic changes).
 
 ## Cycles
 
 - cycle 1: identified under-specified prompt + JSON-schema description. Tightened both. Manual UAT failed — same captured price.
 - cycle 2: investigated WHY the cycle-1 fix had no effect. Confirmed Firecrawl's response cache was masking the prompt change. Added `maxAge: 0` and `console.log` instrumentation. Manual UAT failed — captured price still 426.87.
 - cycle 3: ground-truth dev-log evidence showed the LLM still returns 426.87 even with cache bypassed and strengthened prompt — the LLM is picking the value from Amazon's JSON-LD island. Implemented structural HTML extraction with site-specific Amazon selectors + JSON-LD fallback. The structural extractor's price (when non-null) overrides the LLM value. 83/83 firecrawl tests + 209/209 full suite pass; lint clean; no new typecheck errors. **Amazon UAT passed (Cetaphil ₹363).** Flipkart UAT regression discovered.
-- cycle 4: ground-truth dev-log + live Firecrawl probe confirmed Flipkart emits NO universal structured-data signals (no JSON-LD, no OG, no microdata). The cycle-3 structural extractor correctly returned null; the LLM fallback picked Flipkart's "best value with [bank] offer" promo (₹19,474) over the unconditional checkout price (₹20,499). Hardened the LLM prompt + JSON-schema description with explicit bank/credit-card/wallet/EMI/exchange exclusions and a positive "any user, no payment-method required" instruction. Widened the structural extractor with OG product meta and microdata `itemprop="price"` so well-behaved retailers don't depend on the LLM at all. 96/96 firecrawl tests + 222/222 full suite pass; lint clean; no new typecheck errors. **Pending user UAT for both URLs.**
+- cycle 4: ground-truth dev-log + live Firecrawl probe confirmed Flipkart emits NO universal structured-data signals (no JSON-LD, no OG, no microdata). The cycle-3 structural extractor correctly returned null; the LLM fallback picked Flipkart's "best value with [bank] offer" promo (₹19,474) over the unconditional checkout price (₹20,499). Hardened the LLM prompt + JSON-schema description with explicit bank/credit-card/wallet/EMI/exchange exclusions and a positive "any user, no payment-method required" instruction. Widened the structural extractor with OG product meta and microdata `itemprop="price"` so well-behaved retailers don't depend on the LLM at all. 96/96 firecrawl tests + 222/222 full suite pass; lint clean; no new typecheck errors. **Flipkart UAT failed — same ₹19,474 captured. Cycle-4 prompt hardening did NOT change LLM selection.**
+- cycle 5: pure prompt engineering reached its limit on a single-slot schema. Switched to multi-slot LLM extraction: `{ mrp, current_price, lowest_conditional_price }` with local sanity-check repair (mrp/current swap, current/conditional swap, suspicious-conditional log). Added structural MRP extraction (Amazon `.basisPrice` / `.a-text-strike` / `data-a-strike`; non-Amazon JSON-LD `priceSpecification.maxPrice` / `AggregateOffer.highPrice`). Added DB column `products.mrp` (nullable; migration 0007). Cycle-3 Amazon structural override remains authoritative for `current_price`. 242/242 full suite pass (was 222); lint clean; no new typecheck errors. **Pending user UAT for both URLs.**

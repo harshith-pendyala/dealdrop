@@ -14,11 +14,16 @@ export type ScrapeFailureReason =
   | 'invalid_currency'
   | 'unknown'
 
+// Cycle-5: `mrp` is OPTIONAL. The LLM emits it as a separate slot when the
+// page shows a strike-through / "was" / list price; otherwise null. Structural
+// (Amazon / JSON-LD) paths may also populate it. Adding the field here is
+// non-breaking — every existing consumer continues to ignore it.
 export type ProductData = {
   name: string
   current_price: number
   currency_code: string
   image_url: string | null
+  mrp: number | null
 }
 
 export type ScrapeResult =
