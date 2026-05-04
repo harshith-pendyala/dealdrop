@@ -42,9 +42,9 @@ Populated by planner. Planner MUST map each task to a requirement + test command
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 3-01-01 | 01 | 0 | — | — | Vitest installed, fixture captured | infra | `cd dealdrop && npx vitest --version` | ❌ W0 | ⬜ pending |
 | 3-02-01 | 02 | 1 | TRACK-03 | — | Protocol allowlist + normalization | unit | `npx vitest run src/lib/firecrawl/url.test.ts` | ❌ W0 | ⬜ pending |
-| 3-03-01 | 03 | 1 | TRACK-04 | — | Firecrawl v2 fetch + JSON schema | unit | `npx vitest run src/lib/firecrawl/scrape-product.test.ts` | ❌ W0 | ⬜ pending |
-| 3-03-02 | 03 | 1 | TRACK-05 | — | missing_price / missing_name / invalid_currency branches | unit | `npx vitest run src/lib/firecrawl/scrape-product.test.ts` | ❌ W0 | ⬜ pending |
-| 3-04-01 | 04 | 2 | — | — | server-only guard causes build failure on client import | integration | `npm run build` (negative test file gated) | ❌ W0 | ⬜ pending |
+| 3-03-01 | 03 | 2 | TRACK-04 | T-3-01, T-3-02, T-3-04 | Firecrawl v2 fetch + JSON schema | unit | `npx vitest run src/lib/firecrawl/scrape-product.test.ts` | ❌ W0 | ⬜ pending |
+| 3-03-02 | 03 | 2 | TRACK-05 | T-3-02 | missing_price / missing_name / invalid_currency branches | unit | `npx vitest run src/lib/firecrawl/scrape-product.test.ts` | ❌ W0 | ⬜ pending |
+| 3-04-01 | 04 | 3 | — | T-3-01 | server-only guard causes build failure on client import | integration | `npm run build` (negative test file gated) | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

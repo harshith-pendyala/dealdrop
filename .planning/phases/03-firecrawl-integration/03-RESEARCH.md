@@ -735,22 +735,25 @@ The file-level `import 'server-only'` on line 1 makes the module un-bundlable in
 
 **These 5 `[ASSUMED]` items are the discuss-phase candidates.** Everything else in this research was verified (codebase grep, live API curl, `npm view`, or cited docs). A2 is the one with highest planner-impact — worth a smoke test in Phase 3 Wave 0 before writing the branch-ordered validation logic.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 3 hit live Firecrawl once in Wave 0 to sanity-check assumptions A2 (price is number) and A5 (image null shape)?**
    - What we know: Unit tests with `fetch` mocks cover every branch at our boundary.
    - What's unclear: Whether Firecrawl's actual response matches the documented shape for real e-commerce URLs.
    - Recommendation: Planner adds a **one-shot manual scrape task** in Wave 0 (using `curl` with the real `FIRECRAWL_API_KEY` against a known product URL like `https://www.amazon.com/dp/B08N5WRWNW`) to capture the live response shape into a commit-committed `dealdrop/src/lib/firecrawl/__fixtures__/amazon-response.json`. Unit tests then replay that fixture via mocked `fetch`. Costs ~4 Firecrawl credits; buys certainty.
+   - **RESOLVED:** Plan 01 Task 3 captures live fixture (`autonomous: false`, user runs with real FIRECRAWL_API_KEY). Closes assumptions A1/A2/A5.
 
 2. **Does Next.js 16 `next build` fail on the server-only guard in the current setup, or does it warn?**
    - What we know: The canonical guard works for `dealdrop/src/lib/supabase/admin.ts` today (Phase 1 passed verification).
    - What's unclear: Whether a deliberate reverse test (import `scrapeProduct` from a `'use client'` file) produces a build-time *error* or just a runtime error.
    - Recommendation: Plan-checker verification step adds a deliberate bad-import smoke test that must fail `npm run build` before the phase is considered complete. Remove after the assertion passes.
+   - **RESOLVED:** Plan 04 Task 1 introduces a throwaway `'use client'` file, runs `npm run build`, asserts the build fails with the server-only error, then deletes the file. Also greps `.next/static/` for API-key patterns.
 
 3. **Should the retry include a request-id header for Firecrawl-side debugging?**
    - What we know: Firecrawl response may include `concurrencyLimited` / `concurrencyQueueDurationMs` fields per the API docs.
    - What's unclear: Whether Firecrawl exposes a request-id header for correlation.
    - Recommendation: Not in scope for v1; log the response body server-side per D-04 and rely on timestamps for correlation.
+   - **RESOLVED:** Out of scope for v1 per research recommendation. Timestamps + server-side `console.error` logs provide adequate correlation for portfolio bar. Revisit if Firecrawl adds a supported request-id header.
 
 ## Environment Availability
 
