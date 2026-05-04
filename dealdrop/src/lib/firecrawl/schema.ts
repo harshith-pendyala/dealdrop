@@ -28,7 +28,7 @@ export const PRODUCT_JSON_SCHEMA = {
     current_price: {
       type: ['number', 'null'],
       description:
-        'Numeric current price (not regular/was price). Parse any formatting like "$1,299.99" to 1299.99. Return null if no price is visible.',
+        'Active checkout price — the single amount the buyer would pay right now if they clicked Buy / Add to Cart. Prefer the price displayed adjacent to the primary Buy / Add-to-Cart / Checkout button. If a discount is applied, return the post-discount deal price, NOT the pre-discount M.R.P. or "was" price. EXCLUDE: M.R.P. / list / regular / "was" / strike-through prices, the tax-inclusive sub-line near the M.R.P. (e.g. "M.R.P. inclusive of all taxes"), per-unit prices (per 100ml, per kg, per count), EMI / monthly installments, Subscribe & Save / subscription prices, bundle / combo / add-on prices, shipping or import fees, and prices for unselected variants. Parse formatting like "$1,299.99" to 1299.99. Return null if no checkout price is visible.',
     },
     currency_code: {
       type: ['string', 'null'],

@@ -25,8 +25,28 @@ const FIRECRAWL_URL = 'https://api.firecrawl.dev/v2/scrape'
 const TIMEOUT_MS = 60_000
 const RETRY_BACKOFF_MS = 2_000
 
-const PROMPT =
-  'Extract product_name, current_price (numeric), currency_code (ISO 4217 alpha-3), product_image_url from this e-commerce product page.'
+const PROMPT = [
+  'Extract product_name, current_price (numeric), currency_code (ISO 4217 alpha-3),',
+  'and product_image_url from this e-commerce product page.',
+  '',
+  'For current_price, return the ACTIVE CHECKOUT PRICE — the single amount the buyer',
+  'would actually pay right now if they clicked Buy / Add to Cart. Prefer the price',
+  'displayed adjacent to the primary Buy / Add-to-Cart / Checkout button.',
+  '',
+  'Do NOT return any of the following, even if they appear larger or more prominent:',
+  '- M.R.P., list price, "was" price, original price, strike-through price',
+  '- Tax-inclusive sub-line near the M.R.P. (e.g. "M.R.P. inclusive of all taxes")',
+  '- Per-unit prices (e.g. price per 100 ml, price per kg, price per count)',
+  '- EMI / monthly installment amounts',
+  '- Subscribe & Save / subscription-only prices',
+  '- Bundle, combo, "frequently bought together", or add-on prices',
+  '- Shipping, delivery, or import fees',
+  '- Prices for variants the user has not selected (different size / color / pack)',
+  '',
+  'If a discount is applied, return the post-discount price (the deal price), not the',
+  'pre-discount M.R.P. If multiple candidate prices appear, choose the one nearest the',
+  'Buy button and matching the currently selected variant.',
+].join(' ')
 
 type FetchOutcome =
   | { kind: 'response'; res: Response }
