@@ -44,7 +44,7 @@ DealDrop is a portfolio project that ships the full loop most people only descri
 
 ---
 
-## Architecture highlights — the parts I'd point to in an interview
+## Architecture highlights
 
 - **Strict server-only env split.** Two env modules (`env.ts` browser-safe, `env.server.ts` server-only via the `import 'server-only'` guard) ensure server-side env-var *names* never reach the client bundle. Validated at boot with Zod via `@t3-oss/env-nextjs` — missing or malformed required values fail fast before the first request. ([`env.server.ts`](dealdrop/src/lib/env.server.ts))
 - **Three Supabase factories with explicit blast radius.** A browser client (anon key, RLS-enforced), a server client (RLS-enforced under the user's session), and an admin client (service-role key, bypasses RLS — guarded by `import 'server-only'`). The daily cron uses the admin client *only* to read product owners; user-scoped queries always go through the RLS-respecting clients. ([`src/lib/supabase/`](dealdrop/src/lib/supabase/))
@@ -125,10 +125,10 @@ I built DealDrop to demonstrate end-to-end product engineering — not just fram
 If you're hiring, the artifacts I'd point you to first are:
 1. **[The retrospective](.planning/RETROSPECTIVE.md)** — how I think about what worked and what didn't
 2. **[The Phase 9 spec](.planning/phases/09-resend-env-config/)** — how I scope a small refactor (research → discuss → plan → execute → verify) for a 1-line code change that unblocks a future milestone
-3. **[The architecture highlights above](#architecture-highlights--the-parts-id-point-to-in-an-interview)** — the engineering decisions I'd defend in an interview
+3. **[The architecture highlights above](#architecture-highlights)** — the engineering decisions I'd defend in an interview
 4. **[The live app](https://dealdrop-khaki.vercel.app)** — see if the loop actually works
 
-Reach me at p.abhijeet777@gmail.com.
+Reach me at harshith.pendyala777@gmail.com.
 
 ---
 
