@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Claude Code per-machine state and GSD install
+# (these are per-developer; the source-of-truth GSD lives in ~/.claude/)
+.claude/
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS Finder duplicates (the "* 2.ext" pattern)
+* 2.*
+* 2/
