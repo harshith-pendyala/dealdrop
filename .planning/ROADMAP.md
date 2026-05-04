@@ -59,3 +59,16 @@ Pending milestone scoping via `/gsd-new-milestone`. Likely candidates:
 | 7. Polish & Deployment                      | v1.0      | 8/8            | Complete    | 2026-05-02 |
 | 8. Brand Polish                             | v1.1      | 6/6            | Complete    | 2026-05-03 |
 | 9. Resend Env Config                        | v1.1      | 4/4            | Complete    | 2026-05-03 |
+
+## Backlog
+
+### Phase 999.1: Surface MRP in dashboard product cards (BACKLOG)
+
+**Goal:** [Captured for future planning]
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Context: `products.mrp` DB column exists (added 2026-05-04 via migration `0007_add_products_mrp.sql` during cycle-5 of debug session `amazon-discount-price-wrong`, now resolved) but no UI consumes it. Render strike-through MRP next to current price as "₹X (was ₹Y)" when `products.mrp` is non-null and greater than `current_price`. Optionally surface MRP in price-history chart hover or stat block.
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)

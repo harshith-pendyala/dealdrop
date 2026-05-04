@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Brand Polish & Email Config
 status: shipped
 stopped_at: v1.1 complete — awaiting v1.2 scoping
-last_updated: "2026-05-03T08:06:19.414Z"
-last_activity: 2026-05-03
+last_updated: "2026-05-04T00:00:00.000Z"
+last_activity: 2026-05-04
 progress:
   total_phases: 2
   completed_phases: 2
