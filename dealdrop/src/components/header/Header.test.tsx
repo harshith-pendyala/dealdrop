@@ -4,10 +4,17 @@ import { render, screen, cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
 // Stub next/image to a plain <img>. Pattern verbatim from ProductCard.test.tsx:6-9
-// with width/height extension so we can assert dimensions.
+// with width/height extension so we can assert dimensions, and className pass-through
+// so we can assert dark-mode filter utilities (quick-260504-pap).
 vi.mock('next/image', () => ({
-  default: (props: { src: string; alt: string; width?: number; height?: number }) => (
-    <img src={props.src} alt={props.alt} width={props.width} height={props.height} />
+  default: (props: { src: string; alt: string; width?: number; height?: number; className?: string }) => (
+    <img
+      src={props.src}
+      alt={props.alt}
+      width={props.width}
+      height={props.height}
+      className={props.className}
+    />
   ),
 }))
 
@@ -70,5 +77,12 @@ describe('Header (BRAND-02)', () => {
     render(<Header user={{ id: 'u1' } as never} />)
     expect(screen.getByTestId('sign-out-stub')).toBeTruthy()
     expect(screen.queryByTestId('sign-in-stub')).toBeNull()
+  })
+
+  it('logo has dark-mode invert+hue-rotate filter so white bg reads as black in dark mode (quick-260504-pap)', () => {
+    render(<Header user={null} />)
+    const logo = screen.getByRole('img', { name: 'DealDrop' })
+    expect(logo.className).toContain('dark:invert')
+    expect(logo.className).toContain('dark:hue-rotate-180')
   })
 })

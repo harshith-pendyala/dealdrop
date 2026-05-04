@@ -19,6 +19,7 @@ export function Header({ user }: HeaderProps) {
             width={95}
             height={32}
             priority
+            className="dark:invert dark:hue-rotate-180"
           />
         </Link>
         {user ? <SignOutButton /> : <SignInButton />}
