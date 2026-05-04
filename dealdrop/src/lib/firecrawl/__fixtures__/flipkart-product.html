@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8">
+    <title>Samsung Galaxy A35 5G (Awesome Lilac, 256 GB) — Flipkart</title>
+    <!-- Cycle-4 fabricated minimal Flipkart-style PDP fixture. -->
+    <!-- Real Flipkart pages do NOT ship JSON-LD, og:price, or microdata at all -->
+    <!-- (verified via /tmp/inspect-flipkart.mjs against the live URL). For the -->
+    <!-- universal-signals path to be testable in CI we synthesize OG meta -->
+    <!-- + a JSON-LD island here. The exact prices below mirror the user's -->
+    <!-- production report so a regression on either signal lights up. -->
+    <meta property="og:title" content="Samsung Galaxy A35 5G (Awesome Lilac, 256 GB)">
+    <meta property="og:type" content="product">
+    <meta property="og:price:amount" content="20499">
+    <meta property="og:price:currency" content="INR">
+    <meta property="product:price:amount" content="20499">
+    <meta property="product:price:currency" content="INR">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "BreadcrumbList", "itemListElement": [] },
+        {
+          "@type": "Product",
+          "name": "Samsung Galaxy A35 5G (Awesome Lilac, 256 GB)",
+          "image": "https://rukminim2.flixcart.com/image/800/1070/xif0q/mobile/x.jpeg",
+          "offers": {
+            "@type": "Offer",
+            "price": "20499",
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock"
+          }
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div class="pdp">
+      <div class="price-block">
+        <!-- Strike-through MRP (rendered with text-decoration:line-through) -->
+        <div style="text-decoration-line:line-through">36,999</div>
+        <!-- Default unconditional checkout price -->
+        <div>₹20,499</div>
+      </div>
+      <!-- Conditional bank-offer "best value" price — the LLM kept selecting -->
+      <!-- this in cycle-3. The cycle-4 prompt update + structural extractor -->
+      <!-- (which prefers JSON-LD/OG → 20499) is what excludes it. -->
+      <div class="bank-offer">
+        <span>Buy at ₹19,474</span>
+        <span>Apply offers for maximum savings</span>
+      </div>
+    </div>
+  </body>
+</html>

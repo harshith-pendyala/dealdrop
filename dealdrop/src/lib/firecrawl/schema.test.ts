@@ -23,6 +23,22 @@ describe('FirecrawlScrapeResponseSchema', () => {
     const result = FirecrawlScrapeResponseSchema.safeParse(fixture)
     expect(result.success).toBe(true)
   })
+
+  it('accepts an envelope that additionally carries `data.html`', () => {
+    const withHtml = {
+      success: true,
+      data: {
+        json: { product_name: 'X', current_price: 1, currency_code: 'USD' },
+        html: '<html><body>x</body></html>',
+        metadata: {},
+      },
+    }
+    const result = FirecrawlScrapeResponseSchema.safeParse(withHtml)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.data?.html).toBe('<html><body>x</body></html>')
+    }
+  })
 })
 
 describe('parseProductResponse branch order', () => {
@@ -93,5 +109,43 @@ describe('parseProductResponse branch order', () => {
       current_price: null,
     })
     expect(out).toEqual({ ok: false, reason: 'missing_name' })
+  })
+})
+
+describe('parseProductResponse priceOverride (Cycle 3)', () => {
+  it('positive override replaces the LLM-extracted current_price', () => {
+    const out = parseProductResponse(
+      { ...baseline, current_price: 999.99 },
+      363,
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.data.current_price).toBe(363)
+  })
+
+  it('null/undefined override → LLM value used unchanged', () => {
+    const out1 = parseProductResponse({ ...baseline, current_price: 12 }, null)
+    const out2 = parseProductResponse(
+      { ...baseline, current_price: 12 },
+      undefined,
+    )
+    expect(out1.ok && out1.data.current_price).toBe(12)
+    expect(out2.ok && out2.data.current_price).toBe(12)
+  })
+
+  it('non-positive override is ignored (LLM value used)', () => {
+    const out = parseProductResponse(
+      { ...baseline, current_price: 50 },
+      0,
+    )
+    expect(out.ok && out.data.current_price).toBe(50)
+  })
+
+  it('override that flips the LLM null/0 to a valid number → ok', () => {
+    const out = parseProductResponse(
+      { ...baseline, current_price: null },
+      77,
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.data.current_price).toBe(77)
   })
 })

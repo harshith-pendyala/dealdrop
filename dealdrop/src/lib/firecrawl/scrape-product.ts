@@ -17,6 +17,7 @@ import {
   PRODUCT_JSON_SCHEMA,
   parseProductResponse,
 } from './schema'
+import { extractStructuralPrice } from './price-extractor'
 import type { ScrapeResult } from './types'
 
 export type { ScrapeResult, ProductData, ScrapeFailureReason } from './types'
@@ -25,6 +26,28 @@ const FIRECRAWL_URL = 'https://api.firecrawl.dev/v2/scrape'
 const TIMEOUT_MS = 60_000
 const RETRY_BACKOFF_MS = 2_000
 
+// Firecrawl v2 caches scrape results by URL (response metadata exposes
+// `cacheState: "hit" | "miss"` and `cachedAt`). The default cache TTL is
+// ~2 days, which means a re-scrape after a prompt/schema change will return
+// the previously cached extraction — silently ignoring the new prompt.
+//
+// Setting `maxAge: 0` in the request body forces Firecrawl to bypass its
+// cache and run a fresh scrape + extraction every time. This is what we want
+// for the add-product flow: the user has just pasted the URL and expects the
+// CURRENT live price, not whatever was extracted hours/days ago under an
+// older prompt.
+//
+// Source: https://docs.firecrawl.dev/api-reference/endpoint/scrape (maxAge param)
+const SCRAPE_MAX_AGE_MS = 0
+
+// Cycle-4: prompt hardening for sites that ship NO structured data at all
+// (e.g. Flipkart — no JSON-LD, no OG product meta, no microdata; the LLM
+// fallback is the only path). The Galaxy A35 5G regression captured Flipkart's
+// "best value with [bank] offer" promo (₹19,474) instead of the unconditional
+// checkout price (₹20,499). The exclusion list now explicitly enumerates the
+// classes of conditional offer the LLM kept gravitating toward, and a
+// positive instruction anchors the choice to "any user, no bank/coupon/exchange
+// required".
 const PROMPT = [
   'Extract product_name, current_price (numeric), currency_code (ISO 4217 alpha-3),',
   'and product_image_url from this e-commerce product page.',
@@ -33,19 +56,31 @@ const PROMPT = [
   'would actually pay right now if they clicked Buy / Add to Cart. Prefer the price',
   'displayed adjacent to the primary Buy / Add-to-Cart / Checkout button.',
   '',
-  'Do NOT return any of the following, even if they appear larger or more prominent:',
+  'POSITIVE INSTRUCTION: If multiple prices appear, pick the price that ANY user would',
+  'pay at checkout WITHOUT requiring a specific payment method, bank account, credit card,',
+  'wallet, coupon code, or exchange. Choose the unconditional sale / deal price — the',
+  'amount shown by default before any optional offer is applied.',
+  '',
+  'Do NOT return any of the following, even if they appear larger, more prominent, or are',
+  'visually highlighted as "best value":',
   '- M.R.P., list price, "was" price, original price, strike-through price',
   '- Tax-inclusive sub-line near the M.R.P. (e.g. "M.R.P. inclusive of all taxes")',
   '- Per-unit prices (e.g. price per 100 ml, price per kg, price per count)',
-  '- EMI / monthly installment amounts',
+  '- EMI / monthly installment amounts (e.g. "EMI starting at", "no-cost EMI of")',
   '- Subscribe & Save / subscription-only prices',
   '- Bundle, combo, "frequently bought together", or add-on prices',
   '- Shipping, delivery, or import fees',
   '- Prices for variants the user has not selected (different size / color / pack)',
+  '- Bank offers, credit card offers, debit card offers (e.g. "with [Bank Name] bank offer",',
+  '  "best value with [Bank] discount", "Buy at ₹X" preceded by an offer banner)',
+  '- Prepaid / wallet / UPI discounts (e.g. "₹X off with prepaid", "wallet discount")',
+  '- Coupon-conditional prices (e.g. "₹X off with coupon CODE")',
+  '- Exchange offers / trade-in prices (e.g. "with exchange of old phone")',
   '',
-  'If a discount is applied, return the post-discount price (the deal price), not the',
-  'pre-discount M.R.P. If multiple candidate prices appear, choose the one nearest the',
-  'Buy button and matching the currently selected variant.',
+  'If a discount is applied unconditionally (visible to every shopper, no payment method',
+  'required), return the post-discount price (the deal price), not the pre-discount M.R.P.',
+  'If multiple candidate prices appear, choose the one nearest the Buy button that matches',
+  'the currently selected variant AND does not require a bank / card / coupon / exchange.',
 ].join(' ')
 
 type FetchOutcome =
@@ -63,15 +98,23 @@ async function doFetch(normalizedUrl: string): Promise<FetchOutcome> {
       },
       body: JSON.stringify({
         url: normalizedUrl,
+        // Cycle-3: request `html` alongside the LLM-extracted `json` so the
+        // structural price extractor can run on the raw page markup. Firecrawl
+        // v2 supports mixing primitive format strings with structured format
+        // objects in a single request — the response then carries `data.html`
+        // and `data.json` side-by-side.
         formats: [
           {
             type: 'json',
             schema: PRODUCT_JSON_SCHEMA,
             prompt: PROMPT,
           },
+          'html',
         ],
         onlyMainContent: true,
         timeout: TIMEOUT_MS,
+        // Bypass Firecrawl's response cache — see SCRAPE_MAX_AGE_MS comment.
+        maxAge: SCRAPE_MAX_AGE_MS,
       }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     })
@@ -186,9 +229,42 @@ export async function scrapeProduct(rawUrl: string): Promise<ScrapeResult> {
       return { ok: false, reason: 'unknown' }
     }
 
+    // Cycle-3: run the structural price extractor on the raw page HTML BEFORE
+    // delegating to parseProductResponse. When the extractor finds a price
+    // (e.g. Amazon's `.priceToPay .a-offscreen` deal-price block, or JSON-LD /
+    // OG / microdata on other retailers) we use it to override the LLM-supplied
+    // `current_price`. The LLM tends to trust schema.org JSON-LD canonical
+    // values which can lag the visible deal price under an active discount.
+    // When the extractor returns null the LLM value is used unchanged.
+    const html = envParsed.data.data.html
+    const structuralPrice = extractStructuralPrice({
+      url: normalizedUrl,
+      html,
+    })
+
+    // Cycle-2 + Cycle-3 instrumentation: log the raw `data.json` payload from
+    // Firecrawl alongside the cache state and the structural price the
+    // extractor selected. Lets us tell at a glance which source produced the
+    // captured price (LLM vs. structural) and whether the cache was bypassed.
+    const meta = envParsed.data.data.metadata as
+      | { cacheState?: unknown; cachedAt?: unknown }
+      | undefined
+    console.log('scrapeProduct: Firecrawl response', {
+      url: normalizedUrl,
+      cacheState: meta?.cacheState,
+      cachedAt: meta?.cachedAt,
+      htmlLength: typeof html === 'string' ? html.length : 0,
+      structuralPrice,
+      json: envParsed.data.data.json,
+    })
+
     // 4. Delegate branch-ordered field validation to parseProductResponse (Plan 02).
-    //    Each D-02 reason fires on its own condition; the helper logs per-branch.
-    return parseProductResponse(envParsed.data.data.json)
+    //    The structuralPrice (if non-null) replaces `data.json.current_price`
+    //    inside parseProductResponse; otherwise the LLM value is used.
+    return parseProductResponse(
+      envParsed.data.data.json,
+      structuralPrice,
+    )
   }
 
   // Unreachable under normal control flow — loop always returns.

@@ -33,12 +33,20 @@ const baselineJson = (fixture as any).data.json as Record<string, unknown>
 // Build an envelope Response for a given inner-json payload.
 function envelopeResponse(
   innerJson: Record<string, unknown> | null,
-  overrides: { success?: boolean; status?: number } = {},
+  overrides: { success?: boolean; status?: number; html?: string } = {},
 ): Response {
   const status = overrides.status ?? 200
+  const dataPart =
+    innerJson === null
+      ? {}
+      : {
+          json: innerJson,
+          metadata: {},
+          ...(overrides.html !== undefined ? { html: overrides.html } : {}),
+        }
   const body = {
     success: overrides.success ?? true,
-    data: innerJson === null ? {} : { json: innerJson, metadata: {} },
+    data: dataPart,
   }
   return new Response(JSON.stringify(body), {
     status,
@@ -59,15 +67,18 @@ beforeAll(async () => {
 })
 
 let errSpy: ReturnType<typeof vi.spyOn>
+let logSpy: ReturnType<typeof vi.spyOn>
 let fetchMock: ReturnType<typeof vi.fn>
 beforeEach(() => {
   errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
   fetchMock = vi.fn()
   vi.stubGlobal('fetch', fetchMock)
   vi.useFakeTimers({ shouldAdvanceTime: true })
 })
 afterEach(() => {
   errSpy.mockRestore()
+  logSpy.mockRestore()
   vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
@@ -240,19 +251,117 @@ describe('scrapeProduct — request shape (Seam 2)', () => {
     // Body assertions
     const body = JSON.parse(init.body as string) as {
       url: string
-      formats: Array<{ type: string; schema: unknown; prompt: string }>
+      formats: Array<unknown>
       onlyMainContent: boolean
       timeout: number
+      maxAge: number
     }
     // Normalized: lowercased host, utm_source stripped, sku preserved
     expect(body.url).toBe('https://shop.example.com/p?sku=123')
-    expect(body.formats).toHaveLength(1)
-    expect(body.formats[0].type).toBe('json')
-    expect(body.formats[0].prompt).toMatch(/product_name/i)
+    // Cycle-3: formats now contains the structured json descriptor AND 'html'.
+    expect(body.formats).toHaveLength(2)
+    const jsonFormat = body.formats[0] as {
+      type: string
+      schema: unknown
+      prompt: string
+    }
+    expect(jsonFormat.type).toBe('json')
+    expect(jsonFormat.prompt).toMatch(/product_name/i)
+    expect(body.formats[1]).toBe('html')
     expect(body.onlyMainContent).toBe(true)
     expect(body.timeout).toBe(60_000)
+    // Cycle-2: cache bypass.
+    expect(body.maxAge).toBe(0)
 
     // AbortSignal.timeout produces a signal — just assert the property exists
     expect(init.signal).toBeDefined()
+  })
+})
+
+describe('scrapeProduct — structural price extractor wiring (Cycle 3)', () => {
+  // Amazon's deal-price block. The structural extractor should pick 363.00
+  // even though the LLM-supplied current_price says 426.87 — this is the
+  // exact production failure mode for amzn.in/d/04K6sdTU (Cetaphil).
+  const AMAZON_DEAL_HTML = `<!doctype html><html><body>
+    <div id="corePriceDisplay_desktop_feature_div">
+      <span class="a-price priceToPay">
+        <span class="a-offscreen">₹363.00</span>
+        <span aria-hidden="true">
+          <span class="a-price-symbol">₹</span>
+          <span class="a-price-whole">363</span>
+        </span>
+      </span>
+      <span class="a-price a-text-price" data-a-strike="true">
+        <span class="a-offscreen">₹429.00</span>
+      </span>
+    </div>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"Product","offers":{"@type":"Offer","price":"426.87","priceCurrency":"INR"}}
+    </script>
+  </body></html>`
+
+  it('B16: Amazon URL with deal HTML → uses structural price (363) not LLM price (426.87)', async () => {
+    fetchMock.mockResolvedValueOnce(
+      envelopeResponse(
+        {
+          ...baselineJson,
+          product_name: 'Cetaphil Gentle Skin Hydrating Face Wash 118ml',
+          current_price: 426.87,
+          currency_code: 'INR',
+          product_image_url: 'https://example.com/img.jpg',
+        },
+        { html: AMAZON_DEAL_HTML },
+      ),
+    )
+    const out = await mod.scrapeProduct(
+      'https://www.amazon.in/Cetaphil-Hydrating/dp/B01CCGW4OE',
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) {
+      expect(out.data.current_price).toBe(363)
+    }
+  })
+
+  it('B17: non-Amazon site without HTML → falls through to LLM price', async () => {
+    fetchMock.mockResolvedValueOnce(
+      envelopeResponse({ ...baselineJson, current_price: 51.77 }),
+    )
+    const out = await mod.scrapeProduct(
+      'https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html',
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.data.current_price).toBe(51.77)
+  })
+
+  it('B18: non-Amazon site with JSON-LD html → uses JSON-LD price', async () => {
+    const jsonLdHtml = `<html><body>
+      <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Product","name":"X","offers":{"@type":"Offer","price":"19.99","priceCurrency":"USD"}}
+      </script>
+    </body></html>`
+    fetchMock.mockResolvedValueOnce(
+      envelopeResponse(
+        { ...baselineJson, current_price: 9999.99, currency_code: 'USD' },
+        { html: jsonLdHtml },
+      ),
+    )
+    const out = await mod.scrapeProduct('https://shop.example.com/p/abc')
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.data.current_price).toBe(19.99)
+  })
+
+  it('B19: Amazon URL but no priceToPay block in HTML → falls through to LLM price', async () => {
+    const sparseHtml = `<html><body><div>no price markers here</div></body></html>`
+    fetchMock.mockResolvedValueOnce(
+      envelopeResponse(
+        { ...baselineJson, current_price: 555.55, currency_code: 'INR' },
+        { html: sparseHtml },
+      ),
+    )
+    const out = await mod.scrapeProduct(
+      'https://www.amazon.in/dp/B0XXXXXXXX',
+    )
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.data.current_price).toBe(555.55)
   })
 })
