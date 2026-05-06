@@ -85,4 +85,36 @@ describe('Header (BRAND-02)', () => {
     expect(logo.className).toContain('dark:invert')
     expect(logo.className).toContain('dark:hue-rotate-180')
   })
+
+  // quick-260506-rk8 Task 1: email-beside-sign-out
+  it('does NOT render "Signed in as" text when user is null', () => {
+    render(<Header user={null} />)
+    expect(screen.queryByText(/Signed in as/i)).toBeNull()
+  })
+
+  it('does NOT render "Signed in as" prefix when user is present but email is undefined', () => {
+    render(<Header user={{ id: 'u1' } as never} />)
+    expect(screen.queryByText(/Signed in as/i)).toBeNull()
+    // SignOutButton still rendered.
+    expect(screen.getByTestId('sign-out-stub')).toBeTruthy()
+  })
+
+  it('renders "Signed in as <email>" when user has an email', () => {
+    render(<Header user={{ id: 'u1', email: 'foo@example.com' } as never} />)
+    // Prefix text and email value are both present.
+    expect(screen.getByText(/Signed in as/i)).toBeTruthy()
+    expect(screen.getByText('foo@example.com')).toBeTruthy()
+    // SignOutButton still rendered alongside.
+    expect(screen.getByTestId('sign-out-stub')).toBeTruthy()
+  })
+
+  it('email span uses truncate utility class so narrow viewports do not wrap the header', () => {
+    render(<Header user={{ id: 'u1', email: 'a-very-long-email-address@example.com' } as never} />)
+    const emailEl = screen.getByText('a-very-long-email-address@example.com')
+    // The email itself or its parent span should carry the truncate class.
+    const truncateInChain =
+      emailEl.className.includes('truncate') ||
+      (emailEl.parentElement?.className?.includes('truncate') ?? false)
+    expect(truncateInChain).toBe(true)
+  })
 })
