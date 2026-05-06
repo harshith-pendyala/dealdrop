@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-03 after v1.1)
 Phase: 09
 Plan: Not started
 Status: Executing Phase 09
-Last activity: 2026-05-04 - Completed quick task 260504-pap: DealDrop logo black background in dark mode
+Last activity: 2026-05-06 - Completed quick task 260506-rk8: Show signed-in user email beside Sign Out + timer-driven scrape progress UI
 
 Progress: [█████░░░░░] 50% (1/2 v1.1 phase plans complete; phase 9 not started; phase 8 awaits HUMAN-UAT closure)
 
@@ -120,6 +120,7 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260504-pap | DealDrop logo: black background in dark mode, white (default) in light mode | 2026-05-04 | 470959f | [260504-pap-dealdrop-logo-black-background-in-dark-m](./quick/260504-pap-dealdrop-logo-black-background-in-dark-m/) |
+| 260506-rk8 | Show signed-in user email beside Sign Out + timer-driven scrape progress UI | 2026-05-06 | 6813b63 | [260506-rk8-show-signed-in-user-email-near-sign-out-](./quick/260506-rk8-show-signed-in-user-email-near-sign-out-/) |
 
 ## Deferred Items
 
