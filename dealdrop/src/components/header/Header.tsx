@@ -22,7 +22,19 @@ export function Header({ user }: HeaderProps) {
             className="dark:invert dark:hue-rotate-180"
           />
         </Link>
-        {user ? <SignOutButton /> : <SignInButton />}
+        {user ? (
+          <div className="flex items-center gap-3 min-w-0">
+            {user.email ? (
+              <span className="text-sm text-muted-foreground truncate max-w-[140px] sm:max-w-[220px] md:max-w-none">
+                Signed in as{' '}
+                <span className="text-foreground font-medium">{user.email}</span>
+              </span>
+            ) : null}
+            <SignOutButton />
+          </div>
+        ) : (
+          <SignInButton />
+        )}
       </div>
     </header>
   )
