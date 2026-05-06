@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { AddProductForm, type AddProductActionResult } from './AddProductForm'
+import { ScrapeProgress } from './ScrapeProgress'
 
 type AddProductDialogProps = Readonly<{
   authed: boolean
@@ -35,6 +36,9 @@ export function AddProductDialog({ authed, formAction, state, pending }: AddProd
             pending={pending}
             onSuccess={() => setOpen(false)}
           />
+          <div className="mt-4">
+            <ScrapeProgress pending={pending} />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

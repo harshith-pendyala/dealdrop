@@ -6,6 +6,7 @@ import {
   dispatchToastForState,
   type AddProductActionResult,
 } from './AddProductForm'
+import { ScrapeProgress } from './ScrapeProgress'
 
 type InlineAddProductWrapperProps = Readonly<{
   authed: boolean
@@ -43,12 +44,17 @@ export function InlineAddProductWrapper({ authed, onSuccess }: InlineAddProductW
   }, [state])
 
   return (
-    <AddProductForm
-      authed={authed}
-      formAction={formAction}
-      state={state}
-      pending={pending}
-      onSuccess={onSuccess}
-    />
+    <>
+      <AddProductForm
+        authed={authed}
+        formAction={formAction}
+        state={state}
+        pending={pending}
+        onSuccess={onSuccess}
+      />
+      <div className="mt-4">
+        <ScrapeProgress pending={pending} />
+      </div>
+    </>
   )
 }
